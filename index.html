@@ -1,0 +1,2289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>90sevo.ca | Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,700;1,700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050508;
+            --panel-bg: rgba(15, 15, 25, 0.85);
+            --neon-pink: #ff00ff;
+            --neon-cyan: #00f3ff;
+            --neon-mint: #39ff14;
+            --neon-gold: #ffb700;
+            --neon-red: #ff3333;
+            --text-main: #f0f0f5;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                linear-gradient(rgba(18, 16, 16, 0.2) 50%, transparent 50%),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 100% 4px, 30px 30px, 30px 30px;
+            color: var(--text-main); font-family: 'Chakra Petch', sans-serif; margin: 0; padding: 0;
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; flex: 1; width: 100%; box-sizing: border-box;}
+
+        header { text-align: center; margin-bottom: 20px; }
+        h1 { font-weight: 700; font-style: italic; font-size: 3rem; margin: 0; text-transform: uppercase; text-shadow: 2px 2px 0px var(--neon-pink), -2px -2px 0px var(--neon-cyan); letter-spacing: 2px; }
+        
+        .news-ticker { background: #000; border-top: 1px solid var(--neon-pink); border-bottom: 1px solid var(--neon-pink); color: var(--neon-pink); font-family: 'Share Tech Mono', monospace; padding: 5px; font-size: 0.9rem; overflow: hidden; white-space: nowrap; margin-top: 10px; cursor: pointer; transition: 0.2s;}
+        .news-ticker:hover { background: rgba(255, 0, 255, 0.1); }
+
+        /* TIGHTER, SLEEKER NAV BAR */
+        nav { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 30px; }
+        .nav-btn { background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); font-family: 'Chakra Petch', sans-serif; font-size: 0.85rem; font-weight: bold; padding: 8px 14px; cursor: pointer; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px;}
+        .nav-btn:hover, .nav-btn.active { background: var(--neon-cyan); color: var(--bg-dark); box-shadow: 0 0 10px var(--neon-cyan); }
+        
+        /* CUSTOM BUTTON COLORS */
+        .nav-btn.btn-gold { border-color: var(--neon-gold); color: var(--neon-gold); }
+        .nav-btn.btn-gold:hover, .nav-btn.btn-gold.active { background: var(--neon-gold); color: var(--bg-dark); box-shadow: 0 0 10px var(--neon-gold); }
+        
+        .nav-btn.btn-red { border-color: var(--neon-red); color: var(--neon-red); }
+        .nav-btn.btn-red:hover, .nav-btn.btn-red.active { background: var(--neon-red); color: var(--bg-dark); box-shadow: 0 0 10px var(--neon-red); }
+
+        .nav-btn.btn-pink { border-color: var(--neon-pink); color: var(--neon-pink); }
+        .nav-btn.btn-pink:hover, .nav-btn.btn-pink.active { background: var(--neon-pink); color: var(--bg-dark); box-shadow: 0 0 10px var(--neon-pink); }
+
+        .nav-btn.btn-green { border-color: var(--neon-mint); color: var(--neon-mint); }
+        .nav-btn.btn-green:hover, .nav-btn.btn-green.active { background: var(--neon-mint); color: var(--bg-dark); box-shadow: 0 0 10px var(--neon-mint); }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* DATA DRIVE BOOTLOADER */
+        .bootloader { background: #000; border: 2px dashed var(--neon-pink); padding: 15px; text-align: center; margin-bottom: 20px; font-family: 'Share Tech Mono'; }
+        .file-input-wrapper { margin: 5px 0; color: var(--neon-cyan); font-size: 0.8rem;}
+        input[type="file"] { background: #111; color: #fff; border: 1px solid var(--neon-cyan); padding: 2px; font-family: 'Share Tech Mono'; font-size: 0.8rem;}
+
+.panel { background: var(--panel-bg); border: 2px solid #333; padding: 15px; position: relative; margin-bottom: 20px; }
+        .panel-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        
+        .attract-mode { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 243, 255, 0.1); text-align: center; display: flex; flex-direction: column; justify-content: center;}
+        
+        /* NEW: FIXED HEIGHT FOR HERO BANNER TO PREVENT RESIZING */
+        .hero-banner-container { height: 260px; box-sizing: border-box; transition: border-color 0.3s; cursor: pointer; overflow: hidden; background-color: #111; background-size: cover; background-position: center; position: relative;}
+        
+        /* BANNER NAVIGATION ARROWS */
+        .banner-arrow { position: absolute; top: 50%; transform: translateY(-50%); font-size: 2rem; color: rgba(255,255,255,0.3); cursor: pointer; z-index: 20; padding: 15px; transition: 0.2s; user-select: none; font-family: sans-serif; }
+        .banner-arrow:hover { color: #fff; text-shadow: 0 0 10px var(--neon-cyan); transform: translateY(-50%) scale(1.2); }
+        .banner-arrow.left { left: 5px; }
+        .banner-arrow.right { right: 5px; }
+        
+        .attract-title { font-size: 1.8rem; font-weight: 700; margin: 8px 0; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); position: relative; z-index: 2;}
+        .attract-data { font-family: 'Share Tech Mono', monospace; color: var(--neon-mint); font-size: 1.1rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); width: 100%; position: relative; z-index: 2;}
+		
+        .metrics-banner { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .metric-box { background: rgba(0,0,0,0.6); border: 1px dashed #555; padding: 15px; text-align: left; }
+        .metric-title { font-family: 'Share Tech Mono', monospace; font-size: 1.1rem; margin-bottom: 5px; font-weight: bold; }
+        .metric-desc { font-size: 0.85rem; color: #aaa; line-height: 1.4; }
+
+        .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .home-grid { grid-template-columns: 1fr; } }
+
+        .screenshot-frame { width: 100%; height: 200px; background: #111; border: 2px solid #333; position: relative; background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.5) 2px, rgba(0,0,0,0.5) 4px); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .screenshot-frame::after { content: "IMG_SIGNAL_LOST.JPG"; color: #555; font-family: 'Share Tech Mono'; position: absolute; }
+        
+        .leaderboard-cycle { font-family: 'Share Tech Mono', monospace; font-size: 0.95rem; }
+        .lb-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #333; padding: 5px; cursor: pointer; transition: 0.2s; }
+        .lb-row:hover { background: rgba(255, 0, 255, 0.1); color: var(--neon-pink); padding-left: 10px; }
+
+        /* LIQUID SAFETY STICKERS (LEFT TO RIGHT) */
+        .safety-sticker { 
+            color: #fff; font-weight: 900; font-family: 'Share Tech Mono', monospace; 
+            padding: 5px 10px; border-radius: 2px; border: 2px solid #fff; 
+            transform: rotate(-3deg); box-shadow: 2px 2px 5px rgba(0,0,0,0.5); display: inline-block;
+            text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 2px 2px 0px #000;
+            white-space: nowrap;
+        }
+        
+        /* SERVER LISTS & ACCORDIONS */
+        .server-item { background: #000; border: 1px solid #444; padding: 15px; margin-bottom: 10px; display: flex; flex-direction: column; align-items: stretch; border-left: 4px solid var(--neon-mint); cursor: pointer; transition: background-color 0.8s ease, border-color 0.2s, box-shadow 0.2s; }
+        .server-item.race-mode { border-left-color: var(--neon-gold); }
+        .server-item:hover { background: #0a0a0f; box-shadow: 0 0 10px rgba(0,243,255,0.1); }
+        
+        .server-header-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .server-roster-table { width: 100%; text-align: left; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; border-collapse: collapse; }
+        .server-roster-table th { color: var(--neon-cyan); border-bottom: 1px dashed #444; padding: 8px 5px; font-weight: normal; }
+        .server-roster-table td { padding: 8px 5px; border-bottom: 1px solid #222; }
+        .server-roster-table tr:hover td { background: rgba(255,0,255,0.1); color: var(--neon-pink); cursor: pointer; }
+
+        /* VOTING UI STYLES WITH IMAGES - 2x2 Grid Fix */
+        .vote-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 15px; }
+        @media (max-width: 600px) { .vote-grid { grid-template-columns: 1fr; } }
+        
+        /* SPLIT VOTE PAGE VIEW */
+        .vote-split { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        @media (max-width: 768px) { .vote-split { grid-template-columns: 1fr; } }
+        .vote-split .vote-grid { grid-template-columns: 1fr; margin-top: 10px; }
+
+        .vote-card { background: #000; border: 1px solid #444; overflow: hidden; transition: 0.3s; position: relative; display: flex; flex-direction: column; }
+        .vote-card:hover { border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); }
+        
+        .vote-img-container { width: 100%; height: 160px; background: #111; position: relative; overflow: hidden; border-bottom: 1px solid #333;}
+        .vote-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; transition: 0.5s; }
+        .vote-card:hover .vote-img { opacity: 1; transform: scale(1.05); }
+
+        .vote-content { padding: 15px; flex-grow: 1; display: flex; flex-direction: column;}
+        .vote-title { font-family: 'Chakra Petch'; font-weight: 700; font-size: 1.2rem; color: #fff; margin-bottom: 5px; text-transform: uppercase;}
+        
+        .vote-meta { font-family: 'Share Tech Mono'; font-size: 0.75rem; color: var(--neon-cyan); margin-bottom: 10px; line-height: 1.4; border-left: 2px solid var(--neon-cyan); padding-left: 8px;}
+        .meta-label { color: #666; font-size: 0.7rem; margin-right: 5px;}
+
+        /* PERCENTAGE BAR */
+        .vote-bar-bg { height: 22px; background: #1a1a1a; border-radius: 3px; overflow: hidden; margin-top: auto; margin-bottom: 10px; border: 1px solid #333;}
+        .vote-bar-fill { height: 100%; width: 0%; transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1); display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; box-sizing: border-box; font-family: 'Share Tech Mono'; font-weight: bold; color: #000; font-size: 0.85rem; overflow: hidden; white-space: nowrap;}
+        
+        .vote-btn { width: 100%; padding: 10px; border: 1px solid var(--neon-pink); background: transparent; color: var(--neon-pink); font-family: 'Chakra Petch'; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase;}
+        .vote-btn:hover { background: var(--neon-pink); color: #000; box-shadow: 0 0 15px var(--neon-pink); }
+        .vote-btn:active { transform: scale(0.95); }
+        .vote-btn.voted { cursor: default; background: transparent; pointer-events: none;}
+
+        /* GLOBAL LEADERBOARD PAGE */
+        .lb-controls { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;}
+        .search-bar, .filter-select { flex: 1; min-width: 200px; padding: 12px; background: #000; border: 1px solid var(--neon-cyan); color: #fff; font-family: 'Share Tech Mono'; font-size: 1rem; outline: none;}
+        .search-bar:focus, .filter-select:focus { box-shadow: 0 0 10px rgba(0, 243, 255, 0.3); }
+        
+        table { width: 100%; border-collapse: collapse; font-family: 'Share Tech Mono', monospace; background: rgba(0,0,0,0.5); text-align: center; font-size: 0.95rem;}
+        th { color: var(--neon-cyan); border-bottom: 2px solid var(--neon-cyan); padding: 12px; transition: 0.2s; white-space: nowrap; text-align: center;}
+        th:nth-child(2), td:nth-child(2) { text-align: left; }
+        
+        th.sortable:hover { background: rgba(0, 243, 255, 0.1); cursor: pointer; color: #fff;}
+        th.sort-active { color: var(--neon-pink); border-bottom-color: var(--neon-pink); }
+        
+        td { padding: 10px 12px; border-bottom: 1px solid #222; text-align: center;}
+        .lb-row-table { cursor: pointer; transition: 0.2s; }
+        .lb-row-table:hover { background: rgba(255, 0, 255, 0.1); color: var(--neon-pink); }
+        .lb-row-table td:nth-child(2) { font-weight: bold; font-family: 'Chakra Petch', sans-serif; text-transform: uppercase; font-size: 1.1rem; }
+
+        /* PROFILE TELEMETRY */
+        .profile-header { border-bottom: 2px solid var(--neon-cyan); padding-bottom: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .profile-name { font-size: 3rem; margin: 0; color: #fff; text-transform: uppercase; text-shadow: 0 0 15px rgba(255, 255, 255, 0.3); line-height: 1;}
+        .profile-id { font-family: 'Share Tech Mono'; color: #666; font-size: 0.9rem; margin-bottom: 5px;}
+        
+        /* Flex Grid for Auto-Centering */
+        .stat-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        .stat-box { flex: 1 1 200px; max-width: 240px; background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 15px; position: relative; overflow: hidden; box-sizing: border-box; text-align: left; }
+        
+        .stat-box::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--neon-cyan); }
+        .stat-box.bad::before { background: var(--neon-pink); }
+        .stat-box.gold::before { background: var(--neon-gold); }
+        .stat-label { font-size: 0.85rem; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { font-family: 'Share Tech Mono'; font-size: 2rem; color: #fff; }
+        .stat-sub { font-size: 0.8rem; color: var(--neon-mint); }
+        
+        .season-list { font-family: 'Share Tech Mono'; font-size: 0.95rem; color: #ccc; background: rgba(0,0,0,0.5); padding: 15px; border: 1px solid #333; margin-bottom: 30px;}
+        .season-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #444; padding: 5px 0; }
+        .season-row:last-child { border-bottom: none; }
+
+        .record-card { background: rgba(0,0,0,0.6); border: 1px solid #333; border-left: 3px solid var(--neon-mint); padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
+        .record-track { color: var(--neon-cyan); font-weight: bold; font-size: 1.1rem; text-transform: uppercase;}
+        .record-car { color: #888; font-family: 'Share Tech Mono'; font-size: 0.9rem;}
+        .record-time { color: var(--neon-mint); font-family: 'Share Tech Mono'; font-size: 1.5rem; text-shadow: 0 0 5px rgba(57, 255, 20, 0.3);}
+
+        /* REPORT FORM */
+        .report-form { background: #0a0a0f; border: 1px solid #333; border-top: 4px solid var(--neon-pink); padding: 30px; display: flex; flex-direction: column; gap: 15px;}
+        .report-label { font-family: 'Share Tech Mono'; color: var(--neon-cyan); font-size: 0.9rem;}
+        .report-input { background: #000; border: 1px solid #444; color: #fff; padding: 10px; font-family: 'Share Tech Mono'; font-size: 1rem; width: 100%; box-sizing: border-box; outline: none;}
+        .report-input:focus { border-color: var(--neon-pink); }
+        textarea.report-input { resize: vertical; min-height: 100px;}
+
+        /* DRIVERS MANUAL STYLES */
+        .manual-wrapper { display: flex; gap: 20px; align-items: flex-start; }
+        @media (max-width: 768px) { .manual-wrapper { flex-direction: column; } }
+        .manual-nav { flex: 0 0 250px; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.6); border: 1px solid #333; padding: 15px; width: 100%; box-sizing: border-box;}
+        .manual-nav-btn { background: transparent; border: 1px solid #444; color: #888; padding: 12px; text-align: left; font-family: 'Share Tech Mono'; cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.95rem;}
+        .manual-nav-btn:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+        .manual-nav-btn.active { border-left: 4px solid var(--neon-cyan); color: #fff; background: rgba(0, 243, 255, 0.1); font-weight: bold; }
+        
+        .manual-content { flex: 1; background: rgba(0,0,0,0.6); border: 1px solid #333; border-top: 4px solid var(--neon-cyan); padding: 25px; width: 100%; box-sizing: border-box;}
+        .manual-chapter { display: none; animation: fadeIn 0.3s ease; }
+        .manual-chapter.active { display: block; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .chapter-title { color: var(--neon-cyan); font-size: 1.8rem; margin-top: 0; border-bottom: 1px dashed #444; padding-bottom: 10px; font-family: 'Chakra Petch'; text-transform: uppercase; text-shadow: 0 0 5px rgba(0, 243, 255, 0.3);}
+        .chapter-text { color: #ccc; line-height: 1.7; font-size: 0.95rem; }
+        .chapter-text h4 { color: #fff; margin-top: 25px; margin-bottom: 10px; font-family: 'Share Tech Mono'; font-size: 1.1rem; color: var(--neon-mint);}
+        .chapter-text ul { padding-left: 20px; margin-top: 5px; }
+        .chapter-text li { margin-bottom: 10px; }
+        .chapter-highlight { color: var(--neon-pink); font-family: 'Share Tech Mono'; font-weight: bold; }
+
+        /* SEASON / CALENDAR STYLES */
+        .event-card-grid { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
+        .event-card { border: 1px solid var(--neon-gold); flex: 1; min-width: 200px; max-width: 300px; position: relative; overflow: hidden; cursor: pointer; transition: 0.3s; min-height: 120px; display: flex; align-items: flex-end;}
+        .event-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255, 183, 0, 0.3); border-color: #fff;}
+        .event-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0.4; transition: 0.3s; z-index: 0;}
+        .event-card:hover .event-bg { opacity: 0.7; transform: scale(1.05);}
+        .event-content { position: relative; z-index: 1; padding: 15px; background: linear-gradient(transparent, rgba(0,0,0,0.9) 30%, #000); width: 100%; box-sizing: border-box;}
+        .event-content h3 { color: #fff; margin: 0 0 5px 0; font-family: 'Chakra Petch'; text-transform: uppercase; font-size: 1.1rem; text-shadow: 1px 1px 2px #000;}
+        .event-track { color: var(--neon-gold); font-size: 0.85rem; font-family: 'Share Tech Mono'; font-weight: bold; }
+        .event-status { color: #aaa; font-size: 0.75rem; font-family: 'Share Tech Mono'; margin-top: 3px;}
+        
+        .standings-tab-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .standings-tab { flex: 1; background: #000; border: 1px solid #444; color: #888; padding: 12px; font-family: 'Chakra Petch'; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s; min-width: 200px; text-align: center;}
+        .standings-tab:hover { border-color: var(--neon-cyan); color: #fff; }
+        .standings-tab.active { background: rgba(0, 243, 255, 0.1); border-color: var(--neon-cyan); color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);}
+
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 30px; }
+        .cal-header { text-align: center; color: var(--neon-pink); font-family: 'Share Tech Mono'; font-weight: bold; padding: 5px 0; border-bottom: 1px solid #333;}
+        .cal-day { background: rgba(0,0,0,0.6); border: 1px solid #333; min-height: 80px; padding: 5px; font-family: 'Share Tech Mono'; display: flex; flex-direction: column; transition: 0.2s;}
+        .cal-day:hover { border-color: var(--neon-cyan); background: rgba(0,243,255,0.05); }
+        .cal-date { color: #888; font-size: 0.8rem; text-align: right; margin-bottom: 5px;}
+        
+        .cal-event { border-left: 3px solid var(--neon-pink); background: rgba(255, 0, 255, 0.1); padding: 5px; font-size: 0.75rem; color: #fff; margin-top: auto; cursor: pointer; line-height: 1.3;}
+        .cal-event.completed { border-left-color: var(--neon-mint); background: rgba(57, 255, 20, 0.1); color: var(--neon-mint);}
+        .cal-event.upcoming { border-left-color: var(--neon-gold); background: rgba(255, 183, 0, 0.1); color: var(--neon-gold);}
+
+        /* FOOTER */
+        footer { border-top: 1px dashed #333; padding: 20px; text-align: center; font-family: 'Share Tech Mono'; font-size: 0.8rem; color: #555; background: var(--bg-dark); margin-top: auto;}
+
+        /* JDM MODAL & XP BAR */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .driver-card-popout { background: #0a0a0f; border: 2px solid var(--neon-pink); padding: 30px; width: 350px; box-shadow: 0 0 40px rgba(255, 0, 255, 0.2); position: relative; background-image: repeating-linear-gradient(45deg, rgba(255,0,255,0.02) 0px, rgba(255,0,255,0.02) 2px, transparent 2px, transparent 10px); }
+        .close-btn { position: absolute; top: 10px; right: 15px; color: #fff; cursor: pointer; font-size: 1.5rem; transition: 0.2s;}
+        .close-btn:hover { color: var(--neon-pink); transform: scale(1.2); }
+        .ticket-header { display: flex; justify-content: space-between; align-items: flex-start;}
+        .helmet-icon { width: 45px; height: 45px; fill: var(--text-main); opacity: 0.8; }
+        .jdm-text { font-family: sans-serif; font-weight: bold; color: var(--neon-cyan); opacity: 0.5; font-size: 0.8rem; letter-spacing: 2px; writing-mode: vertical-rl; position: absolute; right: 20px; top: 60px;}
+        
+        .xp-container { height: 20px; width: 100%; background: #111; border: 1px solid #333; position: relative;}
+        .xp-fill { height: 100%; background: repeating-linear-gradient(90deg, var(--neon-cyan) 0, var(--neon-cyan) 2px, transparent 2px, transparent 4px, var(--neon-cyan) 4px, var(--neon-cyan) 5px, transparent 5px, transparent 8px); width: 0%; transition: width 0.8s ease-out; }
+        .xp-label { font-family: 'Share Tech Mono'; font-size: 0.7rem; color: #888;}
+        
+        .mini-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0; margin-right: 45px;}
+        .mini-stat { background: rgba(0,0,0,0.5); padding: 6px 8px; border: 1px dashed #333; display: flex; justify-content: space-between; font-family: 'Share Tech Mono'; font-size: 0.8rem; align-items: center;}
+        .mini-stat-label { color: #888; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>90sevo.ca</h1>
+        <div class="news-ticker" onclick="showPage('news')">
+            <marquee scrollamount="5">> NEWS: 6-TIER LICENSE SYSTEM ACTIVE (R-D-C-B-A-S) >> CAST YOUR STAGE VOTES IN RACE/TRACKDAY TABS >> NEXT RACE: FRIDAY NIGHT SPRINT >></marquee>
+        </div>
+    </header>
+
+    <nav style="flex-direction: column; align-items: center; gap: 12px;">
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;">
+            <button class="nav-btn btn-gold" style="letter-spacing: 2px;" onclick="showPage('leaderboard')">Leaderboards</button>
+            <button class="nav-btn btn-pink" style="letter-spacing: 2px;" onclick="showPage('schedule')">Schedule/Season</button>
+            <button class="nav-btn btn-red" style="letter-spacing: 2px;" onclick="showPage('report')">Report Driver</button>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 4px 0;">
+            <button class="nav-btn" onclick="showPage('news')">News</button>
+            <button class="nav-btn" onclick="showPage('race')">Race</button>
+            <button class="nav-btn" onclick="showPage('trackday')">Track Day</button>
+            <button class="nav-btn btn-green active" onclick="showPage('home')">Home</button>
+            <button class="nav-btn" onclick="showPage('media')">Media</button>
+            <button class="nav-btn" onclick="showPage('rules')">Info/Rules</button>
+            <button class="nav-btn" onclick="showPage('vote')">Vote</button>
+        </div>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;">
+            <button class="nav-btn btn-pink" style="letter-spacing: 2px;" onclick="showPage('profile')">Telemetry</button>
+        </div>
+    </nav>
+
+    <div id="home" class="page active">
+
+        <div class="panel attract-mode hero-banner-container" style="margin-bottom: 20px; cursor: pointer; transition: border-color 0.3s;" onclick="goToHeroPage()">
+            <div class="hero-label" style="letter-spacing: 2px; font-weight: bold; transition: color 0.3s; text-shadow: 1px 1px 2px #000;">[ SYSTEM INIT ]</div>
+            <div class="attract-title hero-title">AWAITING DATA...</div>
+            <div class="attract-data hero-data" style="color: var(--text-main);">...</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div class="panel attract-mode" id="race-banner-box" style="border-color: var(--neon-gold); margin-bottom: 0; cursor: pointer; background-color: #111;" onclick="showPage('race')">
+                <div style="color: var(--neon-gold); letter-spacing: 2px; text-shadow: 1px 1px 2px #000; font-weight: bold;">[ LIVE RACES ]</div>
+                <div class="attract-title" id="race-ss-title">...</div>
+                <div class="attract-data" id="race-ss-data">...</div>
+            </div>
+            <div class="panel attract-mode" id="td-banner-box" style="border-color: var(--neon-mint); margin-bottom: 0; cursor: pointer; background-color: #111;" onclick="showPage('trackday')">
+                <div style="color: var(--neon-mint); letter-spacing: 2px; text-shadow: 1px 1px 2px #000; font-weight: bold;">[ LIVE TRACK DAYS ]</div>
+                <div class="attract-title" id="td-ss-title">...</div>
+                <div class="attract-data" id="td-ss-data">...</div>
+            </div>
+        </div>
+
+        <div class="metrics-banner">
+            <div class="metric-box" style="border-top: 2px solid var(--neon-cyan); cursor: pointer; transition: 0.2s;" onclick="goToRules('ch-elo')" onmouseover="this.style.backgroundColor='rgba(0,243,255,0.05)'" onmouseout="this.style.backgroundColor='rgba(0,0,0,0.6)'">
+                <div class="metric-title" style="color: var(--neon-cyan);">> DRIVER RATING (ELO)</div>
+                <div class="metric-desc">Your competitive skill level. Gained/lost based on race finishing positions vs opponent ratings.</div>
+            </div>
+            <div class="metric-box" style="border-top: 2px solid var(--neon-mint); cursor: pointer; transition: 0.2s;" onclick="goToRules('ch-license')" onmouseover="this.style.backgroundColor='rgba(57,255,20,0.05)'" onmouseout="this.style.backgroundColor='rgba(0,0,0,0.6)'">
+                <div class="metric-title" style="color: var(--neon-mint);">> SAFETY RATING (SR)</div>
+                <div class="metric-desc">Tiers: R, D, C, B, A, S. Calculated purely by your laps-per-incident ratio. Drive clean to rank up.</div>
+            </div>
+            <div class="metric-box" style="border-top: 2px solid var(--neon-gold); cursor: pointer; transition: 0.2s;" onclick="goToRules('ch-xp')" onmouseover="this.style.backgroundColor='rgba(255,183,0,0.05)'" onmouseout="this.style.backgroundColor='rgba(0,0,0,0.6)'">
+                <div class="metric-title" style="color: var(--neon-gold);">> TrackXP (LEVEL)</div>
+                <div class="metric-desc">Your lifetime experience. Earn TrackXP by setting PBs, logging clean laps, and grinding track days.</div>
+            </div>
+        </div>
+
+        <div class="home-grid">
+            <div class="panel">
+                <div class="panel-header" style="color: var(--neon-pink); cursor: pointer; transition: 0.2s;" onclick="showPage('media')" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--neon-pink)'">[ MEDIA ] SCREENSHOT OF THE WEEK</div>
+                <div class="screenshot-frame"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header" style="color: var(--neon-cyan); cursor: pointer; transition: 0.2s;" onclick="openLeaderboard('laps')" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--neon-cyan)'">[ TOP 5 ] TRACK RECORDS</div>
+                <div class="leaderboard-cycle">
+                    <div style="color: var(--neon-mint); margin-bottom: 10px; font-weight: bold;" id="home-track-name">> WAITING FOR DATA...</div>
+                    <div id="homeRecords">
+                        <div style="color: #444;">[ LOAD LEADERBOARD.JSON ]</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel" style="grid-column: 1 / -1;">
+                <div class="panel-header" style="color: var(--neon-gold); cursor: pointer; transition: 0.2s;" onclick="openLeaderboard('stats')" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--neon-gold)'">[ TOP 5 ] GLOBAL RATINGS</div>
+                <div class="leaderboard-cycle" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <div style="color: #888; margin-bottom: 10px;">> Top Driver Rating</div>
+                        <div id="homeRatingList"><div style="color: #444;">[ LOAD PROFILES.JSON ]</div></div>
+                    </div>
+                    <div>
+                        <div style="color: #888; margin-bottom: 10px;">> Top TrackXP Level</div>
+                        <div id="homeLevelList"><div style="color: #444;">[ LOAD PROFILES.JSON ]</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bootloader" style="margin-top: 30px;">
+            <h3 style="color: #fff; margin-top: 0;">> DATA DRIVE: OFFLINE</h3>
+            <div style="color: #888; font-size: 0.8rem; margin-bottom: 10px;">Select your PowerShell JSONs to populate the hub.</div>
+            <div class="file-input-wrapper">1. DRIVER_PROFILES: <input type="file" id="uploadProfiles" accept=".json"></div>
+            <div class="file-input-wrapper" style="color: var(--neon-mint);">2. LEADERBOARD: <input type="file" id="uploadLeaderboard" accept=".json"></div>
+            <div id="bootStatus" style="margin-top: 10px; color: var(--neon-gold); font-size: 0.9rem;">[ SYSTEM READY ]</div>
+        </div>
+
+    </div>
+
+    <div id="news" class="page">
+        <div class="panel attract-mode hero-banner-container" style="margin-bottom: 20px; cursor: pointer; transition: border-color 0.3s;" onclick="goToHeroPage()">
+            <div class="hero-label" style="letter-spacing: 2px; font-weight: bold; transition: color 0.3s; text-shadow: 1px 1px 2px #000;">[ SYSTEM INIT ]</div>
+            <div class="attract-title hero-title">AWAITING DATA...</div>
+            <div class="attract-data hero-data" style="color: var(--text-main);">...</div>
+        </div>
+
+        <h2 style="color: var(--neon-pink); border-bottom: 1px solid #333; padding-bottom: 10px;">LATEST NEWS & UPDATES</h2>
+        <div style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Stay up to date with the latest 90s Evo Hub announcements.</div>
+        
+        <div class="panel" style="border-left: 4px solid var(--neon-pink);">
+            <div style="color: var(--neon-pink); font-family: 'Share Tech Mono'; font-size: 0.85rem; margin-bottom: 5px;">MAY 10, 2026 // ADMIN</div>
+            <div style="font-size: 1.2rem; font-weight: bold; color: #fff; margin-bottom: 10px; text-transform: uppercase;">6-Tier License System is now Live</div>
+            <p style="color: #ccc; line-height: 1.6; font-size: 0.95rem; margin: 0;">
+                We have officially rolled out the new Safety Rating (SR) driven license tiers! Ranging from R (Rookie) to S (Super), your license dictates which competitive splits you can enter. Keep it clean out there!
+            </p>
+        </div>
+        
+        <div class="panel" style="border-left: 4px solid var(--neon-cyan);">
+            <div style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.85rem; margin-bottom: 5px;">MAY 05, 2026 // LEAGUE OPS</div>
+            <div style="font-size: 1.2rem; font-weight: bold; color: #fff; margin-bottom: 10px; text-transform: uppercase;">Stage Voting Enabled</div>
+            <div style="color: #ccc; line-height: 1.6; font-size: 0.95rem; margin: 0;">
+                Drivers can now directly influence the upcoming server rotation. Head over to the VOTE tab to cast your ballots for the next Championship Track and Track Day layout!
+            </div>
+        </div>
+    </div>
+
+    <div id="race" class="page">
+        <div class="panel attract-mode hero-banner-container" style="margin-bottom: 20px; cursor: pointer; transition: border-color 0.3s;" onclick="goToHeroPage()">
+            <div class="hero-label" style="letter-spacing: 2px; font-weight: bold; transition: color 0.3s; text-shadow: 1px 1px 2px #000;">[ SYSTEM INIT ]</div>
+            <div class="attract-title hero-title">AWAITING DATA...</div>
+            <div class="attract-data hero-data" style="color: var(--text-main);">...</div>
+        </div>
+        
+        <h2 style="color: var(--neon-gold); border-bottom: 1px solid #333; padding-bottom: 10px;">LIVE RACE SERVERS</h2>
+        
+        <div id="raceServersContainer">
+            </div>
+        
+        <div class="panel" style="margin-top: 30px;">
+            <div class="panel-header" style="color: var(--neon-gold);">[ NEXT RACE SELECTION ]</div>
+            <div style="color: #888; font-size: 0.9rem;">Vote for the track layout and car class of the next official championship heat.</div>
+            
+            <div class="vote-grid">
+                <div class="vote-card">
+                    <div class="vote-img-container">
+                        <img src="https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=800" class="vote-img" alt="Spa">
+                    </div>
+                    <div class="vote-content">
+                        <div class="vote-title">Spa-Francorchamps</div>
+                        <div class="vote-meta">
+                            <span class="meta-label">TRACK TIME:</span>2:00 PM<br>
+                            <span class="meta-label">CLASS:</span>MODERN GT3 / GT4<br>
+                            <span class="meta-label">WEATHER:</span>DYNAMIC CLOUDS
+                        </div>
+                        <div class="vote-bar-bg"><div class="vote-bar-fill bar-spa"></div></div>
+                        <button class="vote-btn btn-spa" onclick="castVote('spa', 'race-track')">Vote Race</button>
+                    </div>
+                </div>
+
+                <div class="vote-card">
+                    <div class="vote-img-container">
+                        <img src="https://images.unsplash.com/photo-1541443131876-44b03de101c5?q=80&w=800" class="vote-img" alt="Suzuka">
+                    </div>
+                    <div class="vote-content">
+                        <div class="vote-title">Suzuka Circuit</div>
+                        <div class="vote-meta">
+                            <span class="meta-label">TRACK TIME:</span>7:00 AM<br>
+                            <span class="meta-label">CLASS:</span>90s JDM LEGENDS<br>
+                            <span class="meta-label">WEATHER:</span>CLEAR SKIES
+                        </div>
+                        <div class="vote-bar-bg"><div class="vote-bar-fill bar-suzuka"></div></div>
+                        <button class="vote-btn btn-suzuka" onclick="castVote('suzuka', 'race-track')">Vote Race</button>
+                    </div>
+                </div>
+
+                <div class="vote-card">
+                    <div class="vote-img-container">
+                        <img src="https://images.unsplash.com/photo-1634044535359-543160a2b535?q=80&w=800" class="vote-img" alt="Monza">
+                    </div>
+                    <div class="vote-content">
+                        <div class="vote-title">Monza (GP)</div>
+                        <div class="vote-meta">
+                            <span class="meta-label">TRACK TIME:</span>5:30 PM<br>
+                            <span class="meta-label">CLASS:</span>GROUP A TOURING<br>
+                            <span class="meta-label">WEATHER:</span>LIGHT RAIN
+                        </div>
+                        <div class="vote-bar-bg"><div class="vote-bar-fill bar-monza"></div></div>
+                        <button class="vote-btn btn-monza" onclick="castVote('monza', 'race-track')">Vote Race</button>
+                    </div>
+                </div>
+
+                <div class="vote-card">
+                    <div class="vote-img-container">
+                        <img src="https://images.unsplash.com/photo-1502945144109-84387d377b5a?q=80&w=800" class="vote-img" alt="Nurburgring">
+                    </div>
+                    <div class="vote-content">
+                        <div class="vote-title">Nürburgring GP</div>
+                        <div class="vote-meta">
+                            <span class="meta-label">TRACK TIME:</span>11:00 AM<br>
+                            <span class="meta-label">CLASS:</span>EUROPEAN DTM<br>
+                            <span class="meta-label">WEATHER:</span>OVERCAST
+                        </div>
+                        <div class="vote-bar-bg"><div class="vote-bar-fill bar-nurb"></div></div>
+                        <button class="vote-btn btn-nurb" onclick="castVote('nurb', 'race-track')">Vote Race</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="trackday" class="page">
+        <div class="panel attract-mode hero-banner-container" style="margin-bottom: 20px; cursor: pointer; transition: border-color 0.3s;" onclick="goToHeroPage()">
+            <div class="hero-label" style="letter-spacing: 2px; font-weight: bold; transition: color 0.3s; text-shadow: 1px 1px 2px #000;">[ SYSTEM INIT ]</div>
+            <div class="attract-title hero-title">AWAITING DATA...</div>
+            <div class="attract-data hero-data" style="color: var(--text-main);">...</div>
+        </div>
+
+        <h2 style="color: var(--neon-mint); border-bottom: 1px solid #333; padding-bottom: 10px;">LIVE TRACK DAY SERVERS</h2>
+        
+        <div id="tdServersContainer">
+            </div>
+        
+        <div class="panel" style="margin-top: 30px;">
+            <div class="panel-header" style="color: var(--neon-mint);">[ TRACK VOTE SELECT ]</div>
+            <div style="color: #888; font-size: 0.9rem;">Vote for the environmental conditions and car category of the next practice session.</div>
+            
+            <div class="vote-grid">
+                <div class="vote-card">
+                    <div class="vote-img-container">
+                        <img src="https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=800" class="vote-img" alt="Shutoko">
+                    </div>
+                    <div class="vote-content">
+                        <div class="vote-title">Shutoko Revival</div>
+                        <div class="vote-meta">
+                            <span class="meta-label">TRACK TIME:</span>1:00 AM<br>
+                            <span class="meta-label">CLASS:</span>STREET / DRIFT<br>
+                            <span class="meta-label">WEATHER:</span>HEAVY FOG
+                        </div>
+                        <div class="vote-bar-bg"><div class="vote-bar-fill bar-shutoko"></div></div>
+                        <button class="vote-btn btn-shutoko" style="border-color: var(--neon-cyan); color: var(--neon-cyan);" onclick="castVote('shutoko', 'td-env')">Vote Track</button>
+                    </div>
+                </div>
+
+                <div class="vote-card">
+                    <div class="vote-img-container">
+                        <img src="https://images.unsplash.com/photo-1542281286-9e0a16bb7366?q=80&w=800" class="vote-img" alt="Golden Hour">
+                    </div>
+                    <div class="vote-content">
+                        <div class="vote-title">Golden Hour Nords</div>
+                        <div class="vote-meta">
+                            <span class="meta-label">TRACK TIME:</span>6:30 PM<br>
+                            <span class="meta-label">CLASS:</span>ANY CAR<br>
+                            <span class="meta-label">WEATHER:</span>HAZY SUNSET
+                        </div>
+                        <div class="vote-bar-bg"><div class="vote-bar-fill bar-golden"></div></div>
+                        <button class="vote-btn btn-golden" style="border-color: var(--neon-cyan); color: var(--neon-cyan);" onclick="castVote('golden', 'td-env')">Vote Track</button>
+                    </div>
+                </div>
+
+                <div class="vote-card">
+                    <div class="vote-img-container">
+                        <img src="https://images.unsplash.com/photo-1542281286-9e0a16bb7366?q=80&w=800" class="vote-img" alt="LA Canyons">
+                    </div>
+                    <div class="vote-content">
+                        <div class="vote-title">LA Canyons</div>
+                        <div class="vote-meta">
+                            <span class="meta-label">TRACK TIME:</span>3:00 PM<br>
+                            <span class="meta-label">CLASS:</span>STREET / TUNER<br>
+                            <span class="meta-label">WEATHER:</span>CLEAR SKIES
+                        </div>
+                        <div class="vote-bar-bg"><div class="vote-bar-fill bar-la"></div></div>
+                        <button class="vote-btn btn-la" style="border-color: var(--neon-cyan); color: var(--neon-cyan);" onclick="castVote('la', 'td-env')">Vote Track</button>
+                    </div>
+                </div>
+
+                <div class="vote-card">
+                    <div class="vote-img-container">
+                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=800" class="vote-img" alt="Tsukuba">
+                    </div>
+                    <div class="vote-content">
+                        <div class="vote-title">Tsukuba 2000</div>
+                        <div class="vote-meta">
+                            <span class="meta-label">TRACK TIME:</span>12:00 PM<br>
+                            <span class="meta-label">CLASS:</span>COMPACT JDM<br>
+                            <span class="meta-label">WEATHER:</span>SUNNY
+                        </div>
+                        <div class="vote-bar-bg"><div class="vote-bar-fill bar-tsukuba"></div></div>
+                        <button class="vote-btn btn-tsukuba" style="border-color: var(--neon-cyan); color: var(--neon-cyan);" onclick="castVote('tsukuba', 'td-env')">Vote Track</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="vote" class="page">
+        <div class="panel attract-mode hero-banner-container" style="margin-bottom: 20px; cursor: pointer; transition: border-color 0.3s;" onclick="goToHeroPage()">
+            <div class="hero-label" style="letter-spacing: 2px; font-weight: bold; transition: color 0.3s; text-shadow: 1px 1px 2px #000;">[ SYSTEM INIT ]</div>
+            <div class="attract-title hero-title">AWAITING DATA...</div>
+            <div class="attract-data hero-data" style="color: var(--text-main);">...</div>
+        </div>
+
+        <h2 style="color: var(--neon-gold); border-bottom: 1px solid #333; padding-bottom: 10px;">STAGE VOTING</h2>
+        <div style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Cast your votes for the next Official Championship Heat and Track Day Practice environment.</div>
+
+        <div class="vote-split">
+            <div>
+                <h3 style="color: var(--neon-gold); font-family: 'Share Tech Mono';">> RACE SELECTION</h3>
+                <div class="vote-grid" style="grid-template-columns: 1fr;">
+                    
+                    <div class="vote-card">
+                        <div class="vote-img-container">
+                            <img src="https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=800" class="vote-img" alt="Spa">
+                        </div>
+                        <div class="vote-content">
+                            <div class="vote-title">Spa-Francorchamps</div>
+                            <div class="vote-meta">
+                                <span class="meta-label">TRACK TIME:</span>2:00 PM<br>
+                                <span class="meta-label">CLASS:</span>MODERN GT3 / GT4<br>
+                                <span class="meta-label">WEATHER:</span>DYNAMIC CLOUDS
+                            </div>
+                            <div class="vote-bar-bg"><div class="vote-bar-fill bar-spa"></div></div>
+                            <button class="vote-btn btn-spa" onclick="castVote('spa', 'race-track')">Vote Race</button>
+                        </div>
+                    </div>
+
+                    <div class="vote-card">
+                        <div class="vote-img-container">
+                            <img src="https://images.unsplash.com/photo-1541443131876-44b03de101c5?q=80&w=800" class="vote-img" alt="Suzuka">
+                        </div>
+                        <div class="vote-content">
+                            <div class="vote-title">Suzuka Circuit</div>
+                            <div class="vote-meta">
+                                <span class="meta-label">TRACK TIME:</span>7:00 AM<br>
+                                <span class="meta-label">CLASS:</span>90s JDM LEGENDS<br>
+                                <span class="meta-label">WEATHER:</span>CLEAR SKIES
+                            </div>
+                            <div class="vote-bar-bg"><div class="vote-bar-fill bar-suzuka"></div></div>
+                            <button class="vote-btn btn-suzuka" onclick="castVote('suzuka', 'race-track')">Vote Race</button>
+                        </div>
+                    </div>
+
+                    <div class="vote-card">
+                        <div class="vote-img-container">
+                            <img src="https://images.unsplash.com/photo-1634044535359-543160a2b535?q=80&w=800" class="vote-img" alt="Monza">
+                        </div>
+                        <div class="vote-content">
+                            <div class="vote-title">Monza (GP)</div>
+                            <div class="vote-meta">
+                                <span class="meta-label">TRACK TIME:</span>5:30 PM<br>
+                                <span class="meta-label">CLASS:</span>GROUP A TOURING<br>
+                                <span class="meta-label">WEATHER:</span>LIGHT RAIN
+                            </div>
+                            <div class="vote-bar-bg"><div class="vote-bar-fill bar-monza"></div></div>
+                            <button class="vote-btn btn-monza" onclick="castVote('monza', 'race-track')">Vote Race</button>
+                        </div>
+                    </div>
+
+                    <div class="vote-card">
+                        <div class="vote-img-container">
+                            <img src="https://images.unsplash.com/photo-1502945144109-84387d377b5a?q=80&w=800" class="vote-img" alt="Nurburgring">
+                        </div>
+                        <div class="vote-content">
+                            <div class="vote-title">Nürburgring GP</div>
+                            <div class="vote-meta">
+                                <span class="meta-label">TRACK TIME:</span>11:00 AM<br>
+                                <span class="meta-label">CLASS:</span>EUROPEAN DTM<br>
+                                <span class="meta-label">WEATHER:</span>OVERCAST
+                            </div>
+                            <div class="vote-bar-bg"><div class="vote-bar-fill bar-nurb"></div></div>
+                            <button class="vote-btn btn-nurb" onclick="castVote('nurb', 'race-track')">Vote Race</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div>
+                <h3 style="color: var(--neon-mint); font-family: 'Share Tech Mono';">> TRACK DAY SELECTION</h3>
+                <div class="vote-grid" style="grid-template-columns: 1fr;">
+                    
+                    <div class="vote-card">
+                        <div class="vote-img-container">
+                            <img src="https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=800" class="vote-img" alt="Shutoko">
+                        </div>
+                        <div class="vote-content">
+                            <div class="vote-title">Shutoko Revival</div>
+                            <div class="vote-meta">
+                                <span class="meta-label">TRACK TIME:</span>1:00 AM<br>
+                                <span class="meta-label">CLASS:</span>STREET / DRIFT<br>
+                                <span class="meta-label">WEATHER:</span>HEAVY FOG
+                            </div>
+                            <div class="vote-bar-bg"><div class="vote-bar-fill bar-shutoko"></div></div>
+                            <button class="vote-btn btn-shutoko" style="border-color: var(--neon-cyan); color: var(--neon-cyan);" onclick="castVote('shutoko', 'td-env')">Vote Track</button>
+                        </div>
+                    </div>
+
+                    <div class="vote-card">
+                        <div class="vote-img-container">
+                            <img src="https://images.unsplash.com/photo-1542281286-9e0a16bb7366?q=80&w=800" class="vote-img" alt="Golden Hour">
+                        </div>
+                        <div class="vote-content">
+                            <div class="vote-title">Golden Hour Nords</div>
+                            <div class="vote-meta">
+                                <span class="meta-label">TRACK TIME:</span>6:30 PM<br>
+                                <span class="meta-label">CLASS:</span>ANY CAR<br>
+                                <span class="meta-label">WEATHER:</span>HAZY SUNSET
+                            </div>
+                            <div class="vote-bar-bg"><div class="vote-bar-fill bar-golden"></div></div>
+                            <button class="vote-btn btn-golden" style="border-color: var(--neon-cyan); color: var(--neon-cyan);" onclick="castVote('golden', 'td-env')">Vote Track</button>
+                        </div>
+                    </div>
+
+                    <div class="vote-card">
+                        <div class="vote-img-container">
+                            <img src="https://images.unsplash.com/photo-1542281286-9e0a16bb7366?q=80&w=800" class="vote-img" alt="LA Canyons">
+                        </div>
+                        <div class="vote-content">
+                            <div class="vote-title">LA Canyons</div>
+                            <div class="vote-meta">
+                                <span class="meta-label">TRACK TIME:</span>3:00 PM<br>
+                                <span class="meta-label">CLASS:</span>STREET / TUNER<br>
+                                <span class="meta-label">WEATHER:</span>CLEAR SKIES
+                            </div>
+                            <div class="vote-bar-bg"><div class="vote-bar-fill bar-la"></div></div>
+                            <button class="vote-btn btn-la" style="border-color: var(--neon-cyan); color: var(--neon-cyan);" onclick="castVote('la', 'td-env')">Vote Track</button>
+                        </div>
+                    </div>
+
+                    <div class="vote-card">
+                        <div class="vote-img-container">
+                            <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=800" class="vote-img" alt="Tsukuba">
+                        </div>
+                        <div class="vote-content">
+                            <div class="vote-title">Tsukuba 2000</div>
+                            <div class="vote-meta">
+                                <span class="meta-label">TRACK TIME:</span>12:00 PM<br>
+                                <span class="meta-label">CLASS:</span>COMPACT JDM<br>
+                                <span class="meta-label">WEATHER:</span>SUNNY
+                            </div>
+                            <div class="vote-bar-bg"><div class="vote-bar-fill bar-tsukuba"></div></div>
+                            <button class="vote-btn btn-tsukuba" style="border-color: var(--neon-cyan); color: var(--neon-cyan);" onclick="castVote('tsukuba', 'td-env')">Vote Track</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="leaderboard" class="page">
+        <div class="panel attract-mode hero-banner-container" style="margin-bottom: 20px; cursor: pointer; transition: border-color 0.3s;" onclick="goToHeroPage()">
+            <div class="hero-label" style="letter-spacing: 2px; font-weight: bold; transition: color 0.3s; text-shadow: 1px 1px 2px #000;">[ SYSTEM INIT ]</div>
+            <div class="attract-title hero-title">AWAITING DATA...</div>
+            <div class="attract-data hero-data" style="color: var(--text-main);">...</div>
+        </div>
+
+        <h2 style="color: var(--neon-cyan); border-bottom: 1px solid #333; padding-bottom: 10px;">GLOBAL LEADERBOARDS</h2>
+        
+        <div class="lb-controls">
+            <select class="filter-select" id="lbMode" style="border-color: var(--neon-pink); color: var(--neon-pink);">
+                <option value="laps">FASTEST LAPS (TRACK RECORDS)</option>
+                <option value="stats">DRIVER STANDINGS (GLOBAL STATS)</option>
+            </select>
+            <input type="text" class="search-bar" id="driverSearch" placeholder="> SEARCH ALIAS, CAR, OR TRACK..." autocomplete="off">
+        </div>
+        
+        <div class="lb-controls" id="lapFilters" style="display: flex;">
+            <select class="filter-select" id="lbTrack"><option value="">[ ALL TRACKS ]</option></select>
+            <select class="filter-select" id="lbCar"><option value="">[ ALL CARS ]</option></select>
+        </div>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead id="lbHead">
+                    </thead>
+                <tbody id="leaderboardBody">
+                    <tr><td colspan="10" style="text-align: center; padding: 40px; color: #666;">[ AWAITING DATA DRIVE MOUNT ]</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="paginationControls" style="text-align: center; margin-top: 20px; display: none;">
+            <button class="nav-btn" style="background: var(--neon-cyan); color: var(--bg-dark);" onclick="loadMoreRows()">SHOW MORE (50)</button>
+        </div>
+    </div>
+
+    <div id="schedule" class="page">
+        <div class="panel attract-mode hero-banner-container" style="margin-bottom: 20px; cursor: pointer; transition: border-color 0.3s;" onclick="goToHeroPage()">
+            <div class="hero-label" style="letter-spacing: 2px; font-weight: bold; transition: color 0.3s; text-shadow: 1px 1px 2px #000;">[ SYSTEM INIT ]</div>
+            <div class="attract-title hero-title">AWAITING DATA...</div>
+            <div class="attract-data hero-data" style="color: var(--text-main);">...</div>
+        </div>
+
+        <h2 style="color: var(--neon-gold); border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 30px;">CURRENT EVENTS</h2>
+        <div style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Active official championship lobbies. Click to view live timing & scoring.</div>
+        
+        <div class="event-card-grid">
+            <div class="event-card" onclick="goToRaceAndExpand('srv-r-0')">
+                <div class="event-bg" style="background-image: url('https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500');"></div>
+                <div class="event-content">
+                    <h3>SEASON 4: GT3 SPRINT</h3>
+                    <div class="event-track">> SPA-FRANCORCHAMPS</div>
+                    <div class="event-status">STATUS: QUALIFYING</div>
+                </div>
+            </div>
+            <div class="event-card" onclick="goToRaceAndExpand('srv-r-1')">
+                <div class="event-bg" style="background-image: url('https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=500');"></div>
+                <div class="event-content">
+                    <h3>ENDURANCE PRO-AM</h3>
+                    <div class="event-track">> MOUNT PANORAMA</div>
+                    <div class="event-status">STATUS: PRACTICE</div>
+                </div>
+            </div>
+            <div class="event-card" onclick="goToRaceAndExpand('srv-r-2')">
+                <div class="event-bg" style="background-image: url('https://images.unsplash.com/photo-1541443131876-44b03de101c5?q=80&w=500');"></div>
+                <div class="event-content">
+                    <h3>90s JDM TOUGE</h3>
+                    <div class="event-track">> SUZUKA CIRCUIT</div>
+                    <div class="event-status">STATUS: RACE (L2/10)</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="color: var(--neon-cyan); border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 40px;">LIVE CHAMPIONSHIP STANDINGS</h2>
+        <div style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Current point totals for active seasons.</div>
+
+        <div class="standings-tab-bar">
+            <button class="standings-tab active" onclick="loadStandings('gt3', this)">GT3 SPRINT (SEASON 4)</button>
+            <button class="standings-tab" onclick="loadStandings('enduro', this)">ENDURANCE PRO-AM</button>
+            <button class="standings-tab" onclick="loadStandings('jdm', this)">90s JDM TOUGE</button>
+        </div>
+
+        <div style="overflow-x: auto; margin-bottom: 40px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>POS</th>
+                        <th>DRIVER ALIAS</th>
+                        <th>POINTS</th>
+                        <th>STARTS</th>
+                        <th>WINS</th>
+                    </tr>
+                </thead>
+                <tbody id="standingsBody">
+                    </tbody>
+            </table>
+        </div>
+
+        <h2 style="color: var(--neon-pink); border-bottom: 1px solid #333; padding-bottom: 10px;">EVENT CALENDAR</h2>
+        <div style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">The official calendar for the current championship series.</div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-family: 'Share Tech Mono';">
+            <button class="nav-btn" style="border-color: #444; color: #888;" onclick="changeMonth(-1)">&lt; PREV</button>
+            <h3 id="calendarMonthDisplay" style="margin: 0; color: #fff; text-transform: uppercase; font-size: 1.4rem;">MAY 2026</h3>
+            <button class="nav-btn" style="border-color: #444; color: #888;" onclick="changeMonth(1)">NEXT &gt;</button>
+        </div>
+        
+        <div class="calendar-grid" id="calendarGrid">
+            </div>
+    </div>
+
+    <div id="rules" class="page">
+        <div class="panel attract-mode hero-banner-container" style="margin-bottom: 20px; cursor: pointer; transition: border-color 0.3s;" onclick="goToHeroPage()">
+            <div class="hero-label" style="letter-spacing: 2px; font-weight: bold; transition: color 0.3s; text-shadow: 1px 1px 2px #000;">[ SYSTEM INIT ]</div>
+            <div class="attract-title hero-title">AWAITING DATA...</div>
+            <div class="attract-data hero-data" style="color: var(--text-main);">...</div>
+        </div>
+
+        <h2 style="color: var(--neon-cyan); border-bottom: 1px solid #333; padding-bottom: 10px;">DRIVER'S MANUAL</h2>
+        <div style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Comprehensive guide to server mechanics, telemetry tracking, and racing etiquette.</div>
+        
+        <div class="manual-wrapper">
+            <div class="manual-nav">
+                <button class="manual-nav-btn active" onclick="showChapter('ch-license')">1. Safety & Licenses</button>
+                <button class="manual-nav-btn" onclick="showChapter('ch-penalty')">2. Incident Penalties</button>
+                <button class="manual-nav-btn" onclick="showChapter('ch-elo')">3. Driver Rating (ELO)</button>
+                <button class="manual-nav-btn" onclick="showChapter('ch-xp')">4. TrackXP & Levels</button>
+                <button class="manual-nav-btn" onclick="showChapter('ch-rules')">5. Code of Conduct</button>
+            </div>
+
+            <div class="manual-content">
+                
+                <div id="ch-license" class="manual-chapter active">
+                    <h3 class="chapter-title">1. Safety Rating & Licenses</h3>
+                    <div class="chapter-text">
+                        <p>The 90s Evo Hub uses a dynamic, 6-Tier License system strictly driven by your Safety Rating (SR). This dictates which competitive splits and official races you are eligible to enter.</p>
+                        
+                        <h4>THE TIERS</h4>
+                        <ul>
+                            <li><span class="chapter-highlight">CLASS R (Rookie):</span> Baseline starting point.</li>
+                            <li><span class="chapter-highlight">CLASS D (Novice)</span></li>
+                            <li><span class="chapter-highlight">CLASS C (Clubman)</span></li>
+                            <li><span class="chapter-highlight">CLASS B (Pro)</span></li>
+                            <li><span class="chapter-highlight">CLASS A (Elite)</span></li>
+                            <li><span class="chapter-highlight">CLASS S (Master):</span> Reserved for the cleanest drivers.</li>
+                        </ul>
+
+                        <h4>PROGRESSION MECHANICS</h4>
+                        <p>Every driver starts at <span class="chapter-highlight">Class R with a 2.50 SR</span>. Your SR is calculated by a live laps-per-incident ratio.</p>
+                        <ul>
+                            <li>Reaching <span class="chapter-highlight">4.00 SR</span> instantly promotes you to the next Class, resetting your SR to 2.50.</li>
+                            <li>Dropping below <span class="chapter-highlight">1.00 SR</span> demotes you to the previous Class, resetting your SR to 2.50.</li>
+                        </ul>
+
+                        <h4>EARNING SR</h4>
+                        <p>Completing clean laps is the only way to earn SR. The amount you earn is dynamically scaled by three factors:</p>
+                        <ol>
+                            <li><strong>Track Length:</strong> A clean lap on the Nürburgring Nordschleife pays out significantly more SR than a clean lap on Tsukuba.</li>
+                            <li><strong>License Class:</strong> As you rank up, it becomes harder to earn SR. A Rookie earns <span class="chapter-highlight">+0.06 SR</span> for a clean 4km lap, whereas an S-Class Master earns only <span class="chapter-highlight">+0.01 SR</span>.</li>
+                            <li><strong>Session Type:</strong> Official Races pay out 100% SR. Unofficial Races (fewer than 3 drivers) pay 30%. Practice and Qualifying sessions pay 25%.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div id="ch-penalty" class="manual-chapter">
+                    <h3 class="chapter-title">2. Incident Penalties & Auto-Kicks</h3>
+                    <div class="chapter-text">
+                        <p>During an active race, the telemetry engine acts as a live, automated steward. It monitors all collisions and tracks your Incident Points ("x") in real-time.</p>
+                        
+                        <h4>INCIDENT WEIGHTS</h4>
+                        <ul>
+                            <li><span class="chapter-highlight">0x (Pylons & Cones):</span> Hitting track props is recorded on your profile for fun, but incurs no SR penalty.</li>
+                            <li><span class="chapter-highlight">2x (Wall Contact):</span> Heavy impacts with the environment will incur a minor deduction to your SR.</li>
+                            <li><span class="chapter-highlight">4x (Car Contact):</span> Colliding with another driver's chassis incurs a major deduction to your SR.</li>
+                        </ul>
+
+                        <h4>THE 17x DISQUALIFICATION RULE</h4>
+                        <p>To protect the integrity of official races, there is a strict incident limit. If a driver accumulates <span class="chapter-highlight">17x</span> in a single race (e.g., 4 car contacts and 1 wall scrape), the automated steward will intervene.</p>
+                        <ul>
+                            <li>The driver is instantly Disqualified (DQ).</li>
+                            <li>The driver is forcefully kicked from the server.</li>
+                            <li>A <span class="chapter-highlight">60-second firewall block</span> is automatically applied to their IP, preventing them from rage-rejoining and further disrupting the event.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="ch-elo" class="manual-chapter">
+                    <h3 class="chapter-title">3. Driver Rating (ELO)</h3>
+                    <div class="chapter-text">
+                        <p>Your Driver Rating (ELO) is the ultimate measure of your pace, consistency, and racecraft. It isolates your skill from the amount of time you've spent grinding on the server.</p>
+                        
+                        <h4>THE BASELINE</h4>
+                        <p>Every driver enters the ecosystem with a baseline rating of <span class="chapter-highlight">1500 ELO</span>.</p>
+
+                        <h4>THE COMBAT MATH</h4>
+                        <p>Unlike basic point systems, ELO is calculated dynamically. At the end of every race, the engine runs a 1v1 mathematical comparison between you and <em>every single other driver</em> on the grid.</p>
+                        <ul>
+                            <li><strong>The Underdog Bonus:</strong> If you are rated 1200 ELO and finish ahead of a 2000 ELO driver, you will steal a massive amount of points from them.</li>
+                            <li><strong>The Expected Victory:</strong> If you are rated 2000 ELO and finish ahead of a 1200 ELO driver, you will only gain a tiny fraction of a point, because the system <em>expected</em> you to win.</li>
+                        </ul>
+                        <p>This system completely prevents drivers from "farming" rating points in empty lobbies or against rookies. To reach the top of the global leaderboards, you have to consistently beat fast people.</p>
+                    </div>
+                </div>
+
+                <div id="ch-xp" class="manual-chapter">
+                    <h3 class="chapter-title">4. TrackXP & Levels</h3>
+                    <div class="chapter-text">
+                        <p>TrackXP is our loyalty mechanic. It rewards drivers who put in the hours practicing, grinding laps, and hunting for personal bests.</p>
+                        
+                        <h4>THE COMBO MULTIPLIER</h4>
+                        <p>In Practice and Track Day sessions, stringing together clean laps builds a progressive XP multiplier.</p>
+                        <ul>
+                            <li>Completing consecutive clean laps will grow your multiplier up to a maximum of <span class="chapter-highlight">2.0x</span>.</li>
+                            <li>If you make contact with a wall or another car, your current lap is <strong>invalidated</strong> (0 XP awarded) and your streak multiplier instantly resets to <span class="chapter-highlight">1.0x</span>.</li>
+                        </ul>
+
+                        <h4>PERSONAL BEST BONUSES</h4>
+                        <p>Pushing your limits is directly rewarded. Setting a new Personal Best (PB) on any unique Track/Car combination instantly awards a flat <span class="chapter-highlight">+15 XP</span> bonus, regardless of your current multiplier.</p>
+
+                        <h4>EXPONENTIAL LEVELING</h4>
+                        <p>Your TrackXP directly translates to your Trackday Level, which is proudly displayed on your Driver License. The leveling curve is exponential—reaching Level 2 takes only a handful of laps, but reaching Level 50 requires ultimate dedication to the asphalt.</p>
+                    </div>
+                </div>
+
+                <div id="ch-rules" class="manual-chapter">
+                    <h3 class="chapter-title">5. Code of Conduct</h3>
+                    <div class="chapter-text">
+                        <p>The 90s Evo Hub is built on respect. We expect all drivers to adhere to standard, hard-nosed sim racing etiquette.</p>
+                        
+                        <h4>1. BLUE FLAGS</h4>
+                        <p>If you are being lapped, <strong>hold your line and be predictable.</strong> Do not make sudden lane changes or brake erratically. It is the faster car's responsibility to execute the pass safely around you.</p>
+                        
+                        <h4>2. OVERTAKING & DIVE-BOMBING</h4>
+                        <p>Dive-bombing is strictly prohibited. To be entitled to racing room through a corner, the trailing car must establish <strong>significant overlap</strong> (front bumper alongside the lead car's doors) <em>before</em> the normal turn-in point.</p>
+
+                        <h4>3. UNSAFE REJOINS</h4>
+                        <p>If you spin out or go off-track, you surrender your right of way. You <strong>must</strong> check your relative timings and track map before re-entering the racing surface. Rejoining into traffic and causing a collision will result in heavy steward penalties.</p>
+
+                        <h4>4. ZERO TOLERANCE POLICY</h4>
+                        <p>We do not tolerate malicious behavior. <span class="chapter-highlight">Intentional wrecking, retaliation, or harassment</span> of any kind will result in an immediate and permanent IP and SteamID ban. If you are involved in an incident, save your replay and use the <strong>Report Driver</strong> tab. Let the Stewards handle it.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <div id="media" class="page">
+        <div class="panel attract-mode hero-banner-container" style="margin-bottom: 20px; cursor: pointer; transition: border-color 0.3s;" onclick="goToHeroPage()">
+            <div class="hero-label" style="letter-spacing: 2px; font-weight: bold; transition: color 0.3s; text-shadow: 1px 1px 2px #000;">[ SYSTEM INIT ]</div>
+            <div class="attract-title hero-title">AWAITING DATA...</div>
+            <div class="attract-data hero-data" style="color: var(--text-main);">...</div>
+        </div>
+
+        <h2 style="color: var(--neon-cyan); border-bottom: 1px solid #333; padding-bottom: 10px;">MEDIA ARCHIVE</h2>
+        <div style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Community screenshots and race highlights.</div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="panel" style="margin-bottom: 0;">
+                <div class="panel-header" style="color: var(--neon-pink);">[ PHOTO ] LATEST UPLOAD</div>
+                <div class="screenshot-frame" style="height: 250px;"></div>
+            </div>
+            <div class="panel" style="margin-bottom: 0;">
+                <div class="panel-header" style="color: var(--neon-gold);">[ VIDEO ] RACE HIGHLIGHTS</div>
+                <div class="screenshot-frame" style="height: 250px;"></div>
+            </div>
+            <div class="panel" style="grid-column: 1 / -1; margin-top: 20px;">
+                <div class="panel-header" style="color: var(--neon-mint);">[ COMMUNITY ] GALLERY</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                     <div class="screenshot-frame" style="height: 150px;"></div>
+                     <div class="screenshot-frame" style="height: 150px;"></div>
+                     <div class="screenshot-frame" style="height: 150px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="report" class="page">
+        <h2 style="color: var(--neon-red); border-bottom: 1px solid #333; padding-bottom: 10px;">FILE INCIDENT REPORT</h2>
+        <div style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Stewards review all tickets. Malicious or false reporting may result in SR deductions.</div>
+        
+        <div class="report-form" style="border-top-color: var(--neon-red);">
+            <div>
+                <div class="report-label" style="color: var(--neon-red);">OFFENDING DRIVER NAME / ID</div>
+                <input type="text" class="report-input" placeholder="e.g. SpeedyG">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                    <div class="report-label" style="color: var(--neon-red);">SERVER NAME</div>
+                    <input type="text" class="report-input" placeholder="e.g. 90s Nurburgring">
+                </div>
+                <div>
+                    <div class="report-label" style="color: var(--neon-red);">APPROX. LAP # OR TIME</div>
+                    <input type="text" class="report-input" placeholder="e.g. Lap 4 / 20:15 EST">
+                </div>
+            </div>
+            <div>
+                <div class="report-label" style="color: var(--neon-red);">INCIDENT DESCRIPTION</div>
+                <textarea class="report-input" placeholder="Describe what happened clearly and objectively..."></textarea>
+            </div>
+            <div>
+                <div class="report-label" style="color: var(--neon-red);">VIDEO EVIDENCE LINK (YOUTUBE/STREAMABLE)</div>
+                <input type="text" class="report-input" placeholder="https://...">
+            </div>
+            <button class="nav-btn" style="border-color: var(--neon-red); color: var(--bg-dark); background: var(--neon-red); margin-top: 10px;" onclick="alert('Ticket submitted to Stewards.')">SUBMIT TICKET</button>
+        </div>
+    </div>
+
+    <div id="profile" class="page">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <button class="nav-btn btn-gold" onclick="showPage('leaderboard')" style="font-size: 0.8rem;"><< BACK TO LEADERBOARDS</button>
+            <div style="display: flex; gap: 10px; width: 100%; max-width: 400px;">
+                <input type="text" id="telemetrySearchInput" class="search-bar" placeholder="> SEARCH ALIAS OR STEAM ID..." style="border-color: var(--neon-pink); padding: 8px;" autocomplete="off">
+                <button class="nav-btn btn-pink" onclick="searchTelemetry()">LOAD</button>
+            </div>
+        </div>
+
+      <div class="profile-header">
+            <div>
+                <div class="profile-id" id="profSteamId">ID_SEARCHING...</div>
+                <h2 class="profile-name" id="profName">DRIVER</h2>
+                <div style="margin-top: 8px; font-family: 'Share Tech Mono'; font-size: 0.85rem; color: #aaa;">
+                    <span style="color: var(--neon-cyan);">> </span><span id="profMostCar">Unknown</span>
+                    <span style="color: #444; margin: 0 8px;">//</span>
+                    <span style="color: var(--neon-mint);">> </span><span id="profMostTrack">Unknown</span>
+                </div>
+            </div>
+            <div style="text-align: right;"><div class="safety-sticker" id="profSafety" style="transform: none; font-size: 1.5rem;">CLASS R [2.50]</div><div style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; margin-top:10px;">TrackXP LVL <span id="profLevel">0</span></div></div>
+        </div>
+		
+        <h3 style="color: var(--neon-gold); font-family: 'Share Tech Mono';">> TROPHY CABINET</h3>
+        <div class="stat-grid">
+            <div class="stat-box"><div class="stat-label">RATING (ELO)</div><div class="stat-value" id="profRating" style="color: var(--neon-cyan);">1500</div></div>
+            <div class="stat-box gold"><div class="stat-label">CHAMPIONSHIPS</div><div class="stat-value" id="profTitles" style="color: var(--neon-gold);">0</div></div>
+            <div class="stat-box"><div class="stat-label">RACE WINS</div><div class="stat-value" id="profWins">0</div></div>
+            <div class="stat-box gold"><div class="stat-label">TOTAL SEASON PTS</div><div class="stat-value" id="profSeasonPts" style="color: var(--neon-gold);">0</div></div>
+        </div>
+        
+        <h3 style="color: var(--neon-cyan); font-family: 'Share Tech Mono';">> RACECRAFT & PERFORMANCE</h3>
+        <div class="stat-grid">
+            <div class="stat-box"><div class="stat-label">RACE STARTS</div><div class="stat-value" id="profStarts">0</div></div>
+            <div class="stat-box"><div class="stat-label">WIN %</div><div class="stat-value" id="profWinPctVal">0.0%</div></div>
+            <div class="stat-box"><div class="stat-label">TOP 5s (PODIUMS)</div><div class="stat-value" id="profTop5">0</div></div>
+            <div class="stat-box"><div class="stat-label">TOP 5 %</div><div class="stat-value" id="profTop5Pct">0.0%</div></div>
+            <div class="stat-box"><div class="stat-label">POLE POSITIONS</div><div class="stat-value" id="profPoles">0</div></div>
+            <div class="stat-box"><div class="stat-label">TOTAL LAPS</div><div class="stat-value" id="profLaps">0</div></div>
+            <div class="stat-box"><div class="stat-label">AVG START POS</div><div class="stat-value" id="profAvgStart">P0</div></div>
+            <div class="stat-box"><div class="stat-label">AVG FINISH POS</div><div class="stat-value" id="profAvgFinish">P0</div></div>
+            <div class="stat-box" id="deltaBox"><div class="stat-label">NET POS DELTA</div><div class="stat-value" id="profDelta">0.0</div></div>
+            <div class="stat-box"><div class="stat-label">PTS / RACE</div><div class="stat-value" id="profPtsPerRace" style="color: var(--neon-cyan);">0.0</div></div>
+        </div>
+        
+        <h3 style="color: var(--neon-pink); font-family: 'Share Tech Mono';">> INCIDENT DIAGNOSTICS</h3>
+        <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+            <div class="stat-box bad"><div class="stat-label">RACE CONTACTS</div><div class="stat-value" id="profContacts" style="color: var(--neon-pink);">0</div></div>
+            <div class="stat-box bad"><div class="stat-label">INCIDENTS / RACE</div><div class="stat-value" id="profIncPerRace" style="color: var(--neon-pink);">0.0</div></div>
+            <div class="stat-box bad"><div class="stat-label">QUALI SCUFFS</div><div class="stat-value" id="profQualiScuffs" style="color: var(--neon-pink);">0</div></div>
+            <div class="stat-box bad"><div class="stat-label">TRACKDAY SCUFFS</div><div class="stat-value" id="profTDScuffs" style="color: var(--neon-pink);">0</div></div>
+            <div class="stat-box bad"><div class="stat-label">PYLONS HIT</div><div class="stat-value" id="profPylons" style="color: var(--neon-pink);">0</div></div>
+            <div class="stat-box bad"><div class="stat-label">DNFs (QUITS)</div><div class="stat-value" id="profDnfs" style="color: var(--neon-pink);">0</div></div>
+        </div>
+
+        <h3 style="color: var(--neon-gold); font-family: 'Share Tech Mono'; margin-top: 30px;">> SEASON EVENTS</h3>
+        <div class="season-list" id="profSeasons">
+            <div style="color: #666; font-style: italic; text-align: center;">[ NO SEASON PARTICIPATION FOUND ]</div>
+        </div>
+
+        <h3 style="color: var(--neon-mint); font-family: 'Share Tech Mono'; margin-top: 30px;">> PERSONAL TRACK RECORDS</h3>
+        <div class="lb-controls" style="margin-bottom: 15px; display: flex; gap: 10px;">
+            <select class="filter-select" id="profTrackFilter" onchange="renderProfileRecords()"><option value="">[ ALL TRACKS ]</option></select>
+            <select class="filter-select" id="profCarFilter" onchange="renderProfileRecords()"><option value="">[ ALL CARS ]</option></select>
+            <select class="filter-select" id="profSortFilter" onchange="renderProfileRecords()">
+                <option value="asc">FASTEST FIRST</option>
+                <option value="desc">SLOWEST FIRST</option>
+            </select>
+        </div>
+        <div id="profRecords">
+            <div style="color: #666; font-style: italic; text-align: center;">[ NO RECORDS FOUND / WAITING FOR LEADERBOARD.JSON ]</div>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    > SYS.VER: 21.18.0 | HUB UPLINK ESTABLISHED<br>
+    © 2026 90SEVO.CA SIM RACING HUB. ALL RIGHTS RESERVED.
+</footer>
+
+<div class="modal-overlay" id="driverModal" onclick="closeModal()">
+    <div class="driver-card-popout" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <div class="jdm-text">運転免許証</div>
+        
+        <div class="ticket-header">
+            <div>
+                <div style="color: #888; font-size: 0.7rem; font-family: 'Share Tech Mono';">DRIVER ID</div>
+                <h2 id="modal-name" style="margin: 5px 0 2px 0; text-transform: uppercase; font-size: 1.8rem; line-height: 1;">NAME</h2>
+                <div id="modal-car" style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.75rem;">> UNKNOWN CHASSIS</div>
+            </div>
+            <svg class="helmet-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V12C22 6.48 17.52 2 12 2ZM12 4C16.42 4 20 7.58 20 12V14H4V12C4 7.58 7.58 4 12 4ZM4 19V16H20V19H4ZM7 10C7 8.9 7.9 8 9 8H15C16.1 8 17 8.9 17 10H7Z"/></svg>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px;">
+            <div>
+                <div class="safety-sticker" id="modal-safety" style="display: inline-block; margin-bottom: 15px;">CLASS R [2.50]</div>
+                <div style="font-size: 0.7rem; color: #888; font-family: 'Share Tech Mono'; margin-bottom: 2px;">DRIVER SKILL RATING</div>
+                <div id="modal-rating" style="color: var(--neon-gold); font-size: 1.6rem; font-family: 'Share Tech Mono'; font-weight: bold; line-height: 1;">1500</div>
+            </div>
+            <div style="text-align: right; font-family: 'Share Tech Mono'; font-size: 0.85rem; line-height: 1.6; margin-right: 45px;">
+                <div><span style="color: #888; margin-right: 5px;">WINS</span> <span id="modal-wins" style="color: var(--neon-mint); font-weight: bold;">0</span></div>
+                <div><span style="color: #888; margin-right: 5px;">LAPS</span> <span id="modal-laps" style="color: #fff; font-weight: bold;">0</span></div>
+                <div><span style="color: #888; margin-right: 5px;">INC/RACE</span> <span id="modal-inc" style="color: var(--neon-pink); font-weight: bold;">0.0</span></div>
+                <div><span style="color: #888; margin-right: 5px;">PYLONS</span> <span id="modal-pylons" style="color: var(--neon-pink); font-weight: bold;">0</span></div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px;">
+            <div style="color: var(--neon-cyan); font-family: 'Share Tech Mono';" id="modal-level">TrackXP LVL 1</div>
+            <div class="xp-label" id="modal-xp-text" style="position: static;">0 / 50 XP</div>
+        </div>
+        <div class="xp-container" style="margin-top: 5px;"><div class="xp-fill" id="modal-xp-fill"></div></div>
+        
+        <button class="nav-btn" style="width: 100%; border-color: var(--neon-pink); color: var(--neon-pink); background: #000; margin-top: 15px;" onclick="teleportToTelemetry()">ACCESS TELEMETRY</button>
+    </div>
+</div>
+
+<script>
+    let dbProfiles = {};
+    let dbLeaderboard = [];
+    const classLetters = ["R", "D", "C", "B", "A", "S"];
+    let homeTrackInterval = null;
+
+    // Leaderboard Engine Memory
+    let currentSortCol = 'default';
+    let sortAscending = true;
+    let activeMode = 'laps';
+    let activeDataset = [];
+    let lbCurrentPage = 1;
+    const LB_ROWS_PER_PAGE = 50;
+
+    // DYNAMIC HERO BANNER GLOBALS
+    let globalBannerIdx = 0;
+    let heroTimer = null;
+    
+    // SAFE MODAL TELEPORT VARIABLE
+    let activeModalSteamID = "";
+    
+    // SAFE TRACK RECORDS RENDER VARIABLE
+    let currentTelemetryDriver = null;
+
+function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        
+        // Safe check for onclick attributes so the browser doesn't silent-crash
+        document.querySelectorAll('.nav-btn').forEach(btn => { 
+            let attr = btn.getAttribute('onclick');
+            if(attr && attr.includes(`showPage('${pageId}')`)) {
+                btn.classList.add('active'); 
+            }
+        });
+
+        // NEW: Auto-collapse all server accordions when leaving/switching pages
+        document.querySelectorAll('.server-roster').forEach(roster => roster.style.display = 'none');
+        document.querySelectorAll('[id^="toggle-icon-"]').forEach(icon => icon.innerText = '▼ EXPAND');
+        
+        window.scrollTo(0, 0); 
+
+        // Instantly force a hero banner update based on the new page context
+        updateHeroBanner();
+        clearInterval(heroTimer);
+        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 4500);
+    }
+    
+    // Manual Navigation Router
+    function showChapter(chapterId) {
+        document.querySelectorAll('.manual-chapter').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.manual-nav-btn').forEach(b => {
+            b.classList.remove('active');
+            if(b.getAttribute('onclick').includes(chapterId)) {
+                b.classList.add('active');
+            }
+        });
+        
+        document.getElementById(chapterId).classList.add('active');
+    }
+
+    // Direct routing function for homepage metric boxes
+    function goToRules(chapterId) {
+        showPage('rules');
+        showChapter(chapterId);
+    }
+
+// UNIVERSAL TELEPORT ENGINE
+    function goToServerAndExpand(srvId, pageId) {
+        showPage(pageId);
+        
+        setTimeout(() => {
+            const rosterDiv = document.getElementById(`roster-${srvId}`);
+            const iconDiv = document.getElementById(`toggle-icon-${srvId}`);
+            
+            if (rosterDiv && rosterDiv.style.display === 'none') {
+                rosterDiv.style.display = 'block';
+                if(iconDiv) iconDiv.innerText = '▲ COLLAPSE';
+            }
+            
+            const serverElement = document.getElementById(srvId);
+            if (serverElement) {
+                serverElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const oldBg = serverElement.style.backgroundColor;
+                serverElement.style.backgroundColor = 'rgba(255, 183, 0, 0.2)';
+                setTimeout(() => {
+                    serverElement.style.backgroundColor = oldBg;
+                }, 800);
+            }
+        }, 100);
+    }
+
+    // LEGACY REDIRECT (Keeps your old HTML Schedule page links working!)
+    function goToRaceAndExpand(srvId) {
+        goToServerAndExpand(srvId, 'race');
+    }
+    
+    // Routing Shortcuts
+    function openLeaderboard(mode) {
+        document.getElementById('lbMode').value = mode;
+        showPage('leaderboard');
+        processLeaderboardData();
+    }
+
+    // --- SECURE MOCK VOTING LOGIC ---
+    let mockVotes = {
+        'race-track': { spa: 42, suzuka: 28, monza: 14, nurb: 31 },
+        'td-env': { shutoko: 35, golden: 55, la: 40, tsukuba: 22 }
+    };
+    let userVoted = { 'race-track': false, 'td-env': false };
+
+    function castVote(id, group) {
+        if(userVoted[group]) return; 
+        
+        mockVotes[group][id]++;
+        userVoted[group] = true;
+        
+        let total = 0;
+        for(let k in mockVotes[group]) total += mockVotes[group][k];
+        
+        for(let k in mockVotes[group]) {
+            let pct = Math.round((mockVotes[group][k] / total) * 100);
+            
+            // Sync all progress bars with this track's class
+            document.querySelectorAll('.bar-' + k).forEach(bar => {
+                bar.style.width = pct + '%';
+                bar.style.background = group === 'td-env' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+                if(pct > 5) { bar.innerHTML = pct + '%'; }
+            });
+            
+            // Sync all buttons with this track's class
+            document.querySelectorAll('.btn-' + k).forEach(btn => {
+                btn.classList.add('voted');
+                if(k === id) {
+                    btn.innerText = "VOTED";
+                    btn.style.borderColor = group === 'td-env' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+                    btn.style.color = '#000';
+                    btn.style.background = group === 'td-env' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
+                } else {
+                    btn.innerText = "LOCKED";
+                    btn.style.borderColor = "#333";
+                    btn.style.color = "#555";
+                }
+            });
+        }
+    }
+
+    // --- ACCORDION TOGGLE LOGIC ---
+    function toggleRoster(srvId) {
+        const rosterDiv = document.getElementById(`roster-${srvId}`);
+        const iconDiv = document.getElementById(`toggle-icon-${srvId}`);
+        if(rosterDiv.style.display === 'none') {
+            rosterDiv.style.display = 'block';
+            iconDiv.innerText = '▲ COLLAPSE';
+        } else {
+            rosterDiv.style.display = 'none';
+            iconDiv.innerText = '▼ EXPAND';
+        }
+    }
+
+    // --- CALENDAR LOGIC ---
+    const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+    let currentCalDate = new Date(2026, 4, 1); // Starts at May 2026
+
+    const calEvents = {
+        "2026-4-15": { title: "Round 1: Suzuka", class: "90s JDM LEGENDS", status: "completed" },
+        "2026-4-22": { title: "Round 2: Bathurst", class: "ENDURANCE PRO-AM", status: "upcoming" },
+        "2026-4-29": { title: "Round 3: Spa", class: "MODERN GT3 / GT4", status: "tba" }
+    };
+
+    function renderCalendar() {
+        const year = currentCalDate.getFullYear();
+        const month = currentCalDate.getMonth();
+        document.getElementById('calendarMonthDisplay').innerText = `${monthNames[month]} ${year}`;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        let gridHtml = `
+            <div class="cal-header">SUN</div><div class="cal-header">MON</div><div class="cal-header">TUE</div>
+            <div class="cal-header">WED</div><div class="cal-header">THU</div><div class="cal-header">FRI</div><div class="cal-header">SAT</div>
+        `;
+
+        // Blanks for days before the 1st
+        for (let i = 0; i < firstDay; i++) {
+            gridHtml += `<div class="cal-day" style="opacity: 0.1; border-color: #111;"></div>`;
+        }
+
+        // Actual Days
+        for (let day = 1; day <= daysInMonth; day++) {
+            let dateKey = `${year}-${month}-${day}`;
+            let evt = calEvents[dateKey];
+            let evtHtml = '';
+            
+            if (evt) {
+                let eClass = 'cal-event ' + evt.status;
+                evtHtml = `<div class="${eClass}" onclick="alert('Event Details: ${evt.title}\\nClass: ${evt.class}\\nStatus: ${evt.status.toUpperCase()}')">${evt.title}</div>`;
+            }
+            
+            gridHtml += `<div class="cal-day"><div class="cal-date">${day}</div>${evtHtml}</div>`;
+        }
+
+        document.getElementById('calendarGrid').innerHTML = gridHtml;
+    }
+
+    function changeMonth(dir) {
+        currentCalDate.setMonth(currentCalDate.getMonth() + dir);
+        renderCalendar();
+    }
+
+    // --- LIVE STANDINGS LOGIC ---
+    const standingsData = {
+        'gt3': [
+            { pos: 1, name: "SpeedyG", pts: 125, starts: 5, wins: 3, color: "var(--neon-gold)" },
+            { pos: 2, name: "LateBraker", pts: 98, starts: 5, wins: 1, color: "var(--neon-mint)" },
+            { pos: 3, name: "V10_Scream", pts: 85, starts: 5, wins: 1, color: "var(--neon-cyan)" },
+            { pos: 4, name: "ApexHunter", pts: 60, starts: 4, wins: 0, color: "#888" },
+            { pos: 5, name: "WallRider", pts: 45, starts: 5, wins: 0, color: "#888" }
+        ],
+        'enduro': [
+            { pos: 1, name: "ApexHunter", pts: 210, starts: 8, wins: 4, color: "var(--neon-gold)" },
+            { pos: 2, name: "SpeedyG", pts: 180, starts: 8, wins: 2, color: "var(--neon-mint)" },
+            { pos: 3, name: "DriftKing99", pts: 145, starts: 8, wins: 1, color: "var(--neon-cyan)" },
+            { pos: 4, name: "RotaryPower", pts: 120, starts: 7, wins: 1, color: "#888" },
+            { pos: 5, name: "SlowPoke", pts: 90, starts: 8, wins: 0, color: "#888" }
+        ],
+        'jdm': [
+            { pos: 1, name: "TofuDelivery", pts: 75, starts: 3, wins: 3, color: "var(--neon-gold)" },
+            { pos: 2, name: "Godzilla", pts: 54, starts: 3, wins: 0, color: "var(--neon-mint)" },
+            { pos: 3, name: "VTEC_Kick", pts: 45, starts: 3, wins: 0, color: "var(--neon-cyan)" },
+            { pos: 4, name: "EuroBeat", pts: 30, starts: 2, wins: 0, color: "#888" },
+            { pos: 5, name: "DriftKing99", pts: 20, starts: 3, wins: 0, color: "#888" }
+        ]
+    };
+
+    function loadStandings(series, btnElement) {
+        document.querySelectorAll('.standings-tab').forEach(b => b.classList.remove('active'));
+        if(btnElement) btnElement.classList.add('active');
+
+        let html = '';
+        standingsData[series].forEach(r => {
+            html += `
+                <tr class="lb-row-table" style="color: ${r.pos <= 3 ? r.color : '#fff'};" onclick="alert('In a live environment, this would open ${r.name}\\n\\'s ID Card!')">
+                    <td style="color: ${r.pos <= 3 ? r.color : '#888'};">${r.pos}</td>
+                    <td style="font-weight: bold; font-family: 'Chakra Petch', sans-serif;">${r.name}</td>
+                    <td style="font-weight: bold;">${r.pts}</td>
+                    <td style="color: ${r.pos <= 3 ? '#fff' : '#888'};">${r.starts}</td>
+                    <td style="color: ${r.pos <= 3 ? '#fff' : '#888'};">${r.wins}</td>
+                </tr>
+            `;
+        });
+        document.getElementById('standingsBody').innerHTML = html;
+    }
+
+    // --- PARSE JSONS ---
+    document.getElementById('uploadProfiles').addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            dbProfiles = JSON.parse(e.target.result);
+            document.getElementById('bootStatus').innerText = "DISC 1 MOUNTED: PROFILES SYNCED";
+            
+            // Populating Autocomplete Datalist
+            const datalist = document.getElementById('telemetryDriversList');
+            if(datalist) {
+                datalist.innerHTML = '';
+                for(let k in dbProfiles) {
+                    let opt = document.createElement('option');
+                    opt.value = dbProfiles[k].Name;
+                    datalist.appendChild(opt);
+                }
+            }
+
+            updateHomeEliteLists();
+            processLeaderboardData(); 
+        };
+        reader.readAsText(e.target.files[0]);
+    });
+
+    document.getElementById('uploadLeaderboard').addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            dbLeaderboard = JSON.parse(e.target.result);
+            document.getElementById('bootStatus').innerText = "DISCS MOUNTED: LEADERBOARD SYNCED";
+            populateLeaderboardFilters();
+            startHomeTrackCycle();
+            processLeaderboardData();
+        };
+        reader.readAsText(e.target.files[0]);
+    });
+
+    // --- HOMEPAGE LOGIC ---
+    function updateHomeEliteLists() {
+        const sorted = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]}));
+        const topRating = [...sorted].sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0,5);
+        const topLevel = [...sorted].sort((a,b) => (b.TrackdayXP||0) - (a.TrackdayXP||0)).slice(0,5);
+
+        document.getElementById('homeRatingList').innerHTML = topRating.map((p, i) => `
+            <div class="lb-row" onclick="openDriverCard('${p.id}')"><span>${i+1}. ${p.Name}</span><span style="color: var(--neon-cyan);">${p.DriverRating||1500} ELO</span></div>
+        `).join('');
+
+        document.getElementById('homeLevelList').innerHTML = topLevel.map((p, i) => `
+            <div class="lb-row" onclick="openDriverCard('${p.id}')"><span>${i+1}. ${p.Name}</span><span style="color: var(--neon-gold);">LVL ${Math.floor(Math.sqrt((p.TrackdayXP||0) / 50)) + 1}</span></div>
+        `).join('');
+    }
+
+    function startHomeTrackCycle() {
+        clearInterval(homeTrackInterval);
+        const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown Track'))];
+        if (tracks.length === 0) return;
+
+        let currentIdx = 0;
+        const renderTrack = () => {
+            const track = tracks[currentIdx];
+            document.getElementById('home-track-name').innerText = `> ${track.toUpperCase()}`;
+            const top5 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0,5);
+            
+            document.getElementById('homeRecords').innerHTML = top5.map((entry, i) => `
+                <div class="lb-row" onclick="openDriverCard('${entry.SteamID}')">
+                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${i+1}. ${entry.Name} <span style="font-size: 0.75rem; color: #888; font-family: 'Share Tech Mono'; margin-left: 5px;">[${entry.Car}]</span></span>
+                    <span style="color: var(--neon-mint); flex-shrink: 0;">${entry.LapTime}</span>
+                </div>
+            `).join('');
+            currentIdx = (currentIdx + 1) % tracks.length;
+        };
+        
+        renderTrack();
+        homeTrackInterval = setInterval(renderTrack, 5000); 
+    }
+
+    // --- LEADERBOARD PAGE LOGIC ---
+    const lbMode = document.getElementById('lbMode');
+    const lbTrack = document.getElementById('lbTrack');
+    const lbCar = document.getElementById('lbCar');
+    const driverSearch = document.getElementById('driverSearch');
+
+    lbMode.addEventListener('change', (e) => {
+        document.getElementById('lapFilters').style.display = e.target.value === 'laps' ? 'flex' : 'none';
+        currentSortCol = 'default';
+        sortAscending = (e.target.value === 'laps');
+        processLeaderboardData();
+    });
+    [lbTrack, lbCar, driverSearch].forEach(el => el.addEventListener('input', processLeaderboardData));
+
+    function populateLeaderboardFilters() {
+        const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown'))].sort();
+        const cars = [...new Set(dbLeaderboard.map(x => x.Car || 'Unknown'))].sort();
+        
+        const trackSelect = document.getElementById('lbTrack');
+        trackSelect.innerHTML = '<option value="">[ ALL TRACKS ]</option>' + tracks.map(t => `<option value="${t}">${t}</option>`).join('');
+        
+        if(tracks.includes("Nurburgring [Touristenfahrten]")) {
+            trackSelect.value = "Nurburgring [Touristenfahrten]";
+        }
+        
+        document.getElementById('lbCar').innerHTML = '<option value="">[ ALL CARS ]</option>' + cars.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    window.sortStats = function(colName) {
+        if(currentSortCol === colName) {
+            sortAscending = !sortAscending;
+        } else {
+            currentSortCol = colName;
+            if(['name', 'car', 'track', 'lapTime'].includes(colName) || (colName === 'default' && activeMode === 'laps')) {
+                sortAscending = true; 
+            } else {
+                sortAscending = false; 
+            }
+        }
+        processLeaderboardData();
+    };
+
+    function processLeaderboardData() {
+        activeMode = lbMode.value;
+        const search = driverSearch.value.toLowerCase();
+        
+        // 1. Gather and Filter
+        if(activeMode === 'laps') {
+            const tFilter = lbTrack.value;
+            const cFilter = lbCar.value;
+            activeDataset = dbLeaderboard.filter(x => {
+                if (search) {
+                    const matchName = x.Name && x.Name.toLowerCase().includes(search);
+                    const matchCar = x.Car && x.Car.toLowerCase().includes(search);
+                    const matchTrack = x.Track && x.Track.toLowerCase().includes(search);
+                    if (!matchName && !matchCar && !matchTrack) return false;
+                }
+                if (tFilter && (x.Track || 'Unknown') !== tFilter) return false;
+                if (cFilter && (x.Car || 'Unknown') !== cFilter) return false;
+                return true;
+            }).map(lap => ({ type: 'lap', ...lap, p: dbProfiles[lap.SteamID] || {} }));
+        } else {
+            activeDataset = Object.keys(dbProfiles).filter(id => {
+                const p = dbProfiles[id];
+                if (search && !p.Name.toLowerCase().includes(search)) return false;
+                return true;
+            }).map(id => {
+                const p = dbProfiles[id];
+                const wr = (p.Starts || 0) > 0 ? (p.Wins || 0) / p.Starts : 0;
+                const incR = (p.Starts || 0) > 0 ? (p.RaceContacts || 0) / p.Starts : 0;
+                return { type: 'stat', id, p, wr, incR };
+            });
+        }
+
+        // 2. Sort Array
+        activeDataset.sort((a, b) => {
+            let valA, valB;
+            if (activeMode === 'laps') {
+                switch(currentSortCol) {
+                    case 'default':
+                    case 'lapTime': valA = a.TotalMs; valB = b.TotalMs; break;
+                    case 'name': valA = a.Name.toLowerCase(); valB = b.Name.toLowerCase(); break;
+                    case 'elo': valA = a.p.DriverRating||1500; valB = b.p.DriverRating||1500; break;
+                    case 'sr': valA = ((a.p.LicenseClass||0)*10) + (a.p.SafetyRating||2.5); valB = ((b.p.LicenseClass||0)*10) + (b.p.SafetyRating||2.5); break;
+                    case 'laps': valA = a.Laps||0; valB = b.Laps||0; break;
+                    case 'car': valA = (a.Car||'').toLowerCase(); valB = (b.Car||'').toLowerCase(); break;
+                    case 'track': valA = (a.Track||'').toLowerCase(); valB = (b.Track||'').toLowerCase(); break;
+                    case 'level': valA = a.p.TrackdayXP||0; valB = b.p.TrackdayXP||0; break;
+                    default: valA = a.TotalMs; valB = b.TotalMs;
+                }
+            } else {
+                switch(currentSortCol) {
+                    case 'default':
+                    case 'elo': valA = a.p.DriverRating||1500; valB = b.p.DriverRating||1500; break;
+                    case 'name': valA = a.p.Name.toLowerCase(); valB = b.p.Name.toLowerCase(); break;
+                    case 'sr': valA = ((a.p.LicenseClass||0)*10) + (a.p.SafetyRating||2.5); valB = ((b.p.LicenseClass||0)*10) + (b.p.SafetyRating||2.5); break;
+                    case 'wins': valA = a.p.Wins||0; valB = b.p.Wins||0; break;
+                    case 'winPct': valA = a.wr; valB = b.wr; break;
+                    case 'inc': valA = a.p.RaceContacts||0; valB = b.p.RaceContacts||0; break;
+                    case 'incRatio': valA = a.incR; valB = b.incR; break;
+                    case 'laps': valA = a.p.Laps||0; valB = b.p.Laps||0; break;
+                    case 'level': valA = a.p.TrackdayXP||0; valB = b.p.TrackdayXP||0; break;
+                    default: valA = a.p.DriverRating||1500; valB = b.p.DriverRating||1500; break;
+                }
+            }
+            if (typeof valA === 'string') return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            return sortAscending ? (valA - valB) : (valB - valA);
+        });
+
+        // 3. Assign true visual Rank 
+        let isNormal = true;
+        const ascCols = ['name', 'car', 'track', 'lapTime'];
+        if (activeMode === 'laps' && currentSortCol === 'default') ascCols.push('default');
+        
+        if (ascCols.includes(currentSortCol)) {
+            isNormal = sortAscending;
+        } else {
+            isNormal = !sortAscending;
+        }
+
+        const total = activeDataset.length;
+        activeDataset.forEach((item, idx) => {
+            item.rank = isNormal ? (idx + 1) : (total - idx);
+        });
+
+        lbCurrentPage = 1;
+        renderTableHeaders();
+        renderTableRows();
+    }
+
+    function renderTableHeaders() {
+        const thead = document.getElementById('lbHead');
+        const th = (col, label) => {
+            // FIX: Remove sorting interaction on specific columns based on mode
+            if (activeMode === 'laps' && (col === 'name' || col === 'elo' || col === 'sr' || col === 'level')) {
+                return `<th>${label}</th>`;
+            }
+            if (activeMode === 'stats' && col === 'name') {
+                return `<th>${label}</th>`;
+            }
+
+            let arrow = '';
+            let activeClass = '';
+            if(currentSortCol === col || (currentSortCol === 'default' && ((col === 'lapTime' && activeMode === 'laps') || (col === 'elo' && activeMode === 'stats')))) {
+                activeClass = 'sort-active';
+                arrow = sortAscending ? ' ▲' : ' ▼';
+            }
+            return `<th class="sortable ${activeClass}" onclick="sortStats('${col}')">${label}${arrow}</th>`;
+        };
+
+        if (activeMode === 'laps') {
+            thead.innerHTML = `<tr>${th('default', '#')}${th('name', 'DRIVER ALIAS')}${th('elo', 'RATING (ELO)')}${th('sr', 'SAFETY (SR)')}${th('lapTime', 'LAP TIME')}${th('car', 'CAR')}${th('track', 'TRACK')}${th('laps', 'LAPS')}${th('level', 'TRACKXP (TXP)')}</tr>`;
+        } else {
+            thead.innerHTML = `<tr>${th('default', '#')}${th('name', 'DRIVER ALIAS')}${th('elo', 'RATING (ELO)')}${th('sr', 'SAFETY (SR)')}${th('wins', 'WINS')}${th('winPct', 'WIN%')}${th('inc', 'INC')}${th('incRatio', 'INC/RACE')}${th('laps', 'LAPS')}${th('level', 'TRACKXP (TXP)')}</tr>`;
+        }
+    }
+
+    function renderTableRows() {
+        const tbody = document.getElementById('leaderboardBody');
+        const pagination = document.getElementById('paginationControls');
+        let html = '';
+        const limit = lbCurrentPage * LB_ROWS_PER_PAGE;
+        const visibleData = activeDataset.slice(0, limit);
+
+        if (visibleData.length === 0) {
+            html = `<tr><td colspan="10" style="text-align:center; padding: 30px; color: var(--neon-pink);">${Object.keys(dbProfiles).length === 0 ? '[ AWAITING DATA DRIVE MOUNT ]' : 'NO DATA MATCHES FILTERS'}</td></tr>`;
+            pagination.style.display = 'none';
+            tbody.innerHTML = html;
+            return;
+        }
+
+        visibleData.forEach(item => {
+            const p = item.p;
+            const className = classLetters[p.LicenseClass || 0] || "R";
+            const srValue = (p.SafetyRating || 2.50).toFixed(2);
+            const elo = p.DriverRating || 1500;
+            const lvl = Math.floor(Math.sqrt((p.TrackdayXP||0) / 50)) + 1;
+
+            if (activeMode === 'laps') {
+                html += `
+                    <tr class="lb-row-table" onclick="openDriverCard('${item.SteamID}')">
+                        <td style="color: #888;">${item.rank}</td>
+                        <td>${item.Name}</td>
+                        <td style="color: var(--neon-cyan);">${elo}</td>
+                        <td><span class="safety-sticker" style="border-color: ${getStickerColor(className)}; background: linear-gradient(to right, ${getStickerColor(className)} ${getSrFill(p.SafetyRating)}%, #222 ${getSrFill(p.SafetyRating)}%); padding: 2px 6px; font-size: 0.8rem; transform: none; display: inline-block; box-shadow: none;">${className} [${srValue}]</span></td>
+                        <td style="color: var(--neon-mint); font-weight: bold; font-size: 1.1rem; font-family: 'Share Tech Mono';">${item.LapTime}</td>
+                        <td style="font-size: 0.9rem; color: #ccc;">${item.Car}</td>
+                        <td style="font-size: 0.9rem; color: #888;">${item.Track}</td>
+                        <td style="color: #888;">${item.Laps || 0}</td>
+                        <td style="color: var(--neon-gold);">LVL ${lvl}</td>
+                    </tr>`;
+            } else {
+                html += `
+                    <tr class="lb-row-table" onclick="openDriverCard('${item.id}')">
+                        <td style="color: #888;">${item.rank}</td>
+                        <td>${p.Name}</td>
+                        <td style="color: var(--neon-cyan); font-weight: bold;">${elo}</td>
+                        <td><span class="safety-sticker" style="border-color: ${getStickerColor(className)}; background: linear-gradient(to right, ${getStickerColor(className)} ${getSrFill(p.SafetyRating)}%, #222 ${getSrFill(p.SafetyRating)}%); padding: 3px 8px; font-size: 0.9rem; transform: none; display: inline-block; box-shadow: none;">CLASS ${className} [${srValue}]</span></td>
+                        <td>${p.Wins || 0}</td>
+                        <td>${(item.wr * 100).toFixed(1)}%</td>
+                        <td style="color: #888;">${p.RaceContacts || 0}</td>
+                        <td style="color: #888;">${item.incR.toFixed(2)}</td>
+                        <td style="color: #888;">${p.Laps || 0}</td>
+                        <td style="color: var(--neon-gold);">LVL ${lvl}</td>
+                    </tr>`;
+            }
+        });
+
+        tbody.innerHTML = html;
+        pagination.style.display = (activeDataset.length > limit) ? 'block' : 'none';
+    }
+
+    function loadMoreRows() {
+        lbCurrentPage++;
+        renderTableRows();
+    }
+
+    function getStickerColor(c) {
+        if(c==='S') return 'var(--neon-gold)';
+        if(c==='A') return '#fff';
+        if(c==='R' || c==='D') return 'var(--neon-pink)';
+        return 'var(--neon-mint)';
+    }
+
+    function getSrFill(sr) {
+        let val = sr || 2.50;
+        return Math.min((val / 4.0) * 100, 100).toFixed(1);
+    }
+
+    function openDriverCard(steamId) {
+        if(Object.keys(dbProfiles).length === 0) { alert("Please load DRIVER_PROFILES.JSON on the Home tab first to view ID Cards."); return; }
+        
+        const prof = dbProfiles[steamId];
+        if(!prof) { alert("Driver profile not found in local database."); return; }
+        
+        activeModalSteamID = steamId; // Safe reference for teleporting
+        
+        const className = classLetters[prof.LicenseClass || 0] || "R";
+        const srValue = (prof.SafetyRating || 2.50).toFixed(2);
+        const xp = prof.TrackdayXP || 0;
+        const level = Math.floor(Math.sqrt(xp / 50)) + 1;
+        const currentLevelXP = 50 * Math.pow(level - 1, 2);
+        const nextLevelXP = 50 * Math.pow(level, 2);
+        const xpProgress = ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
+        
+        const starts = prof.Starts || 0;
+        const incPerRace = starts > 0 ? ((prof.RaceContacts || 0) / starts).toFixed(1) : "0.0";
+        
+        document.getElementById('modal-name').innerText = prof.Name;
+        document.getElementById('modal-rating').innerText = prof.DriverRating || 1500;
+        
+        // NEW INLINE STATS
+        document.getElementById('modal-car').innerText = "> " + (prof.MostDrivenCar && prof.MostDrivenCar !== "None" ? prof.MostDrivenCar : "NO DATA");
+        document.getElementById('modal-wins').innerText = prof.Wins || 0;
+        document.getElementById('modal-laps').innerText = prof.Laps || 0;
+        document.getElementById('modal-inc').innerText = incPerRace;
+        document.getElementById('modal-pylons').innerText = prof.Pylons || 0;
+        
+        let sticker = document.getElementById('modal-safety');
+        sticker.innerText = `CLASS ${className} [${srValue}]`;
+        sticker.style.borderColor = getStickerColor(className);
+        sticker.style.background = `linear-gradient(to right, ${getStickerColor(className)} ${getSrFill(prof.SafetyRating)}%, #222 ${getSrFill(prof.SafetyRating)}%)`;
+        
+        document.getElementById('modal-level').innerText = "TrackXP LVL " + level;
+        document.getElementById('modal-xp-text').innerText = `${xp - currentLevelXP} / ${nextLevelXP - currentLevelXP} XP`;
+        
+        document.getElementById('modal-xp-fill').style.width = '0%';
+        setTimeout(() => { document.getElementById('modal-xp-fill').style.width = xpProgress + '%'; }, 100);
+
+        document.getElementById('driverModal').style.display = 'flex';
+    }
+
+    function closeModal() { document.getElementById('driverModal').style.display = 'none'; }
+
+    function teleportToTelemetry() {
+        closeModal();
+        if(activeModalSteamID) {
+            viewDriverStats(activeModalSteamID);
+        }
+    }
+    
+    // NEW: Standalone Telemetry Search Logic with Inline Type-Ahead Autocomplete
+    function searchTelemetry() {
+        if(Object.keys(dbProfiles).length === 0) { alert("Please load DRIVER_PROFILES.JSON on the Home tab first."); return; }
+        const term = document.getElementById('telemetrySearchInput').value.trim();
+        if(!term) return;
+        
+        // 1. Check exact SteamID
+        if(dbProfiles[term]) {
+            viewDriverStats(term);
+            return;
+        }
+        
+        // 2. Fallback to Name check
+        for(let sid in dbProfiles) {
+            if(dbProfiles[sid].Name && dbProfiles[sid].Name.toLowerCase() === term.toLowerCase()) {
+                viewDriverStats(sid);
+                return;
+            }
+        }
+        
+        alert("Driver not found. Please verify the exact Alias or Steam ID.");
+    }
+    
+    // Inline Autocomplete & Enter Key logic
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById('telemetrySearchInput');
+        if(searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                // Ignore if the user is hitting backspace/delete
+                if (e.inputType === 'deleteContentBackward' || e.inputType === 'deleteContentForward') return;
+                
+                const val = this.value;
+                if (!val) return;
+
+                let match = null;
+                for(let sid in dbProfiles) {
+                    if(dbProfiles[sid].Name && dbProfiles[sid].Name.toLowerCase().startsWith(val.toLowerCase())) {
+                        match = dbProfiles[sid].Name;
+                        break;
+                    }
+                }
+
+                if (match) {
+                    this.value = match;
+                    this.setSelectionRange(val.length, match.length);
+                }
+            });
+
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchTelemetry();
+                }
+            });
+        }
+    });
+
+    // NEW: Track Records Renderer
+    function renderProfileRecords() {
+        if (!currentTelemetryDriver) return;
+        const id = currentTelemetryDriver;
+        
+        let pRecords = dbLeaderboard.filter(entry => entry.SteamID === id);
+        
+        // Populate filters if empty (only run once per driver load)
+        const trackSelect = document.getElementById('profTrackFilter');
+        const carSelect = document.getElementById('profCarFilter');
+        
+        if(trackSelect.options.length <= 1 && pRecords.length > 0) { 
+            const tracks = [...new Set(pRecords.map(x => x.Track || 'Unknown'))].sort();
+            const cars = [...new Set(pRecords.map(x => x.Car || 'Unknown'))].sort();
+            trackSelect.innerHTML = '<option value="">[ ALL TRACKS ]</option>' + tracks.map(t => `<option value="${t}">${t}</option>`).join('');
+            carSelect.innerHTML = '<option value="">[ ALL CARS ]</option>' + cars.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        const tFilter = trackSelect.value;
+        const cFilter = carSelect.value;
+        const sFilter = document.getElementById('profSortFilter').value;
+
+        // Apply filters
+        if(tFilter) pRecords = pRecords.filter(r => (r.Track || 'Unknown') === tFilter);
+        if(cFilter) pRecords = pRecords.filter(r => (r.Car || 'Unknown') === cFilter);
+
+        // Sort
+        pRecords.sort((a,b) => {
+            if(sFilter === 'asc') return a.TotalMs - b.TotalMs;
+            return b.TotalMs - a.TotalMs;
+        });
+
+        const recDiv = document.getElementById('profRecords');
+        if(pRecords.length > 0) {
+            recDiv.innerHTML = pRecords.map(r => {
+                let lapSetString = r.LapSetOn ? `<span style="font-size: 0.8rem; color: #555;">[ SET ON LAP ${r.LapSetOn} ]</span>` : '';
+                return `
+                <div class="record-card">
+                    <div>
+                        <div class="record-track">${r.Track || 'Unknown Track'} ${lapSetString}</div>
+                        <div class="record-car">> ${r.Car}</div>
+                    </div>
+                    <div class="record-time">${r.LapTime}</div>
+                </div>
+            `}).join('');
+        } else {
+            recDiv.innerHTML = '<div style="color: #666; font-style: italic; padding: 20px; text-align: center;">[ NO MATCHING RECORDS ]</div>';
+        }
+    }
+
+    function viewDriverStats(id) {
+        const p = dbProfiles[id];
+        if(!p) { alert("Profile missing. Please load DRIVER_PROFILES.JSON."); return; }
+
+        const className = classLetters[p.LicenseClass || 0] || "R";
+        const srValue = (p.SafetyRating || 2.50).toFixed(2);
+        const lvl = Math.floor(Math.sqrt((p.TrackdayXP||0) / 50)) + 1;
+        
+        document.getElementById('profName').innerText = p.Name;
+        document.getElementById('profSteamId').innerText = "STEAM_ID: " + id;
+        
+        // --- TROPHY CABINET ---
+        document.getElementById('profRating').innerText = p.DriverRating || 1500;
+        
+        let totalTitles = 0;
+        let totalPts = 0;
+        if(p.ServerStats) {
+            for (let k in p.ServerStats) {
+                totalTitles += (p.ServerStats[k].Titles || 0);
+                totalPts += (p.ServerStats[k].Points || 0);
+            }
+        }
+        document.getElementById('profTitles').innerText = totalTitles;
+        document.getElementById('profSeasonPts').innerText = totalPts;
+        
+        let profSticker = document.getElementById('profSafety');
+        profSticker.innerText = `CLASS ${className} [${srValue}]`;
+        profSticker.style.borderColor = getStickerColor(className);
+        profSticker.style.background = `linear-gradient(to right, ${getStickerColor(className)} ${getSrFill(p.SafetyRating)}%, #222 ${getSrFill(p.SafetyRating)}%)`;
+        
+        document.getElementById('profLevel').innerText = lvl;
+        
+        const wins = p.Wins || 0;
+        const starts = p.Starts || 0;
+        const winPct = starts > 0 ? ((wins/starts)*100).toFixed(1) : 0;
+        const top5Pct = starts > 0 ? (((p.Top5s || 0)/starts)*100).toFixed(1) : 0;
+        const ptsPerRace = starts > 0 ? (totalPts/starts).toFixed(1) : "0.0";
+        const incPerRace = starts > 0 ? ((p.RaceContacts || 0)/starts).toFixed(1) : "0.0";
+        
+        document.getElementById('profWins').innerText = wins;
+        document.getElementById('profStarts').innerText = starts;
+        document.getElementById('profTop5').innerText = p.Top5s || 0;
+        document.getElementById('profPoles').innerText = p.Poles || 0;
+        document.getElementById('profLaps').innerText = p.Laps || 0;
+        
+        let wpElem = document.getElementById('profWinPctVal');
+        wpElem.innerText = winPct + "%";
+        wpElem.style.color = winPct >= 20.0 ? "var(--neon-gold)" : "#fff";
+
+        let t5pElem = document.getElementById('profTop5Pct');
+        t5pElem.innerText = top5Pct + "%";
+        t5pElem.style.color = top5Pct >= 50.0 ? "var(--neon-gold)" : "#fff";
+
+        document.getElementById('profPtsPerRace').innerText = ptsPerRace;
+        document.getElementById('profIncPerRace').innerText = incPerRace;
+        
+        // --- RACECRAFT METRICS ---
+        let avgS = starts > 0 ? (p.TotalStartPos / starts).toFixed(1) : "0.0";
+        let avgF = starts > 0 ? (p.TotalFinishPos / starts).toFixed(1) : "0.0";
+        document.getElementById('profAvgStart').innerText = "P" + avgS;
+        document.getElementById('profAvgFinish').innerText = "P" + avgF;
+        
+        let delta = (parseFloat(avgS) - parseFloat(avgF)).toFixed(1);
+        let deltaBox = document.getElementById('deltaBox');
+        let deltaElem = document.getElementById('profDelta');
+        
+        if(starts === 0) {
+            deltaElem.innerText = "0.0";
+            deltaElem.style.color = "#fff";
+            deltaBox.style.borderColor = "#333";
+            deltaBox.classList.remove('bad', 'gold');
+        } else if (delta > 0) {
+            deltaElem.innerText = "+" + delta;
+            deltaElem.style.color = "var(--neon-mint)";
+            deltaBox.style.borderColor = "var(--neon-mint)";
+            deltaBox.classList.remove('bad', 'gold');
+        } else if (delta < 0) {
+            deltaElem.innerText = delta;
+            deltaElem.style.color = "var(--neon-pink)";
+            deltaBox.style.borderColor = "var(--neon-pink)";
+            deltaBox.classList.add('bad');
+            deltaBox.classList.remove('gold');
+        } else {
+            deltaElem.innerText = delta;
+            deltaElem.style.color = "#fff";
+            deltaBox.style.borderColor = "#333";
+            deltaBox.classList.remove('bad', 'gold');
+        }
+        
+// --- DRIVER PREFERENCES ---
+        document.getElementById('profMostCar').innerText = p.MostDrivenCar && p.MostDrivenCar !== "None" ? p.MostDrivenCar : "NO DATA";
+        document.getElementById('profMostTrack').innerText = p.MostDrivenTrack && p.MostDrivenTrack !== "None" ? p.MostDrivenTrack : "NO DATA";
+
+        // --- INCIDENT DIAGNOSTICS ---
+        document.getElementById('profContacts').innerText = p.RaceContacts || 0;
+        document.getElementById('profQualiScuffs').innerText = p.QualiIncidents || 0;
+        document.getElementById('profTDScuffs').innerText = p.TrackdayScuffs || 0;
+        document.getElementById('profPylons').innerText = p.Pylons || 0;
+        document.getElementById('profDnfs').innerText = p.DNFs || 0;
+        
+        // --- SEASON EVENTS ---
+        const seasonDiv = document.getElementById('profSeasons');
+        if (p.ServerStats && Object.keys(p.ServerStats).length > 0) {
+            let sHtml = '';
+            for (let port in p.ServerStats) {
+                if (p.ServerStats[port].Points > 0) {
+                    sHtml += `<div class="season-row"><span>> SERVER PORT ${port}</span><span style="color: var(--neon-gold); font-weight: bold;">${p.ServerStats[port].Points} PTS</span></div>`;
+                }
+            }
+            seasonDiv.innerHTML = sHtml !== '' ? sHtml : `<div style="color: #666; font-style: italic; text-align: center;">[ NO SEASON PARTICIPATION FOUND ]</div>`;
+        } else {
+            seasonDiv.innerHTML = `<div style="color: #666; font-style: italic; text-align: center;">[ NO SEASON PARTICIPATION FOUND ]</div>`;
+        }
+
+        // --- TRACK RECORDS ---
+        currentTelemetryDriver = id;
+        document.getElementById('profTrackFilter').innerHTML = '<option value="">[ ALL TRACKS ]</option>'; // reset filters
+        document.getElementById('profCarFilter').innerHTML = '<option value="">[ ALL CARS ]</option>';
+        document.getElementById('profSortFilter').value = 'asc';
+        renderProfileRecords();
+
+        showPage('profile');
+    }
+
+    // ACCORDION MOCK DATA INJECTION
+    const raceServers = [
+        { 
+            name: "Season 4: GT3 Sprint - Q15/R30", 
+            track: "Spa-Francorchamps", 
+            p: "28/35", 
+            status: "Qualifying", 
+            img: "https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500",
+            roster: [
+                { pos: 1, name: "SpeedyG", car: "Porsche 911 GT3 R", lapTime: "2:14.331", isSessionBest: true, isPersonalBest: false, steamId: "mock1" },
+                { pos: 2, name: "V10_Scream", car: "Audi R8 LMS", lapTime: "2:14.890", isSessionBest: false, isPersonalBest: true, steamId: "mock5" },
+                { pos: 3, name: "LateBraker", car: "Ferrari 488 GT3", lapTime: "2:15.102", isSessionBest: false, isPersonalBest: false, steamId: "mock6" }
+            ]
+        },
+        { 
+            name: "Endurance Pro-Am - Q30/R60", 
+            track: "Mount Panorama [GP]", 
+            p: "32/35", 
+            status: "Practice", 
+            img: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=500",
+            roster: [
+                { pos: 1, name: "ApexHunter", car: "Aston Martin V8 Vantage", lapTime: "2:02.441", isSessionBest: true, isPersonalBest: false, steamId: "mock2" },
+                { pos: 2, name: "DriftKing99", car: "Mercedes AMG GT3", lapTime: "2:03.900", isSessionBest: false, isPersonalBest: false, steamId: "mock3" }
+            ]
+        },
+        { 
+            name: "90s JDM Touge Battle", 
+            track: "Suzuka Circuit", 
+            p: "24/32", 
+            status: "Race (Lap 2/10)", 
+            img: "https://images.unsplash.com/photo-1541443131876-44b03de101c5?q=80&w=500",
+            roster: [
+                { pos: 1, name: "TofuDelivery", car: "Toyota AE86", lapTime: "2:18.115", isSessionBest: true, isPersonalBest: true, steamId: "mock8" },
+                { pos: 2, name: "Godzilla", car: "Nissan Skyline R32", lapTime: "2:19.400", isSessionBest: false, isPersonalBest: false, steamId: "mock10" }
+            ]
+        }
+    ];
+
+    const tdServers = [
+        { 
+            name: "90s Night Nürburgring - Retro & Vintage", 
+            track: "Nurburgring [Touristenfahrten]", 
+            p: "5/64", 
+            status: "Practice",
+            img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=500",
+            roster: [
+                { pos: "-", name: "TofuDelivery", car: "Toyota AE86 Trueno", lapTime: "8:10.552", isSessionBest: true, isPersonalBest: true, steamId: "mock8" },
+                { pos: "-", name: "RotaryPower", car: "Mazda RX-7 FD", lapTime: "8:12.441", isSessionBest: false, isPersonalBest: false, steamId: "mock9" },
+                { pos: "-", name: "Godzilla", car: "Nissan Skyline R32 GT-R", lapTime: "8:15.001", isSessionBest: false, isPersonalBest: false, steamId: "mock10" },
+                { pos: "-", name: "EuroBeat", car: "BMW E30 M3", lapTime: "8:18.992", isSessionBest: false, isPersonalBest: false, steamId: "mock11" },
+                { pos: "-", name: "VTEC_Kick", car: "Honda Civic EG6", lapTime: "8:22.100", isSessionBest: false, isPersonalBest: false, steamId: "mock12" }
+            ]
+        },
+        { 
+            name: "Street Legal Nürburgring - Road Cars", 
+            track: "Nurburgring [Touristenfahrten]", 
+            p: "0/64", 
+            status: "Practice",
+            img: "https://images.unsplash.com/photo-1541443131876-44b03de101c5?q=80&w=500",
+            roster: []
+        },
+        { 
+            name: "Street Legal Seca - Road Cars", 
+            track: "Laguna Seca [GP]", 
+            p: "2/64", 
+            status: "Practice",
+            img: "https://images.unsplash.com/photo-1542281286-9e0a16bb7366?q=80&w=500",
+            roster: [
+                { pos: "-", name: "CorkscrewEnjoyer", car: "Porsche 911 GT3 RS", lapTime: "1:28.441", isSessionBest: true, isPersonalBest: false, steamId: "mock13" },
+                { pos: "-", name: "SandTrap", car: "Chevrolet Corvette C8", lapTime: "1:31.220", isSessionBest: false, isPersonalBest: false, steamId: "mock14" }
+            ]
+        },
+        { 
+            name: "Street Legal Bathurst - Road Cars", 
+            track: "Mount Panorama [GP]", 
+            p: "0/64", 
+            status: "Practice",
+            img: "https://images.unsplash.com/photo-1634044535359-543160a2b535?q=80&w=500",
+            roster: []
+        },
+        { 
+            name: "Street Legal Sebring - Road Cars", 
+            track: "Sebring International Raceway [GP]", 
+            p: "1/64", 
+            status: "Practice",
+            img: "https://images.unsplash.com/photo-1502945144109-84387d377b5a?q=80&w=500",
+            roster: [
+                { pos: "-", name: "BumpyRide", car: "Ford Mustang GT", lapTime: "2:05.112", isSessionBest: true, isPersonalBest: true, steamId: "mock15" }
+            ]
+        }
+    ];
+
+    function renderServerList(containerId, servers, isRace) {
+        const container = document.getElementById(containerId);
+        if(!container) return;
+        
+        let html = '';
+        servers.forEach((s, idx) => {
+            const rowClass = isRace ? 'server-item race-mode' : 'server-item';
+            const srvId = `srv-${isRace ? 'r' : 't'}-${idx}`;
+
+            let rosterHtml = '';
+            if(s.roster && s.roster.length > 0) {
+                rosterHtml = `
+                    <div class="server-roster" id="roster-${srvId}" style="display: none; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
+                        <table class="server-roster-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%;">POS</th>
+                                    <th style="width: 35%;">DRIVER</th>
+                                    <th style="width: 35%;">CAR</th>
+                                    <th style="width: 20%; text-align: right;">BEST LAP</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${s.roster.map(r => {
+                                    let lapColor = '#fff';
+                                    if(r.isSessionBest) lapColor = '#bf00ff';
+                                    else if(r.isPersonalBest) lapColor = 'var(--neon-mint)';
+                                    return `
+                                    <tr onclick="event.stopPropagation(); openDriverCard('${r.steamId}')">
+                                        <td style="color: #888;">${r.pos}</td>
+                                        <td style="font-weight: bold; color: #fff;">${r.name}</td>
+                                        <td style="color: #aaa;">${r.car}</td>
+                                        <td style="text-align: right; color: ${lapColor}; font-weight: bold;">${r.lapTime}</td>
+                                    </tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                        <div style="font-size: 0.7rem; color: #666; margin-top: 10px; font-family: 'Share Tech Mono';">
+                            <span style="color: #bf00ff; margin-right: 10px;">■ SESSION BEST</span>
+                            <span style="color: var(--neon-mint);">■ PERSONAL BEST</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                rosterHtml = `<div class="server-roster" id="roster-${srvId}" style="display: none; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center; color: #666; font-style: italic; font-family: 'Share Tech Mono';">[ SERVER EMPTY ]</div>`;
+            }
+
+            // Notice the id is set on the container to allow scrolling to it
+            html += `
+                <div class="${rowClass}" id="${srvId}" onclick="toggleRoster('${srvId}')">
+                    <div class="server-header-row">
+                        <div>
+                            <div style="font-size: 1.2rem; font-weight: bold; color: #fff;">${s.name}</div>
+                            <div style="color: #888; font-family: 'Share Tech Mono'; font-size: 0.9rem; margin-top: 3px;">TRACK: ${s.track} | STATUS: ${s.status}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: ${isRace ? 'var(--neon-gold)' : 'var(--neon-mint)'}; font-size: 1.5rem; font-family: 'Share Tech Mono'; font-weight: bold;">${s.p}</div>
+                            <div style="font-size: 0.75rem; color: #666; font-family: 'Share Tech Mono'; margin-top: 5px; transition: color 0.2s;" id="toggle-icon-${srvId}">▼ EXPAND</div>
+                        </div>
+                    </div>
+                    ${rosterHtml}
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+const p_season = [
+        { label: "[ SEASON EVENTS ]", title: "SEASON 4: GT3 SPRINT", data: "ROUNDS: 6 | REG. OPEN", color: "var(--neon-pink)", action: () => goToServerAndExpand('srv-r-0', 'race'), img: "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" },
+        { label: "[ SEASON EVENTS ]", title: "90s JDM TOUGE BATTLE", data: "SPECIAL EVENT | THIS FRIDAY", color: "var(--neon-pink)", action: () => goToServerAndExpand('srv-r-2', 'race'), img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000" },
+        { label: "[ SEASON EVENTS ]", title: "ENDURANCE PRO-AM", data: "ROUND 2: Bathurst | REGISTER NOW", color: "var(--neon-pink)", action: () => goToServerAndExpand('srv-r-1', 'race'), img: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=1000" }
+    ];
+
+    // --- MANUAL BANNER NAVIGATION ---
+    function manualBannerChange(dir) {
+        globalBannerIdx += dir;
+        updateHeroBanner();
+        clearInterval(heroTimer);
+        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000);
+    }
+
+    function updateHeroBanner() {
+        const activePage = document.querySelector('.page.active').id;
+        
+        // 1. Build Dynamic Leaderboard HTML (Top 10 / 2-Columns)
+        let eloHtml = '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px;">[ LOAD PROFILES.JSON TO VIEW ]</div>';
+        if (Object.keys(dbProfiles).length > 0) {
+            const sortedElo = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]})).sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0, 10);
+            eloHtml = `<div style="font-family:'Share Tech Mono'; font-size:0.85rem; text-align:left; width: 100%; max-width:700px; margin: 5px auto 0 auto; background:rgba(0,0,0,0.8); border:1px solid var(--neon-cyan); padding:5px 15px; z-index: 10; box-sizing:border-box; display: grid; grid-template-columns: 1fr 1fr; column-gap: 30px;">`;
+            sortedElo.forEach((p, i) => {
+                eloHtml += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:2px 0; cursor:pointer;" onclick="event.stopPropagation(); openDriverCard('${p.id}')" onmouseover="this.style.color='var(--neon-pink)'" onmouseout="this.style.color=''"><span>${i+1}. ${p.Name}</span><span style="color:var(--neon-cyan); font-weight:bold;">${p.DriverRating||1500}</span></div>`;
+            });
+            eloHtml += `</div>`;
+        }
+
+        let trHtml = '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px;">[ LOAD LEADERBOARD.JSON TO VIEW ]</div>';
+        if (dbLeaderboard.length > 0) {
+            const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown Track'))];
+            const track = tracks[Math.floor(Date.now() / 15000) % tracks.length] || tracks[0]; 
+            const top10 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0, 10);
+            trHtml = `<div style="font-family:'Share Tech Mono'; font-size:0.85rem; text-align:left; width: 100%; max-width:700px; margin: 5px auto 0 auto; background:rgba(0,0,0,0.8); border:1px solid var(--neon-mint); padding:5px 15px; z-index: 10; box-sizing:border-box;"><div style="color:var(--neon-mint); font-size:0.75rem; margin-bottom:2px; border-bottom:1px solid #444; padding-bottom:2px; font-weight:bold;">> ${track.toUpperCase()}</div><div style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 30px;">`;
+            top10.forEach((entry, i) => {
+                trHtml += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:2px 0; cursor:pointer;" onclick="event.stopPropagation(); openDriverCard('${entry.SteamID}')" onmouseover="this.style.color='var(--neon-pink)'" onmouseout="this.style.color=''"><span>${i+1}. ${entry.Name}</span><span style="color:var(--neon-mint); font-weight:bold;">${entry.LapTime}</span></div>`;
+            });
+            trHtml += `</div></div>`;
+        }
+
+        const p_leaderboard = [
+            { label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" },
+            { label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=1000" }
+        ];
+
+        const p_race = raceServers.map((s, i) => ({ label: "[ LIVE RACES ]", title: s.name.split(' - ')[0].toUpperCase(), data: `DRIVERS: ${s.p} | ${s.status.toUpperCase()}`, color: "var(--neon-gold)", action: () => goToServerAndExpand(`srv-r-${i}`, 'race'), img: s.img }));
+        const p_td = tdServers.map((s, i) => ({ label: "[ LIVE TRACK DAYS ]", title: s.name.split(' - ')[0].toUpperCase(), data: `DRIVERS: ${s.p} | PRACTICE`, color: "var(--neon-mint)", action: () => goToServerAndExpand(`srv-t-${i}`, 'trackday'), img: s.img }));
+
+        // 2. Filter Pool Based on Current Page
+        let pool = [];
+        if (activePage === 'home') pool = [...p_season, ...p_leaderboard];
+        else if (activePage === 'schedule') pool = [...p_td, ...p_leaderboard];
+        else if (activePage === 'race') pool = [...p_season, ...p_td, ...p_leaderboard];
+        else if (activePage === 'trackday') pool = [...p_season, ...p_race, ...p_leaderboard];
+        else pool = [...p_season, ...p_race, ...p_td, ...p_leaderboard];
+
+        if(pool.length === 0) return;
+        let safeIdx = ((globalBannerIdx % pool.length) + pool.length) % pool.length;
+        const slide = pool[safeIdx];
+        
+        document.querySelectorAll('.hero-banner-container').forEach(banner => {
+            banner.style.borderColor = slide.color;
+            banner.querySelector('.hero-label').innerText = slide.label;
+            banner.querySelector('.hero-label').style.color = slide.color;
+            banner.querySelector('.hero-title').innerText = slide.title;
+            banner.querySelector('.hero-data').innerHTML = slide.data;
+            banner.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${slide.img}')`;
+            banner.removeAttribute('onclick');
+            banner.onclick = slide.action;
+
+            if (!banner.querySelector('.banner-arrow.left')) {
+                const leftArr = document.createElement('div'); leftArr.className = 'banner-arrow left'; leftArr.innerHTML = '&#10094;';
+                leftArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(-1); };
+                const rightArr = document.createElement('div'); rightArr.className = 'banner-arrow right'; rightArr.innerHTML = '&#10095;';
+                rightArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(1); };
+                banner.appendChild(leftArr); banner.appendChild(rightArr);
+            }
+        });
+    }
+
+    // Home Page Cycle Logic
+    let rIdx = 0; let tIdx = 0;
+    function initHomeGrids() {
+        const rBoxTitle = document.getElementById('race-ss-title');
+        if(rBoxTitle) {
+            rBoxTitle.innerText = raceServers[rIdx].name.toUpperCase();
+            document.getElementById('race-ss-data').innerText = `DRIVERS: ${raceServers[rIdx].p} | ${raceServers[rIdx].status.toUpperCase()}`;
+            const rBox = rBoxTitle.parentElement;
+            rBox.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${raceServers[rIdx].img}')`;
+            rBox.onclick = () => goToServerAndExpand('srv-r-' + rIdx, 'race');
+        }
+        const tBoxTitle = document.getElementById('td-ss-title');
+        if(tBoxTitle) {
+            tBoxTitle.innerText = tdServers[tIdx].name.toUpperCase();
+            document.getElementById('td-ss-data').innerText = `DRIVERS: ${tdServers[tIdx].p} | PRACTICE`;
+            const tBox = tBoxTitle.parentElement;
+            tBox.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${tdServers[tIdx].img}')`;
+            tBox.onclick = () => goToServerAndExpand('srv-t-' + tIdx, 'trackday');
+        }
+    }
+
+    // Boot Routines
+    renderServerList('raceServersContainer', raceServers, true);
+    renderServerList('tdServersContainer', tdServers, false);
+    initHomeGrids();
+    
+    setInterval(() => {
+        rIdx = (rIdx + 1) % raceServers.length;
+        const rb = document.getElementById('race-ss-title');
+        if(rb) {
+            rb.innerText = raceServers[rIdx].name.toUpperCase();
+            document.getElementById('race-ss-data').innerText = `DRIVERS: ${raceServers[rIdx].p} | ${raceServers[rIdx].status.toUpperCase()}`;
+            rb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${raceServers[rIdx].img}')`;
+            rb.parentElement.onclick = () => goToServerAndExpand('srv-r-' + rIdx, 'race');
+        }
+    }, 4000);
+
+    setInterval(() => {
+        tIdx = (tIdx + 1) % tdServers.length;
+        const tb = document.getElementById('td-ss-title');
+        if(tb) {
+            tb.innerText = tdServers[tIdx].name.toUpperCase();
+            document.getElementById('td-ss-data').innerText = `DRIVERS: ${tdServers[tIdx].p} | PRACTICE`;
+            tb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${tdServers[tIdx].img}')`;
+            tb.parentElement.onclick = () => goToServerAndExpand('srv-t-' + tIdx, 'trackday');
+        }
+    }, 4500);
+
+    renderCalendar();
+    loadStandings('gt3', document.querySelector('.standings-tab.active'));
+    updateHeroBanner();
+    heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000);
+
+</script>
+</body>
+</html>
