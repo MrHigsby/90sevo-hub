@@ -647,7 +647,7 @@
     "LapsPerCar": {
       "DALLARA STRADALE COUPE": 1
     },
-    "TrackdayScuffs": 1,
+    "TrackdayScuffs": 6,
     "MostDrivenCar": "DALLARA STRADALE COUPE",
     "Name": "Justin Zerbin",
     "RaceContacts": 0,
@@ -1955,6 +1955,29 @@
     "QualiIncidents": 0,
     "DriverRating": 1500,
     "MostDrivenTrack": "None"
+  },
+  "76561198077326643": {
+    "LapsPerCar": {},
+    "TrackdayScuffs": 1,
+    "MostDrivenCar": "None",
+    "Name": "Moritz Markulin",
+    "RaceContacts": 0,
+    "Laps": 0,
+    "DNFs": 0,
+    "Poles": 0,
+    "QualiIncidents": 0,
+    "Pylons": 0,
+    "Top5s": 0,
+    "Wins": 0,
+    "TotalFinishPos": 0,
+    "SafetyRating": 2.5,
+    "ServerStats": {},
+    "MostDrivenTrack": "None",
+    "TrackdayXP": 0,
+    "LicenseClass": 0,
+    "TotalStartPos": 0,
+    "LapsPerTrack": {},
+    "DriverRating": 1500
   },
   "76561199680219027": {
     "TotalStartPos": 0,

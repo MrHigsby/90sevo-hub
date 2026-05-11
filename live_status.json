@@ -1,5 +1,5 @@
 {
-  "LastUpdated": "2026-05-11 15:13:09",
+  "LastUpdated": "2026-05-11 15:18:13",
   "Servers": [
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
@@ -32,7 +32,7 @@
       "Track": "Mount Panorama\r\n[GP]",
       "Mode": "Practice",
       "Port": "9603",
-      "Players": "1 / 64",
+      "Players": "3 / 64",
       "Status": "🟢 ONLINE",
       "LiveDrivers": [
         {
@@ -48,6 +48,13 @@
           "Laps": "0",
           "SteamID": "76561197979177810",
           "Name": "Justin Zerbin"
+        },
+        {
+          "BestLap": "--:--.---",
+          "Car": "DALLARA STRADALE COUPE",
+          "Laps": "0",
+          "SteamID": "76561198077326643",
+          "Name": "Moritz Markulin"
         }
       ],
       "Name": "Street Legal Bathurst - Road Cars - Trackday"
