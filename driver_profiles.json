@@ -245,13 +245,13 @@
   },
   "76561199545169499": {
     "LapsPerCar": {
-      "HONDA NSX R": 5
+      "HONDA NSX R": 6
     },
     "TrackdayScuffs": 1,
     "MostDrivenCar": "HONDA NSX R",
     "Name": "juanjo ///MRT",
     "RaceContacts": 0,
-    "Laps": 5,
+    "Laps": 6,
     "DNFs": 0,
     "Poles": 0,
     "QualiIncidents": 0,
@@ -259,14 +259,14 @@
     "Top5s": 0,
     "Wins": 0,
     "TotalFinishPos": 0,
-    "SafetyRating": 2.5734250000000003,
+    "SafetyRating": 2.5881100000000004,
     "ServerStats": {},
     "MostDrivenTrack": "Laguna Seca\r\n[GP]",
     "TrackdayXP": 86.0,
     "LicenseClass": 0,
     "TotalStartPos": 0,
     "LapsPerTrack": {
-      "Laguna Seca\r\n[GP]": 5
+      "Laguna Seca\r\n[GP]": 6
     },
     "DriverRating": 1500
   },
@@ -588,13 +588,13 @@
   },
   "76561199680300718": {
     "LapsPerCar": {
-      "HONDA NSX R": 5
+      "HONDA NSX R": 6
     },
     "TrackdayScuffs": 2,
     "MostDrivenCar": "HONDA NSX R",
     "Name": "Nano Racing /// MRT",
     "RaceContacts": 0,
-    "Laps": 5,
+    "Laps": 6,
     "DNFs": 0,
     "Poles": 0,
     "QualiIncidents": 0,
@@ -602,14 +602,14 @@
     "Top5s": 0,
     "Wins": 0,
     "TotalFinishPos": 0,
-    "SafetyRating": 2.5734250000000003,
+    "SafetyRating": 2.5881100000000004,
     "ServerStats": {},
     "MostDrivenTrack": "Laguna Seca\r\n[GP]",
     "TrackdayXP": 101.0,
     "LicenseClass": 0,
     "TotalStartPos": 0,
     "LapsPerTrack": {
-      "Laguna Seca\r\n[GP]": 5
+      "Laguna Seca\r\n[GP]": 6
     },
     "DriverRating": 1500
   },
