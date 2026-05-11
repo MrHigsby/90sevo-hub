@@ -1320,24 +1320,24 @@
   },
   "76561199008114291": {
     "LapsPerTrack": {
-      "Sebring International Raceway\r\n[GP]": 4
+      "Sebring International Raceway\r\n[GP]": 5
     },
     "QualiIncidents": 0,
     "Wins": 0,
     "MostDrivenCar": "CHEVROLET CAMARO ZL1",
     "DriverRating": 1500,
     "LapsPerCar": {
-      "CHEVROLET CAMARO ZL1": 4
+      "CHEVROLET CAMARO ZL1": 5
     },
     "TotalFinishPos": 0,
-    "TrackdayXP": 48.0,
-    "Laps": 4,
+    "TrackdayXP": 58.0,
+    "Laps": 5,
     "RaceContacts": 0,
     "DNFs": 0,
     "LicenseClass": 0,
     "TrackdayScuffs": 1,
     "MostDrivenTrack": "Sebring International Raceway\r\n[GP]",
-    "SafetyRating": 2.5587400000000002,
+    "SafetyRating": 2.5734250000000003,
     "Name": "Oleslaw Koleslaw",
     "TotalStartPos": 0,
     "Poles": 0,
