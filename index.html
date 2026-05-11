@@ -1402,77 +1402,93 @@
 
     // --- THE HUB UPLINK ENGINE ---
 
-    async function fetchLiveStatus() {
-        try {
-            const response = await fetch('live_status.json?t=' + Date.now());
-            if (!response.ok) return;
-            const data = await response.json();
-            let liveRaceServers = [];
-            let liveTdServers = [];
-            const reservedRacePorts = ["9605", "9606", "9607"]; 
+// --- HUB UPLINK ENGINE ---
+async function fetchLiveStatus() {
+    try {
+        const response = await fetch('live_status.json?t=' + Date.now());
+        if (!response.ok) throw new Error('Status JSON not found');
+        const data = await response.json();
 
-            data.Servers.forEach(server => {
-                const serverObj = {
-                    name: server.Name, track: server.Track, p: server.Players,
-                    status: server.Status.replace("🟢 ", "").replace("🔴 ", "").toUpperCase(),
-                    port: server.Port,
-                    roster: server.LiveDrivers.map((d, idx) => ({
-                        pos: idx + 1, name: d.Name, car: d.Car, lapTime: d.BestLap || "--:--.---", steamId: d.SteamID
-                    }))
-                };
-                if (reservedRacePorts.includes(server.Port.toString()) || server.Name.toLowerCase().includes("race")) {
-                    liveRaceServers.push(serverObj);
-                } else {
-                    liveTdServers.push(serverObj);
-                }
-            });
+        let liveRaceServers = [];
+        let liveTdServers = [];
+        const reservedRacePorts = ["9605", "9606", "9607"]; 
 
-            renderServerList('raceServersContainer', liveRaceServers, true);
-            renderServerList('tdServersContainer', liveTdServers, false);
-            console.log("📡 HUB UPLINK: Servers Synced.");
-        } catch (e) { console.error("📡 UPLINK ERROR:", e); }
+        data.Servers.forEach(server => {
+            const serverObj = {
+                name: server.Name,
+                track: server.Track,
+                p: server.Players,
+                status: server.Status.replace("🟢 ", "").replace("🔴 ", "").toUpperCase(),
+                port: server.Port,
+                roster: server.LiveDrivers.map((d, idx) => ({
+                    pos: idx + 1,
+                    name: d.Name,
+                    car: d.Car,
+                    lapTime: d.BestLap || "--:--.---",
+                    steamId: d.SteamID
+                }))
+            };
+
+            if (reservedRacePorts.includes(server.Port.toString()) || server.Name.toLowerCase().includes("race")) {
+                liveRaceServers.push(serverObj);
+            } else {
+                liveTdServers.push(serverObj);
+            }
+        });
+
+        // Push data to UI
+        renderServerList('raceServersContainer', liveRaceServers, true);
+        renderServerList('tdServersContainer', liveTdServers, false);
+        console.log("📡 HUB UPLINK: Servers Synced.");
+
+    } catch (error) {
+        console.error("📡 UPLINK ERROR:", error);
     }
+}
 
-    async function initStaticData() {
-        try {
-            // 1. Load Profiles
-            const profRes = await fetch('driver_profiles.json?t=' + Date.now());
-            if (profRes.ok) {
-                dbProfiles = await profRes.json();
-                console.log("📂 Profiles Synced");
-            }
+// --- AUTOMATIC REPOSITORY DATA SYNC ---
+async function initStaticData() {
+    console.log("📂 Initializing Data Sync...");
+    try {
+        // 1. Pull Profiles
+        const profRes = await fetch('driver_profiles.json?t=' + Date.now());
+        if (profRes.ok) {
+            dbProfiles = await profRes.json();
+            console.log("📂 Profiles Synced.");
+            updateHomeEliteLists(); // Draw Top 5 Ratings
+        }
 
-            // 2. Load Leaderboards
-            const lbRes = await fetch('leaderboard.json?t=' + Date.now());
-            if (lbRes.ok) {
-                dbLeaderboard = await lbRes.json();
-                console.log("📂 Leaderboards Synced");
-            }
-            
-            // 3. Trigger UI Update Sequence
-            updateHomeEliteLists();
+        // 2. Pull Leaderboard
+        const lbRes = await fetch('leaderboard.json?t=' + Date.now());
+        if (lbRes.ok) {
+            dbLeaderboard = await lbRes.json();
+            console.log("📂 Leaderboards Synced.");
             populateLeaderboardFilters();
-            startHomeTrackCycle();
-            processLeaderboardData();
-            
-            const bootloader = document.querySelector('.bootloader');
-            if (bootloader) bootloader.style.display = 'none';
-
-        } catch (err) { console.error("📡 STATIC SYNC ERROR:", err); }
-    }
-
-    function openDriverCard(sid) { /* Original logic */ }
-
-    // --- BOOT SEQUENCE ---
-    window.addEventListener('load', () => {
-        initStaticData();
-        fetchLiveStatus();
-        renderCalendar();
+            startHomeTrackCycle(); // Draw Top 5 Records
+            processLeaderboardData(); // Draw Main Tables
+        }
         
-        // Refresh loops
-        setInterval(fetchLiveStatus, 120000); 
-        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000);
-    });
+        // Hide bootloader if it exists
+        const bootloader = document.querySelector('.bootloader');
+        if (bootloader) bootloader.style.display = 'none';
+
+    } catch (err) {
+        console.error("📂 SYNC ERROR:", err);
+    }
+}
+
+// --- BOOT SEQUENCE ---
+// This runs only after the website is fully rendered
+window.onload = () => {
+    console.log("🏁 90s Evo Hub: Ignition");
+    initStaticData();
+    fetchLiveStatus();
+    renderCalendar();
+    
+    // Refresh intervals
+    setInterval(fetchLiveStatus, 120000); // 2 Minute Live Heartbeat
+    heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000);
+};
 
 </script>
 </body>
