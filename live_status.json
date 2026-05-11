@@ -1,5 +1,5 @@
 {
-  "LastUpdated": "2026-05-11 15:03:23",
+  "LastUpdated": "2026-05-11 15:08:06",
   "Servers": [
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
@@ -30,12 +30,20 @@
     },
     {
       "Track": "Mount Panorama\r\n[GP]",
-      "Port": "9603",
-      "Name": "Street Legal Bathurst - Road Cars - Trackday",
       "Mode": "Practice",
-      "Status": "🟢 ONLINE",
+      "Port": "9603",
       "Players": "0 / 64",
-      "LiveDrivers": []
+      "Status": "🟢 ONLINE",
+      "LiveDrivers": [
+        {
+          "BestLap": "--:--.---",
+          "Car": "DALLARA STRADALE COUPE",
+          "Laps": "0",
+          "SteamID": "76561197979177810",
+          "Name": "Justin Zerbin"
+        }
+      ],
+      "Name": "Street Legal Bathurst - Road Cars - Trackday"
     },
     {
       "Track": "Sebring International Raceway\r\n[GP]",
