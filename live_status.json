@@ -1,16 +1,16 @@
 {
-  "LastUpdated": "2026-05-11 15:30:01",
+  "LastUpdated": "2026-05-11 15:35:04",
   "Servers": [
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
       "Mode": "Practice",
       "Port": "9604",
-      "Players": "0 / 64",
+      "Players": "1 / 64",
       "Status": "🟢 ONLINE",
       "LiveDrivers": [
         {
           "Rating": 1529,
-          "Car": "ALFA ROMEO 75 TURBO EVO",
+          "Car": "LAMBORGHINI COUNTACH",
           "BestLap": "--:--.---",
           "SteamID": "76561198158038393",
           "Name": "Higsby Higs",
