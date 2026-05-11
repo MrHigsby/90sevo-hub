@@ -1,5 +1,5 @@
 {
-  "LastUpdated": "2026-05-11 12:21:12",
+  "LastUpdated": "2026-05-11 12:23:14",
   "Servers": [
     {
       "Mode": "Practice",
@@ -26,19 +26,13 @@
       "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
+      "LiveDrivers": [],
       "Mode": "Practice",
-      "Track": "Laguna Seca\r\n[GP]",
-      "Players": "1 / 64",
-      "Port": "9601",
       "Status": "🟢 ONLINE",
+      "Port": "9601",
       "Name": "Street Legal Seca - Road Cars - Trackday",
-      "LiveDrivers": [
-        {
-          "BestLap": "--:--.---",
-          "Car": "BMW M3 E30 EVO III",
-          "Name": "Sergio G"
-        }
-      ]
+      "Players": "0 / 64",
+      "Track": "Laguna Seca\r\n[GP]"
     },
     {
       "LiveDrivers": [],
