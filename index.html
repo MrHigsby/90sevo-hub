@@ -338,20 +338,30 @@
                 <div class="screenshot-frame"></div>
             </div>
 
-<div class="panel" style="grid-column: 1 / -1;">
+            <div class="panel">
+                <div class="panel-header" style="color: var(--neon-cyan); cursor: pointer; transition: 0.2s;" onclick="openLeaderboard('laps')" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--neon-cyan)'">[ TOP 5 ] TRACK RECORDS</div>
+                <div class="leaderboard-cycle">
+                    <div style="color: var(--neon-mint); margin-bottom: 10px; font-weight: bold;" id="home-track-name">> WAITING FOR DATA...</div>
+                    <div id="homeRecords">
+                        <div style="color: #444;">[ LOAD LEADERBOARD.JSON ]</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel" style="grid-column: 1 / -1;">
                 <div class="panel-header" style="color: var(--neon-gold); cursor: pointer; transition: 0.2s;" onclick="openLeaderboard('stats')" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--neon-gold)'">[ TOP 5 ] GLOBAL RATINGS</div>
                 <div class="leaderboard-cycle" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div>
                         <div style="color: #888; margin-bottom: 10px;">> Top Driver Rating</div>
-                        <div id="homeRatingList"><div style="color: #444;">[ SYNCING PROFILES... ]</div></div>
+                        <div id="homeRatingList"><div style="color: #444;">[ LOAD PROFILES.JSON ]</div></div>
                     </div>
                     <div>
                         <div style="color: #888; margin-bottom: 10px;">> Top TrackXP Level</div>
-                        <div id="homeLevelList"><div style="color: #444;">[ SYNCING LEVELS... ]</div></div>
+                        <div id="homeLevelList"><div style="color: #444;">[ LOAD PROFILES.JSON ]</div></div>
                     </div>
                 </div>
             </div>
-        </div> </div> ```
+        </div>
 
     </div>
 
@@ -2267,4 +2277,96 @@ const p_season = [
     heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000);
 	// --- LIVE TELEMETRY UPLINK SYSTEM ---
 
-t
+async function fetchLiveStatus() {
+    try {
+        const response = await fetch('live_status.json?t=' + Date.now());
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+
+        let liveRaceServers = [];
+        let liveTdServers = [];
+
+        // --- DEFINE YOUR RESERVED RACE PORTS HERE ---
+        const reservedRacePorts = ["9605", "9606", "9607"]; 
+
+        data.Servers.forEach(server => {
+            const serverObj = {
+                name: server.Name,
+                track: server.Track,
+                p: server.Players,
+                // Keeps the text but removes the emoji icons for a cleaner look
+                status: server.Status.replace("🟢 ", "").replace("🔴 ", "").toUpperCase(),
+                port: server.Port,
+                roster: server.LiveDrivers.map((d, idx) => ({
+                    pos: idx + 1,
+                    name: d.Name,
+                    car: d.Car,
+                    lapTime: d.BestLap || "--:--.---",
+                    isSessionBest: false,
+                    isPersonalBest: false,
+                    steamId: "" 
+                }))
+            };
+
+            // --- THE PORT-BASED ANCHOR LOGIC ---
+            // If the port is in our list OR the name has "Race" in it, anchor to Race Tab
+            if (reservedRacePorts.includes(server.Port.toString()) || server.Name.toLowerCase().includes("race")) {
+                liveRaceServers.push(serverObj);
+            } else {
+                liveTdServers.push(serverObj);
+            }
+        });
+
+        // Sync the website memory with the new data
+        raceServers.splice(0, raceServers.length, ...liveRaceServers);
+        tdServers.splice(0, tdServers.length, ...liveTdServers);
+
+        // Force the UI to refresh with live data
+        renderServerList('raceServersContainer', raceServers, true);
+        renderServerList('tdServersContainer', tdServers, false);
+        
+        console.log(`📡 HUB UPLINK: ${data.Servers.length} Servers Synced.`);
+
+    } catch (error) {
+        console.error("📡 UPLINK ERROR:", error);
+    }
+}
+// --- AUTO-SYNC REPOSITORY DATA ---
+async function initStaticData() {
+    try {
+        // 1. Fetch Driver Profiles
+        const profRes = await fetch('driver_profiles.json?t=' + Date.now());
+        if (profRes.ok) {
+            dbProfiles = await profRes.json();
+            updateHomeEliteLists(); // Refresh homepage lists
+            console.log("📂 Profiles Synced from GitHub");
+        }
+
+        // 2. Fetch Leaderboard
+        const lbRes = await fetch('leaderboard.json?t=' + Date.now());
+        if (lbRes.ok) {
+            dbLeaderboard = await lbRes.json();
+            populateLeaderboardFilters();
+            startHomeTrackCycle();
+            processLeaderboardData();
+            console.log("📂 Leaderboards Synced from GitHub");
+        }
+        
+        // Hide the manual bootloader if it exists
+        const bootloader = document.querySelector('.bootloader');
+        if (bootloader) bootloader.style.display = 'none';
+
+    } catch (err) {
+        console.error("📡 STATIC SYNC ERROR:", err);
+    }
+}
+
+// Call this immediately on page load
+initStaticData();
+// Refresh every 60 seconds
+setInterval(fetchLiveStatus, 120000);
+fetchLiveStatus();
+
+</script>
+</body>
+</html>
