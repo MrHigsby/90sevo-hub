@@ -1,5 +1,5 @@
 {
-  "LastUpdated": "2026-05-11 12:31:24",
+  "LastUpdated": "2026-05-11 12:33:26",
   "Servers": [
     {
       "Mode": "Practice",
@@ -44,19 +44,13 @@
       "Track": "Mount Panorama\r\n[GP]"
     },
     {
+      "LiveDrivers": [],
       "Mode": "Practice",
-      "Track": "Sebring International Raceway\r\n[GP]",
-      "Players": "1 / 64",
-      "Port": "9602",
       "Status": "🟢 ONLINE",
+      "Port": "9602",
       "Name": "Street Legal Sebring - Road Cars - Trackday",
-      "LiveDrivers": [
-        {
-          "BestLap": "02:20.190",
-          "Car": "CHEVROLET CAMARO ZL1",
-          "Name": "Oleslaw Koleslaw"
-        }
-      ]
+      "Players": "0 / 64",
+      "Track": "Sebring International Raceway\r\n[GP]"
     },
     {
       "LiveDrivers": [],
