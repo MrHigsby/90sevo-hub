@@ -338,20 +338,38 @@
                 <div class="screenshot-frame"></div>
             </div>
 
-<div class="panel" style="grid-column: 1 / -1;">
+            <div class="panel">
+                <div class="panel-header" style="color: var(--neon-cyan); cursor: pointer; transition: 0.2s;" onclick="openLeaderboard('laps')" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--neon-cyan)'">[ TOP 5 ] TRACK RECORDS</div>
+                <div class="leaderboard-cycle">
+                    <div style="color: var(--neon-mint); margin-bottom: 10px; font-weight: bold;" id="home-track-name">> WAITING FOR DATA...</div>
+                    <div id="homeRecords">
+                        <div style="color: #444;">[ LOAD LEADERBOARD.JSON ]</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel" style="grid-column: 1 / -1;">
                 <div class="panel-header" style="color: var(--neon-gold); cursor: pointer; transition: 0.2s;" onclick="openLeaderboard('stats')" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--neon-gold)'">[ TOP 5 ] GLOBAL RATINGS</div>
                 <div class="leaderboard-cycle" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div>
                         <div style="color: #888; margin-bottom: 10px;">> Top Driver Rating</div>
-                        <div id="homeRatingList"><div style="color: #444;">[ SYNCING PROFILES... ]</div></div>
+                        <div id="homeRatingList"><div style="color: #444;">[ LOAD PROFILES.JSON ]</div></div>
                     </div>
                     <div>
                         <div style="color: #888; margin-bottom: 10px;">> Top TrackXP Level</div>
-                        <div id="homeLevelList"><div style="color: #444;">[ SYNCING LEVELS... ]</div></div>
+                        <div id="homeLevelList"><div style="color: #444;">[ LOAD PROFILES.JSON ]</div></div>
                     </div>
                 </div>
             </div>
-        </div> </div> ```
+        </div>
+
+        <div class="bootloader" style="margin-top: 30px;">
+            <h3 style="color: #fff; margin-top: 0;">> DATA DRIVE: OFFLINE</h3>
+            <div style="color: #888; font-size: 0.8rem; margin-bottom: 10px;">Select your PowerShell JSONs to populate the hub.</div>
+            <div class="file-input-wrapper">1. DRIVER_PROFILES: <input type="file" id="uploadProfiles" accept=".json"></div>
+            <div class="file-input-wrapper" style="color: var(--neon-mint);">2. LEADERBOARD: <input type="file" id="uploadLeaderboard" accept=".json"></div>
+            <div id="bootStatus" style="margin-top: 10px; color: var(--neon-gold); font-size: 0.9rem;">[ SYSTEM READY ]</div>
+        </div>
 
     </div>
 
@@ -1917,40 +1935,126 @@
     window.raceServers = [];
     window.tdServers = [];
 
-    async function fetchLiveStatus() {
-        try {
-            const response = await fetch('live_status.json?t=' + Date.now());
-            if (!response.ok) return;
-            const data = await response.json();
+async function fetchLiveStatus() {
+    try {
+        const response = await fetch('live_status.json?t=' + Date.now());
+        if (!response.ok) return;
+        const data = await response.json();
 
-            let liveRaceServers = [];
-            let liveTdServers = [];
-            const reservedRacePorts = ["9605", "9606", "9607"]; 
+        let liveRaceServers = [];
+        let liveTdServers = [];
+        const reservedRacePorts = ["9605", "9606", "9607"]; 
 
-            data.Servers.forEach(server => {
-                const serverObj = {
-                    name: server.Name, track: server.Track, p: server.Players,
-                    status: server.Status.replace("🟢 ", "").replace("🔴 ", "").toUpperCase(),
-                    port: server.Port,
-                    img: "https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500", // Prevents Hero Banner crash
-                    roster: server.LiveDrivers.map((d, idx) => ({
-                        pos: idx + 1, name: d.Name, car: d.Car, lapTime: d.BestLap || "--:--.---",
-                        isSessionBest: false, isPersonalBest: false, steamId: d.SteamID
-                    }))
-                };
-                if (reservedRacePorts.includes(server.Port.toString()) || server.Name.toLowerCase().includes("race")) {
-                    liveRaceServers.push(serverObj);
-                } else { liveTdServers.push(serverObj); }
-            });
+        data.Servers.forEach(server => {
+            // Determine the display status (Mode)
+            const displayStatus = server.Mode ? server.Mode.toUpperCase() : "ONLINE";
 
-            // Update Global Arrays
-            window.raceServers = liveRaceServers;
-            window.tdServers = liveTdServers;
+            const serverObj = {
+                name: server.Name, 
+                track: server.Track, 
+                p: server.Players,
+                status: displayStatus, // This feeds the "STATUS: RACE" text
+                port: server.Port,
+                img: "https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500",
+                roster: (server.LiveDrivers || []).map((d, idx) => ({
+                    pos: idx + 1, 
+                    name: d.Name, 
+                    car: d.Car, 
+                    lapTime: d.BestLap || "--:--.---",
+                    laps: d.Laps || "0",
+                    // Simple logic to highlight the fastest person in the list
+                    isSessionBest: (idx === 0 && d.BestLap && d.BestLap !== "--:--.---"), 
+                    isPersonalBest: false, 
+                    steamId: d.SteamID
+                }))
+            };
 
-            renderServerList('raceServersContainer', window.raceServers, true);
-            renderServerList('tdServersContainer', window.tdServers, false);
-        } catch (error) { console.error("📡 UPLINK ERROR:", error); }
+            // Sorting logic to put servers on the right page
+            if (reservedRacePorts.includes(server.Port.toString()) || server.Name.toLowerCase().includes("race")) {
+                liveRaceServers.push(serverObj);
+            } else { 
+                liveTdServers.push(serverObj); 
+            }
+        });
+
+        // Sync to global memory for the homepage banners
+        window.raceServers = liveRaceServers;
+        window.tdServers = liveTdServers;
+
+        // Draw the lists on the Race and Track Day pages
+        renderServerList('raceServersContainer', window.raceServers, true);
+        renderServerList('tdServersContainer', window.tdServers, false);
+
+    } catch (error) { console.error("📡 UPLINK ERROR:", error); }
+}
+
+function renderServerList(containerId, servers, isRace) {
+    const container = document.getElementById(containerId);
+    if(!container) return;
+    
+    let html = '';
+    if (servers.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:20px; color:#666; font-family:'Share Tech Mono'; border:1px dashed #333;">[ NO LIVE ${isRace ? 'RACE' : 'TRACK DAY'} SERVERS FOUND ]</div>`;
+        return;
     }
+
+    servers.forEach((s, idx) => {
+        const rowClass = isRace ? 'server-item race-mode' : 'server-item';
+        const srvId = `srv-${isRace ? 'r' : 't'}-${idx}`;
+
+        let rosterHtml = '';
+        if(s.roster && s.roster.length > 0) {
+            rosterHtml = `
+                <div class="server-roster" id="roster-${srvId}" style="display: none; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
+                    <table class="server-roster-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">POS</th>
+                                <th style="width: 30%;">DRIVER</th>
+                                <th style="width: 30%;">CAR</th>
+                                <th style="width: 10%; text-align: center;">LAPS</th>
+                                <th style="width: 20%; text-align: right;">BEST LAP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${s.roster.map(r => {
+                                let lapColor = '#fff';
+                                if(r.isSessionBest) lapColor = '#bf00ff'; // Purple for fastest in server
+                                return `
+                                <tr onclick="event.stopPropagation(); openDriverCard('${r.steamId}')">
+                                    <td style="color: #888;">${r.pos}</td>
+                                    <td style="font-weight: bold; color: #fff;">${r.name}</td>
+                                    <td style="color: #aaa;">${r.car}</td>
+                                    <td style="text-align: center; color: var(--neon-cyan);">${r.laps}</td>
+                                    <td style="text-align: right; color: ${lapColor}; font-weight: bold;">${r.lapTime}</td>
+                                </tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } else {
+            rosterHtml = `<div class="server-roster" id="roster-${srvId}" style="display: none; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center; color: #666; font-style: italic; font-family: 'Share Tech Mono';">[ SERVER EMPTY ]</div>`;
+        }
+
+        html += `
+            <div class="${rowClass}" id="${srvId}" onclick="toggleRoster('${srvId}')">
+                <div class="server-header-row">
+                    <div>
+                        <div style="font-size: 1.2rem; font-weight: bold; color: #fff;">${s.name}</div>
+                        <div style="color: #888; font-family: 'Share Tech Mono'; font-size: 0.9rem; margin-top: 3px;">TRACK: ${s.track} | STATUS: ${s.status}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: ${isRace ? 'var(--neon-gold)' : 'var(--neon-mint)'}; font-size: 1.5rem; font-family: 'Share Tech Mono'; font-weight: bold;">${s.p}</div>
+                        <div style="font-size: 0.75rem; color: #666; font-family: 'Share Tech Mono'; margin-top: 5px; transition: color 0.2s;" id="toggle-icon-${srvId}">▼ EXPAND</div>
+                    </div>
+                </div>
+                ${rosterHtml}
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
 
     async function initStaticData() {
         try {
@@ -1971,42 +2075,6 @@
         } catch (err) { console.error("📡 STATIC SYNC ERROR:", err); }
     }
 
-<<<<<<< HEAD
-    // Boot Routines
-    renderServerList('raceServersContainer', raceServers, true);
-    renderServerList('tdServersContainer', tdServers, false);
-    initHomeGrids();
-    
-    setInterval(() => {
-        rIdx = (rIdx + 1) % raceServers.length;
-        const rb = document.getElementById('race-ss-title');
-        if(rb) {
-            rb.innerText = raceServers[rIdx].name.toUpperCase();
-            document.getElementById('race-ss-data').innerText = `DRIVERS: ${raceServers[rIdx].p} | ${raceServers[rIdx].status.toUpperCase()}`;
-            rb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${raceServers[rIdx].img}')`;
-            rb.parentElement.onclick = () => goToServerAndExpand('srv-r-' + rIdx, 'race');
-        }
-    }, 4000);
-
-    setInterval(() => {
-        tIdx = (tIdx + 1) % tdServers.length;
-        const tb = document.getElementById('td-ss-title');
-        if(tb) {
-            tb.innerText = tdServers[tIdx].name.toUpperCase();
-            document.getElementById('td-ss-data').innerText = `DRIVERS: ${tdServers[tIdx].p} | PRACTICE`;
-            tb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${tdServers[tIdx].img}')`;
-            tb.parentElement.onclick = () => goToServerAndExpand('srv-t-' + tIdx, 'trackday');
-        }
-    }, 4500);
-
-    renderCalendar();
-    loadStandings('gt3', document.querySelector('.standings-tab.active'));
-    updateHeroBanner();
-    heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000);
-	// --- LIVE TELEMETRY UPLINK SYSTEM ---
-
-t
-=======
     // --- BOOT SEQUENCE ---
     window.addEventListener('load', () => {
         // Run initial data fetch
@@ -2068,4 +2136,3 @@ t
 </script>
 </body>
 </html>
->>>>>>> adf3cb65ebe6f81e69e0117ad29306adc0e7bd71
