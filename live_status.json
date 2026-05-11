@@ -1,5 +1,5 @@
 {
-  "LastUpdated": "2026-05-11 14:12:02",
+  "LastUpdated": "2026-05-11 14:17:04",
   "Servers": [
     {
       "LiveDrivers": [],
@@ -13,7 +13,7 @@
     {
       "Mode": "Practice",
       "Track": "Nurburgring\r\n[Touristenfahrten]",
-      "Players": "0 / 32",
+      "Players": "1 / 32",
       "Port": "9600",
       "Status": "🟢 ONLINE",
       "Name": "SLNurb",
