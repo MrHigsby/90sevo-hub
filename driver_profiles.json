@@ -1295,6 +1295,33 @@
     "LicenseClass": 0,
     "Name": "maurizio pompilii"
   },
+  "76561199008114291": {
+    "LapsPerTrack": {
+      "Sebring International Raceway\r\n[GP]": 1
+    },
+    "QualiIncidents": 0,
+    "Wins": 0,
+    "MostDrivenCar": "CHEVROLET CAMARO ZL1",
+    "DriverRating": 1500,
+    "LapsPerCar": {
+      "CHEVROLET CAMARO ZL1": 1
+    },
+    "TotalFinishPos": 0,
+    "TrackdayXP": 25.0,
+    "Laps": 1,
+    "RaceContacts": 0,
+    "DNFs": 0,
+    "LicenseClass": 0,
+    "TrackdayScuffs": 0,
+    "MostDrivenTrack": "Sebring International Raceway\r\n[GP]",
+    "SafetyRating": 2.514685,
+    "Name": "Oleslaw Koleslaw",
+    "TotalStartPos": 0,
+    "Poles": 0,
+    "Top5s": 0,
+    "Pylons": 0,
+    "ServerStats": {}
+  },
   "76561198191106347": {
     "QualiIncidents": 0,
     "TotalStartPos": 0,
