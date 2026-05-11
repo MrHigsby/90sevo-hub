@@ -3216,9 +3216,9 @@
     "SteamID": "76561198109322429",
     "Name": "yoyo nono",
     "Car": "TOYOTA AE86 SPRINTER TRUENO",
+    "LapTime": "01:44.667",
+    "TotalMs": 104667.0,
     "Track": "Laguna Seca\r\n[GP]",
-    "LapTime": "01:51.537",
-    "TotalMs": 111537.0,
-    "LapSetOn": 1
+    "LapSetOn": 2
   }
 ]
