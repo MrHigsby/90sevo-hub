@@ -1,5 +1,5 @@
 {
-  "LastUpdated": "2026-05-11 05:51:41",
+  "LastUpdated": "2026-05-11 05:53:43",
   "Servers": [
     {
       "Mode": "Practice",
@@ -26,19 +26,13 @@
       "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
+      "LiveDrivers": [],
       "Mode": "Practice",
-      "Track": "Laguna Seca\r\n[GP]",
-      "Players": "1 / 64",
-      "Port": "9601",
       "Status": "🟢 ONLINE",
+      "Port": "9601",
       "Name": "Street Legal Seca - Road Cars - Trackday",
-      "LiveDrivers": [
-        {
-          "BestLap": "01:44.250",
-          "Car": "TOYOTA AE86 SPRINTER TRUENO",
-          "Name": "yoyo nono"
-        }
-      ]
+      "Players": "0 / 64",
+      "Track": "Laguna Seca\r\n[GP]"
     },
     {
       "LiveDrivers": [],
