@@ -1,5 +1,5 @@
 {
-  "LastUpdated": "2026-05-11 15:08:06",
+  "LastUpdated": "2026-05-11 15:13:09",
   "Servers": [
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
@@ -32,12 +32,19 @@
       "Track": "Mount Panorama\r\n[GP]",
       "Mode": "Practice",
       "Port": "9603",
-      "Players": "0 / 64",
+      "Players": "1 / 64",
       "Status": "🟢 ONLINE",
       "LiveDrivers": [
         {
           "BestLap": "--:--.---",
-          "Car": "DALLARA STRADALE COUPE",
+          "Car": "ALPINE A110 S",
+          "Laps": "0",
+          "SteamID": "76561198158038393",
+          "Name": "Higsby Higs"
+        },
+        {
+          "BestLap": "--:--.---",
+          "Car": "PORSCHE 992 GT3 RS",
           "Laps": "0",
           "SteamID": "76561197979177810",
           "Name": "Justin Zerbin"
