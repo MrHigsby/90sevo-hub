@@ -1,5 +1,5 @@
 {
-  "LastUpdated": "2026-05-11 15:18:13",
+  "LastUpdated": "2026-05-11 15:25:42",
   "Servers": [
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
@@ -32,29 +32,19 @@
       "Track": "Mount Panorama\r\n[GP]",
       "Mode": "Practice",
       "Port": "9603",
-      "Players": "3 / 64",
+      "Players": "0 / 64",
       "Status": "🟢 ONLINE",
       "LiveDrivers": [
         {
-          "BestLap": "--:--.---",
+          "Rating": 1529,
           "Car": "ALPINE A110 S",
-          "Laps": "0",
+          "BestLap": "--:--.---",
           "SteamID": "76561198158038393",
-          "Name": "Higsby Higs"
-        },
-        {
-          "BestLap": "--:--.---",
-          "Car": "PORSCHE 992 GT3 RS",
-          "Laps": "0",
-          "SteamID": "76561197979177810",
-          "Name": "Justin Zerbin"
-        },
-        {
-          "BestLap": "--:--.---",
-          "Car": "DALLARA STRADALE COUPE",
-          "Laps": "0",
-          "SteamID": "76561198077326643",
-          "Name": "Moritz Markulin"
+          "Name": "Higsby Higs",
+          "SessionLaps": "0",
+          "Class": 0,
+          "Level": 1.0,
+          "SR": "3.16"
         }
       ],
       "Name": "Street Legal Bathurst - Road Cars - Trackday"

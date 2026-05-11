@@ -1957,12 +1957,14 @@
     "MostDrivenTrack": "None"
   },
   "76561198077326643": {
-    "LapsPerCar": {},
+    "LapsPerCar": {
+      "DALLARA STRADALE COUPE": 1
+    },
     "TrackdayScuffs": 1,
-    "MostDrivenCar": "None",
+    "MostDrivenCar": "DALLARA STRADALE COUPE",
     "Name": "Moritz Markulin",
     "RaceContacts": 0,
-    "Laps": 0,
+    "Laps": 1,
     "DNFs": 0,
     "Poles": 0,
     "QualiIncidents": 0,
@@ -1970,13 +1972,15 @@
     "Top5s": 0,
     "Wins": 0,
     "TotalFinishPos": 0,
-    "SafetyRating": 2.5,
+    "SafetyRating": 2.514685,
     "ServerStats": {},
-    "MostDrivenTrack": "None",
-    "TrackdayXP": 0,
+    "MostDrivenTrack": "Mount Panorama\r\n[GP]",
+    "TrackdayXP": 15,
     "LicenseClass": 0,
     "TotalStartPos": 0,
-    "LapsPerTrack": {},
+    "LapsPerTrack": {
+      "Mount Panorama\r\n[GP]": 1
+    },
     "DriverRating": 1500
   },
   "76561199680219027": {
