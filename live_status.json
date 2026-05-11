@@ -1,5 +1,5 @@
 {
-  "LastUpdated": "2026-05-11 04:23:59",
+  "LastUpdated": "2026-05-11 04:28:03",
   "Servers": [
     {
       "Mode": "Practice",
@@ -72,11 +72,11 @@
     },
     {
       "LiveDrivers": [],
-      "Mode": "Qualifying",
-      "Status": "🟢 ONLINE",
+      "Mode": "N/A",
+      "Status": "🔴 OFFLINE",
       "Port": "9707",
       "Name": "Quick Race - GT3 Cars - Q10R15",
-      "Players": "0 / 32",
+      "Players": "0",
       "Track": "Brands Hatch\r\n[GP]"
     }
   ]
