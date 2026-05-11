@@ -1246,24 +1246,24 @@
   },
   "76561198109322429": {
     "LapsPerTrack": {
-      "Laguna Seca\r\n[GP]": 2
+      "Laguna Seca\r\n[GP]": 3
     },
     "QualiIncidents": 0,
     "Wins": 0,
     "MostDrivenCar": "TOYOTA AE86 SPRINTER TRUENO",
     "DriverRating": 1500,
     "LapsPerCar": {
-      "TOYOTA AE86 SPRINTER TRUENO": 2
+      "TOYOTA AE86 SPRINTER TRUENO": 3
     },
     "TotalFinishPos": 0,
-    "TrackdayXP": 51.0,
-    "Laps": 2,
+    "TrackdayXP": 63.0,
+    "Laps": 3,
     "RaceContacts": 0,
     "DNFs": 0,
     "LicenseClass": 0,
     "TrackdayScuffs": 0,
     "MostDrivenTrack": "Laguna Seca\r\n[GP]",
-    "SafetyRating": 2.52937,
+    "SafetyRating": 2.544055,
     "Name": "yoyo nono",
     "TotalStartPos": 0,
     "Poles": 0,
