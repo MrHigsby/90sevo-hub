@@ -1,10 +1,10 @@
 {
-  "LastUpdated": "2026-05-11 13:32:23",
+  "LastUpdated": "2026-05-11 13:37:25",
   "Servers": [
     {
       "Mode": "Practice",
       "Track": "Nurburgring\r\n[Touristenfahrten]",
-      "Players": "0 / 32",
+      "Players": "1 / 32",
       "Port": "9604",
       "Status": "🟢 ONLINE",
       "Name": "90s Nurburgring",
