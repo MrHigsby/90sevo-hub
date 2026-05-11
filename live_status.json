@@ -1,62 +1,67 @@
 {
-  "LastUpdated": "2026-05-11 14:23:49",
+  "LastUpdated": "2026-05-11 14:28:51",
   "Servers": [
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
       "Port": "9604",
-      "Name": "90s Nurburgring",
+      "Name": "90s Night N├╝rburgring - Retro & Vintage - Tourist Regulations",
       "Mode": "Practice",
       "Status": "🟢 ONLINE",
-      "Players": "0 / 32",
+      "Players": "0 / 64",
       "LiveDrivers": []
     },
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
-      "Mode": "Practice",
       "Port": "9600",
-      "Players": "0 / 32",
+      "Name": "Street Legal Nurburgring - Road Cars - Tourist Regulations",
+      "Mode": "Practice",
       "Status": "🟢 ONLINE",
-      "LiveDrivers": [
-        {
-          "BestLap": "--:--.---",
-          "Car": "ALPINE A110 S",
-          "Name": "Higsby Higs"
-        }
-      ],
-      "Name": "SLNurb"
+      "Players": "0 / 64",
+      "LiveDrivers": []
     },
     {
       "Track": "Laguna Seca\r\n[GP]",
-      "Port": "9601",
-      "Name": "SLSeca",
       "Mode": "Practice",
+      "Port": "9601",
+      "Players": "2 / 32",
       "Status": "🟢 ONLINE",
-      "Players": "0 / 32",
-      "LiveDrivers": []
+      "LiveDrivers": [
+        {
+          "BestLap": "03:17.649",
+          "Car": "HONDA NSX R",
+          "Name": "juanjo ///MRT"
+        },
+        {
+          "BestLap": "01:55.083",
+          "Car": "HONDA NSX R",
+          "Name": "Nano Racing /// MRT"
+        }
+      ],
+      "Name": "SLSeca"
     },
     {
       "Track": "Mount Panorama\r\n[GP]",
       "Port": "9603",
-      "Name": "SLBathurst",
+      "Name": "Street Legal Bathurst - Road Cars - Trackday",
       "Mode": "Practice",
       "Status": "🟢 ONLINE",
-      "Players": "0 / 32",
+      "Players": "0 / 64",
       "LiveDrivers": []
     },
     {
       "Track": "Sebring International Raceway\r\n[GP]",
       "Port": "9602",
-      "Name": "SLSebring",
+      "Name": "Street Legal Sebring - Road Cars - Trackday",
       "Mode": "Practice",
       "Status": "🟢 ONLINE",
-      "Players": "0 / 32",
+      "Players": "0 / 64",
       "LiveDrivers": []
     },
     {
       "Track": "Mount Panorama\r\n[GP]",
       "Port": "9605",
       "Name": "Endurance Race - Alfa Sprint GTA - Q20/R40",
-      "Mode": "Practice",
+      "Mode": "Qualifying",
       "Status": "🟢 ONLINE",
       "Players": "0 / 35",
       "LiveDrivers": []

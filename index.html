@@ -1134,12 +1134,12 @@
 </div>
 
 <script>
+    // --- GLOBAL VARIABLES ---
     let dbProfiles = {};
     let dbLeaderboard = [];
     const classLetters = ["R", "D", "C", "B", "A", "S"];
     let homeTrackInterval = null;
 
-    // Leaderboard Engine Memory
     let currentSortCol = 'default';
     let sortAscending = true;
     let activeMode = 'laps';
@@ -1147,22 +1147,17 @@
     let lbCurrentPage = 1;
     const LB_ROWS_PER_PAGE = 50;
 
-    // DYNAMIC HERO BANNER GLOBALS
     let globalBannerIdx = 0;
     let heroTimer = null;
-    
-    // SAFE MODAL TELEPORT VARIABLE
     let activeModalSteamID = "";
-    
-    // SAFE TRACK RECORDS RENDER VARIABLE
     let currentTelemetryDriver = null;
 
-function showPage(pageId) {
+    // --- YOUR UI & NAVIGATION FUNCTIONS ---
+    function showPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
         
-        // Safe check for onclick attributes so the browser doesn't silent-crash
         document.querySelectorAll('.nav-btn').forEach(btn => { 
             let attr = btn.getAttribute('onclick');
             if(attr && attr.includes(`showPage('${pageId}')`)) {
@@ -1170,101 +1165,65 @@ function showPage(pageId) {
             }
         });
 
-        // NEW: Auto-collapse all server accordions when leaving/switching pages
         document.querySelectorAll('.server-roster').forEach(roster => roster.style.display = 'none');
         document.querySelectorAll('[id^="toggle-icon-"]').forEach(icon => icon.innerText = '▼ EXPAND');
         
         window.scrollTo(0, 0); 
-
-        // Instantly force a hero banner update based on the new page context
         updateHeroBanner();
         clearInterval(heroTimer);
         heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 4500);
     }
     
-    // Manual Navigation Router
     function showChapter(chapterId) {
         document.querySelectorAll('.manual-chapter').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.manual-nav-btn').forEach(b => {
             b.classList.remove('active');
-            if(b.getAttribute('onclick').includes(chapterId)) {
-                b.classList.add('active');
-            }
+            if(b.getAttribute('onclick').includes(chapterId)) b.classList.add('active');
         });
-        
         document.getElementById(chapterId).classList.add('active');
     }
 
-    // Direct routing function for homepage metric boxes
-    function goToRules(chapterId) {
-        showPage('rules');
-        showChapter(chapterId);
-    }
+    function goToRules(chapterId) { showPage('rules'); showChapter(chapterId); }
 
-// UNIVERSAL TELEPORT ENGINE
     function goToServerAndExpand(srvId, pageId) {
         showPage(pageId);
-        
         setTimeout(() => {
             const rosterDiv = document.getElementById(`roster-${srvId}`);
             const iconDiv = document.getElementById(`toggle-icon-${srvId}`);
-            
             if (rosterDiv && rosterDiv.style.display === 'none') {
                 rosterDiv.style.display = 'block';
                 if(iconDiv) iconDiv.innerText = '▲ COLLAPSE';
             }
-            
             const serverElement = document.getElementById(srvId);
             if (serverElement) {
                 serverElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 const oldBg = serverElement.style.backgroundColor;
                 serverElement.style.backgroundColor = 'rgba(255, 183, 0, 0.2)';
-                setTimeout(() => {
-                    serverElement.style.backgroundColor = oldBg;
-                }, 800);
+                setTimeout(() => { serverElement.style.backgroundColor = oldBg; }, 800);
             }
         }, 100);
     }
 
-    // LEGACY REDIRECT (Keeps your old HTML Schedule page links working!)
-    function goToRaceAndExpand(srvId) {
-        goToServerAndExpand(srvId, 'race');
-    }
-    
-    // Routing Shortcuts
-    function openLeaderboard(mode) {
-        document.getElementById('lbMode').value = mode;
-        showPage('leaderboard');
-        processLeaderboardData();
-    }
+    function goToRaceAndExpand(srvId) { goToServerAndExpand(srvId, 'race'); }
+    function openLeaderboard(mode) { document.getElementById('lbMode').value = mode; showPage('leaderboard'); processLeaderboardData(); }
 
-    // --- SECURE MOCK VOTING LOGIC ---
-    let mockVotes = {
-        'race-track': { spa: 42, suzuka: 28, monza: 14, nurb: 31 },
-        'td-env': { shutoko: 35, golden: 55, la: 40, tsukuba: 22 }
-    };
+    // --- VOTING SYSTEM ---
+    let mockVotes = { 'race-track': { spa: 42, suzuka: 28, monza: 14, nurb: 31 }, 'td-env': { shutoko: 35, golden: 55, la: 40, tsukuba: 22 } };
     let userVoted = { 'race-track': false, 'td-env': false };
 
     function castVote(id, group) {
         if(userVoted[group]) return; 
-        
         mockVotes[group][id]++;
         userVoted[group] = true;
-        
         let total = 0;
         for(let k in mockVotes[group]) total += mockVotes[group][k];
-        
         for(let k in mockVotes[group]) {
             let pct = Math.round((mockVotes[group][k] / total) * 100);
-            
-            // Sync all progress bars with this track's class
             document.querySelectorAll('.bar-' + k).forEach(bar => {
                 bar.style.width = pct + '%';
                 bar.style.background = group === 'td-env' ? 'var(--neon-cyan)' : 'var(--neon-pink)';
-                if(pct > 5) { bar.innerHTML = pct + '%'; }
+                if(pct > 5) bar.innerHTML = pct + '%'; 
             });
-            
-            // Sync all buttons with this track's class
             document.querySelectorAll('.btn-' + k).forEach(btn => {
                 btn.classList.add('voted');
                 if(k === id) {
@@ -1281,7 +1240,6 @@ function showPage(pageId) {
         }
     }
 
-    // --- ACCORDION TOGGLE LOGIC ---
     function toggleRoster(srvId) {
         const rosterDiv = document.getElementById(`roster-${srvId}`);
         const iconDiv = document.getElementById(`toggle-icon-${srvId}`);
@@ -1294,10 +1252,9 @@ function showPage(pageId) {
         }
     }
 
-    // --- CALENDAR LOGIC ---
+    // --- CALENDAR & STANDINGS ---
     const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-    let currentCalDate = new Date(2026, 4, 1); // Starts at May 2026
-
+    let currentCalDate = new Date(2026, 4, 1);
     const calEvents = {
         "2026-4-15": { title: "Round 1: Suzuka", class: "90s JDM LEGENDS", status: "completed" },
         "2026-4-22": { title: "Round 2: Bathurst", class: "ENDURANCE PRO-AM", status: "upcoming" },
@@ -1308,43 +1265,22 @@ function showPage(pageId) {
         const year = currentCalDate.getFullYear();
         const month = currentCalDate.getMonth();
         document.getElementById('calendarMonthDisplay').innerText = `${monthNames[month]} ${year}`;
-
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-        let gridHtml = `
-            <div class="cal-header">SUN</div><div class="cal-header">MON</div><div class="cal-header">TUE</div>
-            <div class="cal-header">WED</div><div class="cal-header">THU</div><div class="cal-header">FRI</div><div class="cal-header">SAT</div>
-        `;
-
-        // Blanks for days before the 1st
-        for (let i = 0; i < firstDay; i++) {
-            gridHtml += `<div class="cal-day" style="opacity: 0.1; border-color: #111;"></div>`;
-        }
-
-        // Actual Days
+        let gridHtml = `<div class="cal-header">SUN</div><div class="cal-header">MON</div><div class="cal-header">TUE</div><div class="cal-header">WED</div><div class="cal-header">THU</div><div class="cal-header">FRI</div><div class="cal-header">SAT</div>`;
+        for (let i = 0; i < firstDay; i++) gridHtml += `<div class="cal-day" style="opacity: 0.1; border-color: #111;"></div>`;
         for (let day = 1; day <= daysInMonth; day++) {
             let dateKey = `${year}-${month}-${day}`;
             let evt = calEvents[dateKey];
             let evtHtml = '';
-            
-            if (evt) {
-                let eClass = 'cal-event ' + evt.status;
-                evtHtml = `<div class="${eClass}" onclick="alert('Event Details: ${evt.title}\\nClass: ${evt.class}\\nStatus: ${evt.status.toUpperCase()}')">${evt.title}</div>`;
-            }
-            
+            if (evt) evtHtml = `<div class="cal-event ${evt.status}" onclick="alert('Event Details: ${evt.title}\\nClass: ${evt.class}')">${evt.title}</div>`;
             gridHtml += `<div class="cal-day"><div class="cal-date">${day}</div>${evtHtml}</div>`;
         }
-
         document.getElementById('calendarGrid').innerHTML = gridHtml;
     }
 
-    function changeMonth(dir) {
-        currentCalDate.setMonth(currentCalDate.getMonth() + dir);
-        renderCalendar();
-    }
+    function changeMonth(dir) { currentCalDate.setMonth(currentCalDate.getMonth() + dir); renderCalendar(); }
 
-    // --- LIVE STANDINGS LOGIC ---
     const standingsData = {
         'gt3': [
             { pos: 1, name: "SpeedyG", pts: 125, starts: 5, wins: 3, color: "var(--neon-gold)" },
@@ -1355,59 +1291,44 @@ function showPage(pageId) {
         ],
         'enduro': [
             { pos: 1, name: "ApexHunter", pts: 210, starts: 8, wins: 4, color: "var(--neon-gold)" },
-            { pos: 2, name: "SpeedyG", pts: 180, starts: 8, wins: 2, color: "var(--neon-mint)" },
-            { pos: 3, name: "DriftKing99", pts: 145, starts: 8, wins: 1, color: "var(--neon-cyan)" },
-            { pos: 4, name: "RotaryPower", pts: 120, starts: 7, wins: 1, color: "#888" },
-            { pos: 5, name: "SlowPoke", pts: 90, starts: 8, wins: 0, color: "#888" }
+            { pos: 2, name: "SpeedyG", pts: 180, starts: 8, wins: 2, color: "var(--neon-mint)" }
         ],
         'jdm': [
             { pos: 1, name: "TofuDelivery", pts: 75, starts: 3, wins: 3, color: "var(--neon-gold)" },
-            { pos: 2, name: "Godzilla", pts: 54, starts: 3, wins: 0, color: "var(--neon-mint)" },
-            { pos: 3, name: "VTEC_Kick", pts: 45, starts: 3, wins: 0, color: "var(--neon-cyan)" },
-            { pos: 4, name: "EuroBeat", pts: 30, starts: 2, wins: 0, color: "#888" },
-            { pos: 5, name: "DriftKing99", pts: 20, starts: 3, wins: 0, color: "#888" }
+            { pos: 2, name: "Godzilla", pts: 54, starts: 3, wins: 0, color: "var(--neon-mint)" }
         ]
     };
 
     function loadStandings(series, btnElement) {
         document.querySelectorAll('.standings-tab').forEach(b => b.classList.remove('active'));
         if(btnElement) btnElement.classList.add('active');
-
         let html = '';
         standingsData[series].forEach(r => {
-            html += `
-                <tr class="lb-row-table" style="color: ${r.pos <= 3 ? r.color : '#fff'};" onclick="alert('In a live environment, this would open ${r.name}\\n\\'s ID Card!')">
-                    <td style="color: ${r.pos <= 3 ? r.color : '#888'};">${r.pos}</td>
-                    <td style="font-weight: bold; font-family: 'Chakra Petch', sans-serif;">${r.name}</td>
-                    <td style="font-weight: bold;">${r.pts}</td>
-                    <td style="color: ${r.pos <= 3 ? '#fff' : '#888'};">${r.starts}</td>
-                    <td style="color: ${r.pos <= 3 ? '#fff' : '#888'};">${r.wins}</td>
-                </tr>
-            `;
+            html += `<tr class="lb-row-table" style="color: ${r.pos <= 3 ? r.color : '#fff'};">
+                        <td style="color: ${r.pos <= 3 ? r.color : '#888'};">${r.pos}</td>
+                        <td style="font-weight: bold; font-family: 'Chakra Petch', sans-serif;">${r.name}</td>
+                        <td style="font-weight: bold;">${r.pts}</td>
+                        <td style="color: ${r.pos <= 3 ? '#fff' : '#888'};">${r.starts}</td>
+                        <td style="color: ${r.pos <= 3 ? '#fff' : '#888'};">${r.wins}</td>
+                    </tr>`;
         });
         document.getElementById('standingsBody').innerHTML = html;
     }
 
-    // --- PARSE JSONS ---
+    // --- MANUAL FILE UPLOADS (FALLBACK) ---
     document.getElementById('uploadProfiles').addEventListener('change', function(e) {
         const reader = new FileReader();
         reader.onload = (e) => {
             dbProfiles = JSON.parse(e.target.result);
             document.getElementById('bootStatus').innerText = "DISC 1 MOUNTED: PROFILES SYNCED";
-            
-            // Populating Autocomplete Datalist
             const datalist = document.getElementById('telemetryDriversList');
             if(datalist) {
                 datalist.innerHTML = '';
                 for(let k in dbProfiles) {
-                    let opt = document.createElement('option');
-                    opt.value = dbProfiles[k].Name;
-                    datalist.appendChild(opt);
+                    let opt = document.createElement('option'); opt.value = dbProfiles[k].Name; datalist.appendChild(opt);
                 }
             }
-
-            updateHomeEliteLists();
-            processLeaderboardData(); 
+            updateHomeEliteLists(); processLeaderboardData(); 
         };
         reader.readAsText(e.target.files[0]);
     });
@@ -1417,29 +1338,31 @@ function showPage(pageId) {
         reader.onload = (e) => {
             dbLeaderboard = JSON.parse(e.target.result);
             document.getElementById('bootStatus').innerText = "DISCS MOUNTED: LEADERBOARD SYNCED";
-            populateLeaderboardFilters();
-            startHomeTrackCycle();
-            processLeaderboardData();
+            populateLeaderboardFilters(); startHomeTrackCycle(); processLeaderboardData();
         };
         reader.readAsText(e.target.files[0]);
     });
 
-    // --- HOMEPAGE LOGIC ---
+    // --- HOMEPAGE & HERO BANNER ---
     function updateHomeEliteLists() {
+        if(!dbProfiles) return;
         const sorted = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]}));
         const topRating = [...sorted].sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0,5);
         const topLevel = [...sorted].sort((a,b) => (b.TrackdayXP||0) - (a.TrackdayXP||0)).slice(0,5);
 
-        document.getElementById('homeRatingList').innerHTML = topRating.map((p, i) => `
+        const homeRating = document.getElementById('homeRatingList');
+        if(homeRating) homeRating.innerHTML = topRating.map((p, i) => `
             <div class="lb-row" onclick="openDriverCard('${p.id}')"><span>${i+1}. ${p.Name}</span><span style="color: var(--neon-cyan);">${p.DriverRating||1500} ELO</span></div>
         `).join('');
 
-        document.getElementById('homeLevelList').innerHTML = topLevel.map((p, i) => `
+        const homeLevel = document.getElementById('homeLevelList');
+        if(homeLevel) homeLevel.innerHTML = topLevel.map((p, i) => `
             <div class="lb-row" onclick="openDriverCard('${p.id}')"><span>${i+1}. ${p.Name}</span><span style="color: var(--neon-gold);">LVL ${Math.floor(Math.sqrt((p.TrackdayXP||0) / 50)) + 1}</span></div>
         `).join('');
     }
 
     function startHomeTrackCycle() {
+        if(!dbLeaderboard || dbLeaderboard.length === 0) return;
         clearInterval(homeTrackInterval);
         const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown Track'))];
         if (tracks.length === 0) return;
@@ -1447,10 +1370,12 @@ function showPage(pageId) {
         let currentIdx = 0;
         const renderTrack = () => {
             const track = tracks[currentIdx];
-            document.getElementById('home-track-name').innerText = `> ${track.toUpperCase()}`;
+            const tName = document.getElementById('home-track-name');
+            if(tName) tName.innerText = `> ${track.toUpperCase()}`;
             const top5 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0,5);
             
-            document.getElementById('homeRecords').innerHTML = top5.map((entry, i) => `
+            const hRecords = document.getElementById('homeRecords');
+            if(hRecords) hRecords.innerHTML = top5.map((entry, i) => `
                 <div class="lb-row" onclick="openDriverCard('${entry.SteamID}')">
                     <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${i+1}. ${entry.Name} <span style="font-size: 0.75rem; color: #888; font-family: 'Share Tech Mono'; margin-left: 5px;">[${entry.Car}]</span></span>
                     <span style="color: var(--neon-mint); flex-shrink: 0;">${entry.LapTime}</span>
@@ -1463,72 +1388,137 @@ function showPage(pageId) {
         homeTrackInterval = setInterval(renderTrack, 5000); 
     }
 
-    // --- LEADERBOARD PAGE LOGIC ---
+    function manualBannerChange(dir) {
+        globalBannerIdx += dir;
+        updateHeroBanner();
+        clearInterval(heroTimer);
+        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000);
+    }
+
+    function updateHeroBanner() {
+        const activePage = document.querySelector('.page.active').id;
+        
+        let eloHtml = '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px;">[ LOAD PROFILES.JSON TO VIEW ]</div>';
+        if (Object.keys(dbProfiles).length > 0) {
+            const sortedElo = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]})).sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0, 10);
+            eloHtml = `<div style="font-family:'Share Tech Mono'; font-size:0.85rem; text-align:left; width: 100%; max-width:700px; margin: 5px auto 0 auto; background:rgba(0,0,0,0.8); border:1px solid var(--neon-cyan); padding:5px 15px; z-index: 10; box-sizing:border-box; display: grid; grid-template-columns: 1fr 1fr; column-gap: 30px;">`;
+            sortedElo.forEach((p, i) => { eloHtml += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:2px 0; cursor:pointer;" onclick="event.stopPropagation(); openDriverCard('${p.id}')" onmouseover="this.style.color='var(--neon-pink)'" onmouseout="this.style.color=''"><span>${i+1}. ${p.Name}</span><span style="color:var(--neon-cyan); font-weight:bold;">${p.DriverRating||1500}</span></div>`; });
+            eloHtml += `</div>`;
+        }
+
+        let trHtml = '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px;">[ LOAD LEADERBOARD.JSON TO VIEW ]</div>';
+        if (dbLeaderboard.length > 0) {
+            const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown Track'))];
+            const track = tracks[Math.floor(Date.now() / 15000) % tracks.length] || tracks[0]; 
+            const top10 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0, 10);
+            trHtml = `<div style="font-family:'Share Tech Mono'; font-size:0.85rem; text-align:left; width: 100%; max-width:700px; margin: 5px auto 0 auto; background:rgba(0,0,0,0.8); border:1px solid var(--neon-mint); padding:5px 15px; z-index: 10; box-sizing:border-box;"><div style="color:var(--neon-mint); font-size:0.75rem; margin-bottom:2px; border-bottom:1px solid #444; padding-bottom:2px; font-weight:bold;">> ${track.toUpperCase()}</div><div style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 30px;">`;
+            top10.forEach((entry, i) => { trHtml += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:2px 0; cursor:pointer;" onclick="event.stopPropagation(); openDriverCard('${entry.SteamID}')" onmouseover="this.style.color='var(--neon-pink)'" onmouseout="this.style.color=''"><span>${i+1}. ${entry.Name}</span><span style="color:var(--neon-mint); font-weight:bold;">${entry.LapTime}</span></div>`; });
+            trHtml += `</div></div>`;
+        }
+
+        const p_leaderboard = [
+            { label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" },
+            { label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=1000" }
+        ];
+
+        const p_season = [
+            { label: "[ SEASON EVENTS ]", title: "SEASON 4: GT3 SPRINT", data: "ROUNDS: 6 | REG. OPEN", color: "var(--neon-pink)", action: () => goToServerAndExpand('srv-r-0', 'race'), img: "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" }
+        ];
+
+        // Ensure raceServers and tdServers have fallbacks to prevent crash
+        const activeRace = window.raceServers && window.raceServers.length > 0 ? window.raceServers : [{name: "AWAITING RACES", p: "0/0", status: "OFFLINE", img: "https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500"}];
+        const activeTd = window.tdServers && window.tdServers.length > 0 ? window.tdServers : [{name: "AWAITING TRACK DAYS", p: "0/0", status: "OFFLINE", img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=500"}];
+
+        const p_race = activeRace.map((s, i) => ({ label: "[ LIVE RACES ]", title: s.name.split(' - ')[0].toUpperCase(), data: `DRIVERS: ${s.p} | ${s.status.toUpperCase()}`, color: "var(--neon-gold)", action: () => goToServerAndExpand(`srv-r-${i}`, 'race'), img: s.img || "https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500" }));
+        const p_td = activeTd.map((s, i) => ({ label: "[ LIVE TRACK DAYS ]", title: s.name.split(' - ')[0].toUpperCase(), data: `DRIVERS: ${s.p} | PRACTICE`, color: "var(--neon-mint)", action: () => goToServerAndExpand(`srv-t-${i}`, 'trackday'), img: s.img || "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=500" }));
+
+        let pool = [];
+        if (activePage === 'home') pool = [...p_season, ...p_leaderboard];
+        else if (activePage === 'schedule') pool = [...p_td, ...p_leaderboard];
+        else if (activePage === 'race') pool = [...p_season, ...p_td, ...p_leaderboard];
+        else if (activePage === 'trackday') pool = [...p_season, ...p_race, ...p_leaderboard];
+        else pool = [...p_season, ...p_race, ...p_td, ...p_leaderboard];
+
+        if(pool.length === 0) return;
+        let safeIdx = ((globalBannerIdx % pool.length) + pool.length) % pool.length;
+        const slide = pool[safeIdx];
+        
+        document.querySelectorAll('.hero-banner-container').forEach(banner => {
+            banner.style.borderColor = slide.color;
+            banner.querySelector('.hero-label').innerText = slide.label;
+            banner.querySelector('.hero-label').style.color = slide.color;
+            banner.querySelector('.hero-title').innerText = slide.title;
+            banner.querySelector('.hero-data').innerHTML = slide.data;
+            banner.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${slide.img}')`;
+            banner.onclick = slide.action;
+            if (!banner.querySelector('.banner-arrow.left')) {
+                const leftArr = document.createElement('div'); leftArr.className = 'banner-arrow left'; leftArr.innerHTML = '&#10094;';
+                leftArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(-1); };
+                const rightArr = document.createElement('div'); rightArr.className = 'banner-arrow right'; rightArr.innerHTML = '&#10095;';
+                rightArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(1); };
+                banner.appendChild(leftArr); banner.appendChild(rightArr);
+            }
+        });
+    }
+
+    // --- LEADERBOARD & TABLES ---
     const lbMode = document.getElementById('lbMode');
     const lbTrack = document.getElementById('lbTrack');
     const lbCar = document.getElementById('lbCar');
     const driverSearch = document.getElementById('driverSearch');
 
-    lbMode.addEventListener('change', (e) => {
-        document.getElementById('lapFilters').style.display = e.target.value === 'laps' ? 'flex' : 'none';
-        currentSortCol = 'default';
-        sortAscending = (e.target.value === 'laps');
-        processLeaderboardData();
+    if(lbMode) {
+        lbMode.addEventListener('change', (e) => {
+            const filters = document.getElementById('lapFilters');
+            if(filters) filters.style.display = e.target.value === 'laps' ? 'flex' : 'none';
+            currentSortCol = 'default';
+            sortAscending = (e.target.value === 'laps');
+            processLeaderboardData();
+        });
+    }
+    
+    [lbTrack, lbCar, driverSearch].forEach(el => {
+        if(el) el.addEventListener('input', processLeaderboardData)
     });
-    [lbTrack, lbCar, driverSearch].forEach(el => el.addEventListener('input', processLeaderboardData));
 
     function populateLeaderboardFilters() {
+        if(!dbLeaderboard) return;
         const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown'))].sort();
         const cars = [...new Set(dbLeaderboard.map(x => x.Car || 'Unknown'))].sort();
-        
         const trackSelect = document.getElementById('lbTrack');
-        trackSelect.innerHTML = '<option value="">[ ALL TRACKS ]</option>' + tracks.map(t => `<option value="${t}">${t}</option>`).join('');
-        
-        if(tracks.includes("Nurburgring [Touristenfahrten]")) {
-            trackSelect.value = "Nurburgring [Touristenfahrten]";
+        if(trackSelect) {
+            trackSelect.innerHTML = '<option value="">[ ALL TRACKS ]</option>' + tracks.map(t => `<option value="${t}">${t}</option>`).join('');
+            if(tracks.includes("Nurburgring [Touristenfahrten]")) trackSelect.value = "Nurburgring [Touristenfahrten]";
         }
-        
-        document.getElementById('lbCar').innerHTML = '<option value="">[ ALL CARS ]</option>' + cars.map(c => `<option value="${c}">${c}</option>`).join('');
+        const carSelect = document.getElementById('lbCar');
+        if(carSelect) carSelect.innerHTML = '<option value="">[ ALL CARS ]</option>' + cars.map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
     window.sortStats = function(colName) {
-        if(currentSortCol === colName) {
-            sortAscending = !sortAscending;
-        } else {
+        if(currentSortCol === colName) sortAscending = !sortAscending;
+        else {
             currentSortCol = colName;
-            if(['name', 'car', 'track', 'lapTime'].includes(colName) || (colName === 'default' && activeMode === 'laps')) {
-                sortAscending = true; 
-            } else {
-                sortAscending = false; 
-            }
+            sortAscending = (['name', 'car', 'track', 'lapTime'].includes(colName) || (colName === 'default' && activeMode === 'laps'));
         }
         processLeaderboardData();
     };
 
     function processLeaderboardData() {
+        if(!lbMode) return;
         activeMode = lbMode.value;
-        const search = driverSearch.value.toLowerCase();
-        
-        // 1. Gather and Filter
+        const search = driverSearch ? driverSearch.value.toLowerCase() : "";
         if(activeMode === 'laps') {
-            const tFilter = lbTrack.value;
-            const cFilter = lbCar.value;
+            const tFilter = lbTrack ? lbTrack.value : "";
+            const cFilter = lbCar ? lbCar.value : "";
             activeDataset = dbLeaderboard.filter(x => {
-                if (search) {
-                    const matchName = x.Name && x.Name.toLowerCase().includes(search);
-                    const matchCar = x.Car && x.Car.toLowerCase().includes(search);
-                    const matchTrack = x.Track && x.Track.toLowerCase().includes(search);
-                    if (!matchName && !matchCar && !matchTrack) return false;
-                }
+                if (search && !(x.Name && x.Name.toLowerCase().includes(search)) && !(x.Car && x.Car.toLowerCase().includes(search)) && !(x.Track && x.Track.toLowerCase().includes(search))) return false;
                 if (tFilter && (x.Track || 'Unknown') !== tFilter) return false;
                 if (cFilter && (x.Car || 'Unknown') !== cFilter) return false;
                 return true;
             }).map(lap => ({ type: 'lap', ...lap, p: dbProfiles[lap.SteamID] || {} }));
         } else {
             activeDataset = Object.keys(dbProfiles).filter(id => {
-                const p = dbProfiles[id];
-                if (search && !p.Name.toLowerCase().includes(search)) return false;
-                return true;
+                return !(search && !dbProfiles[id].Name.toLowerCase().includes(search));
             }).map(id => {
                 const p = dbProfiles[id];
                 const wr = (p.Starts || 0) > 0 ? (p.Wins || 0) / p.Starts : 0;
@@ -1537,13 +1527,10 @@ function showPage(pageId) {
             });
         }
 
-        // 2. Sort Array
         activeDataset.sort((a, b) => {
             let valA, valB;
             if (activeMode === 'laps') {
                 switch(currentSortCol) {
-                    case 'default':
-                    case 'lapTime': valA = a.TotalMs; valB = b.TotalMs; break;
                     case 'name': valA = a.Name.toLowerCase(); valB = b.Name.toLowerCase(); break;
                     case 'elo': valA = a.p.DriverRating||1500; valB = b.p.DriverRating||1500; break;
                     case 'sr': valA = ((a.p.LicenseClass||0)*10) + (a.p.SafetyRating||2.5); valB = ((b.p.LicenseClass||0)*10) + (b.p.SafetyRating||2.5); break;
@@ -1555,8 +1542,6 @@ function showPage(pageId) {
                 }
             } else {
                 switch(currentSortCol) {
-                    case 'default':
-                    case 'elo': valA = a.p.DriverRating||1500; valB = b.p.DriverRating||1500; break;
                     case 'name': valA = a.p.Name.toLowerCase(); valB = b.p.Name.toLowerCase(); break;
                     case 'sr': valA = ((a.p.LicenseClass||0)*10) + (a.p.SafetyRating||2.5); valB = ((b.p.LicenseClass||0)*10) + (b.p.SafetyRating||2.5); break;
                     case 'wins': valA = a.p.Wins||0; valB = b.p.Wins||0; break;
@@ -1572,21 +1557,13 @@ function showPage(pageId) {
             return sortAscending ? (valA - valB) : (valB - valA);
         });
 
-        // 3. Assign true visual Rank 
         let isNormal = true;
         const ascCols = ['name', 'car', 'track', 'lapTime'];
         if (activeMode === 'laps' && currentSortCol === 'default') ascCols.push('default');
-        
-        if (ascCols.includes(currentSortCol)) {
-            isNormal = sortAscending;
-        } else {
-            isNormal = !sortAscending;
-        }
+        isNormal = ascCols.includes(currentSortCol) ? sortAscending : !sortAscending;
 
         const total = activeDataset.length;
-        activeDataset.forEach((item, idx) => {
-            item.rank = isNormal ? (idx + 1) : (total - idx);
-        });
+        activeDataset.forEach((item, idx) => { item.rank = isNormal ? (idx + 1) : (total - idx); });
 
         lbCurrentPage = 1;
         renderTableHeaders();
@@ -1595,41 +1572,31 @@ function showPage(pageId) {
 
     function renderTableHeaders() {
         const thead = document.getElementById('lbHead');
+        if(!thead) return;
         const th = (col, label) => {
-            // FIX: Remove sorting interaction on specific columns based on mode
-            if (activeMode === 'laps' && (col === 'name' || col === 'elo' || col === 'sr' || col === 'level')) {
-                return `<th>${label}</th>`;
-            }
-            if (activeMode === 'stats' && col === 'name') {
-                return `<th>${label}</th>`;
-            }
-
-            let arrow = '';
-            let activeClass = '';
+            if (activeMode === 'laps' && (col === 'name' || col === 'elo' || col === 'sr' || col === 'level')) return `<th>${label}</th>`;
+            if (activeMode === 'stats' && col === 'name') return `<th>${label}</th>`;
+            let arrow = ''; let activeClass = '';
             if(currentSortCol === col || (currentSortCol === 'default' && ((col === 'lapTime' && activeMode === 'laps') || (col === 'elo' && activeMode === 'stats')))) {
-                activeClass = 'sort-active';
-                arrow = sortAscending ? ' ▲' : ' ▼';
+                activeClass = 'sort-active'; arrow = sortAscending ? ' ▲' : ' ▼';
             }
             return `<th class="sortable ${activeClass}" onclick="sortStats('${col}')">${label}${arrow}</th>`;
         };
-
-        if (activeMode === 'laps') {
-            thead.innerHTML = `<tr>${th('default', '#')}${th('name', 'DRIVER ALIAS')}${th('elo', 'RATING (ELO)')}${th('sr', 'SAFETY (SR)')}${th('lapTime', 'LAP TIME')}${th('car', 'CAR')}${th('track', 'TRACK')}${th('laps', 'LAPS')}${th('level', 'TRACKXP (TXP)')}</tr>`;
-        } else {
-            thead.innerHTML = `<tr>${th('default', '#')}${th('name', 'DRIVER ALIAS')}${th('elo', 'RATING (ELO)')}${th('sr', 'SAFETY (SR)')}${th('wins', 'WINS')}${th('winPct', 'WIN%')}${th('inc', 'INC')}${th('incRatio', 'INC/RACE')}${th('laps', 'LAPS')}${th('level', 'TRACKXP (TXP)')}</tr>`;
-        }
+        if (activeMode === 'laps') thead.innerHTML = `<tr>${th('default', '#')}${th('name', 'DRIVER ALIAS')}${th('elo', 'RATING (ELO)')}${th('sr', 'SAFETY (SR)')}${th('lapTime', 'LAP TIME')}${th('car', 'CAR')}${th('track', 'TRACK')}${th('laps', 'LAPS')}${th('level', 'TRACKXP (TXP)')}</tr>`;
+        else thead.innerHTML = `<tr>${th('default', '#')}${th('name', 'DRIVER ALIAS')}${th('elo', 'RATING (ELO)')}${th('sr', 'SAFETY (SR)')}${th('wins', 'WINS')}${th('winPct', 'WIN%')}${th('inc', 'INC')}${th('incRatio', 'INC/RACE')}${th('laps', 'LAPS')}${th('level', 'TRACKXP (TXP)')}</tr>`;
     }
 
     function renderTableRows() {
         const tbody = document.getElementById('leaderboardBody');
         const pagination = document.getElementById('paginationControls');
+        if(!tbody) return;
         let html = '';
         const limit = lbCurrentPage * LB_ROWS_PER_PAGE;
         const visibleData = activeDataset.slice(0, limit);
 
         if (visibleData.length === 0) {
             html = `<tr><td colspan="10" style="text-align:center; padding: 30px; color: var(--neon-pink);">${Object.keys(dbProfiles).length === 0 ? '[ AWAITING DATA DRIVE MOUNT ]' : 'NO DATA MATCHES FILTERS'}</td></tr>`;
-            pagination.style.display = 'none';
+            if(pagination) pagination.style.display = 'none';
             tbody.innerHTML = html;
             return;
         }
@@ -1642,64 +1609,38 @@ function showPage(pageId) {
             const lvl = Math.floor(Math.sqrt((p.TrackdayXP||0) / 50)) + 1;
 
             if (activeMode === 'laps') {
-                html += `
-                    <tr class="lb-row-table" onclick="openDriverCard('${item.SteamID}')">
-                        <td style="color: #888;">${item.rank}</td>
-                        <td>${item.Name}</td>
-                        <td style="color: var(--neon-cyan);">${elo}</td>
+                html += `<tr class="lb-row-table" onclick="openDriverCard('${item.SteamID}')">
+                        <td style="color: #888;">${item.rank}</td><td>${item.Name}</td><td style="color: var(--neon-cyan);">${elo}</td>
                         <td><span class="safety-sticker" style="border-color: ${getStickerColor(className)}; background: linear-gradient(to right, ${getStickerColor(className)} ${getSrFill(p.SafetyRating)}%, #222 ${getSrFill(p.SafetyRating)}%); padding: 2px 6px; font-size: 0.8rem; transform: none; display: inline-block; box-shadow: none;">${className} [${srValue}]</span></td>
                         <td style="color: var(--neon-mint); font-weight: bold; font-size: 1.1rem; font-family: 'Share Tech Mono';">${item.LapTime}</td>
-                        <td style="font-size: 0.9rem; color: #ccc;">${item.Car}</td>
-                        <td style="font-size: 0.9rem; color: #888;">${item.Track}</td>
-                        <td style="color: #888;">${item.Laps || 0}</td>
-                        <td style="color: var(--neon-gold);">LVL ${lvl}</td>
-                    </tr>`;
+                        <td style="font-size: 0.9rem; color: #ccc;">${item.Car}</td><td style="font-size: 0.9rem; color: #888;">${item.Track}</td>
+                        <td style="color: #888;">${item.Laps || 0}</td><td style="color: var(--neon-gold);">LVL ${lvl}</td></tr>`;
             } else {
-                html += `
-                    <tr class="lb-row-table" onclick="openDriverCard('${item.id}')">
-                        <td style="color: #888;">${item.rank}</td>
-                        <td>${p.Name}</td>
-                        <td style="color: var(--neon-cyan); font-weight: bold;">${elo}</td>
+                html += `<tr class="lb-row-table" onclick="openDriverCard('${item.id}')">
+                        <td style="color: #888;">${item.rank}</td><td>${p.Name}</td><td style="color: var(--neon-cyan); font-weight: bold;">${elo}</td>
                         <td><span class="safety-sticker" style="border-color: ${getStickerColor(className)}; background: linear-gradient(to right, ${getStickerColor(className)} ${getSrFill(p.SafetyRating)}%, #222 ${getSrFill(p.SafetyRating)}%); padding: 3px 8px; font-size: 0.9rem; transform: none; display: inline-block; box-shadow: none;">CLASS ${className} [${srValue}]</span></td>
-                        <td>${p.Wins || 0}</td>
-                        <td>${(item.wr * 100).toFixed(1)}%</td>
-                        <td style="color: #888;">${p.RaceContacts || 0}</td>
-                        <td style="color: #888;">${item.incR.toFixed(2)}</td>
-                        <td style="color: #888;">${p.Laps || 0}</td>
-                        <td style="color: var(--neon-gold);">LVL ${lvl}</td>
-                    </tr>`;
+                        <td>${p.Wins || 0}</td><td>${(item.wr * 100).toFixed(1)}%</td><td style="color: #888;">${p.RaceContacts || 0}</td>
+                        <td style="color: #888;">${item.incR.toFixed(2)}</td><td style="color: #888;">${p.Laps || 0}</td><td style="color: var(--neon-gold);">LVL ${lvl}</td></tr>`;
             }
         });
-
         tbody.innerHTML = html;
-        pagination.style.display = (activeDataset.length > limit) ? 'block' : 'none';
+        if(pagination) pagination.style.display = (activeDataset.length > limit) ? 'block' : 'none';
     }
 
-    function loadMoreRows() {
-        lbCurrentPage++;
-        renderTableRows();
-    }
+    function loadMoreRows() { lbCurrentPage++; renderTableRows(); }
 
+    // --- DRIVER CARDS & TELEMETRY ---
     function getStickerColor(c) {
-        if(c==='S') return 'var(--neon-gold)';
-        if(c==='A') return '#fff';
-        if(c==='R' || c==='D') return 'var(--neon-pink)';
-        return 'var(--neon-mint)';
+        if(c==='S') return 'var(--neon-gold)'; if(c==='A') return '#fff'; if(c==='R' || c==='D') return 'var(--neon-pink)'; return 'var(--neon-mint)';
     }
-
-    function getSrFill(sr) {
-        let val = sr || 2.50;
-        return Math.min((val / 4.0) * 100, 100).toFixed(1);
-    }
+    function getSrFill(sr) { return Math.min(((sr || 2.50) / 4.0) * 100, 100).toFixed(1); }
 
     function openDriverCard(steamId) {
         if(Object.keys(dbProfiles).length === 0) { alert("Please load DRIVER_PROFILES.JSON on the Home tab first to view ID Cards."); return; }
-        
         const prof = dbProfiles[steamId];
         if(!prof) { alert("Driver profile not found in local database."); return; }
         
-        activeModalSteamID = steamId; // Safe reference for teleporting
-        
+        activeModalSteamID = steamId; 
         const className = classLetters[prof.LicenseClass || 0] || "R";
         const srValue = (prof.SafetyRating || 2.50).toFixed(2);
         const xp = prof.TrackdayXP || 0;
@@ -1707,14 +1648,11 @@ function showPage(pageId) {
         const currentLevelXP = 50 * Math.pow(level - 1, 2);
         const nextLevelXP = 50 * Math.pow(level, 2);
         const xpProgress = ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
-        
         const starts = prof.Starts || 0;
         const incPerRace = starts > 0 ? ((prof.RaceContacts || 0) / starts).toFixed(1) : "0.0";
         
         document.getElementById('modal-name').innerText = prof.Name;
         document.getElementById('modal-rating').innerText = prof.DriverRating || 1500;
-        
-        // NEW INLINE STATS
         document.getElementById('modal-car').innerText = "> " + (prof.MostDrivenCar && prof.MostDrivenCar !== "None" ? prof.MostDrivenCar : "NO DATA");
         document.getElementById('modal-wins').innerText = prof.Wins || 0;
         document.getElementById('modal-laps').innerText = prof.Laps || 0;
@@ -1722,20 +1660,32 @@ function showPage(pageId) {
         document.getElementById('modal-pylons').innerText = prof.Pylons || 0;
         
         let sticker = document.getElementById('modal-safety');
-        sticker.innerText = `CLASS ${className} [${srValue}]`;
-        sticker.style.borderColor = getStickerColor(className);
-        sticker.style.background = `linear-gradient(to right, ${getStickerColor(className)} ${getSrFill(prof.SafetyRating)}%, #222 ${getSrFill(prof.SafetyRating)}%)`;
+        if(sticker) {
+            sticker.innerText = `CLASS ${className} [${srValue}]`;
+            sticker.style.borderColor = getStickerColor(className);
+            sticker.style.background = `linear-gradient(to right, ${getStickerColor(className)} ${getSrFill(prof.SafetyRating)}%, #222 ${getSrFill(prof.SafetyRating)}%)`;
+        }
         
-        document.getElementById('modal-level').innerText = "TrackXP LVL " + level;
-        document.getElementById('modal-xp-text').innerText = `${xp - currentLevelXP} / ${nextLevelXP - currentLevelXP} XP`;
+        let modLvl = document.getElementById('modal-level');
+        if(modLvl) modLvl.innerText = "TrackXP LVL " + level;
         
-        document.getElementById('modal-xp-fill').style.width = '0%';
-        setTimeout(() => { document.getElementById('modal-xp-fill').style.width = xpProgress + '%'; }, 100);
+        let xpText = document.getElementById('modal-xp-text');
+        if(xpText) xpText.innerText = `${xp - currentLevelXP} / ${nextLevelXP - currentLevelXP} XP`;
+        
+        let xpFill = document.getElementById('modal-xp-fill');
+        if(xpFill) {
+            xpFill.style.width = '0%';
+            setTimeout(() => { xpFill.style.width = xpProgress + '%'; }, 100);
+        }
 
-        document.getElementById('driverModal').style.display = 'flex';
+        const dModal = document.getElementById('driverModal');
+        if(dModal) dModal.style.display = 'flex';
     }
 
-    function closeModal() { document.getElementById('driverModal').style.display = 'none'; }
+    function closeModal() { 
+        const dModal = document.getElementById('driverModal');
+        if(dModal) dModal.style.display = 'none'; 
+    }
 
     function teleportToTelemetry() {
         closeModal();
@@ -1744,19 +1694,16 @@ function showPage(pageId) {
         }
     }
     
-    // NEW: Standalone Telemetry Search Logic with Inline Type-Ahead Autocomplete
     function searchTelemetry() {
         if(Object.keys(dbProfiles).length === 0) { alert("Please load DRIVER_PROFILES.JSON on the Home tab first."); return; }
         const term = document.getElementById('telemetrySearchInput').value.trim();
         if(!term) return;
         
-        // 1. Check exact SteamID
         if(dbProfiles[term]) {
             viewDriverStats(term);
             return;
         }
         
-        // 2. Fallback to Name check
         for(let sid in dbProfiles) {
             if(dbProfiles[sid].Name && dbProfiles[sid].Name.toLowerCase() === term.toLowerCase()) {
                 viewDriverStats(sid);
@@ -1767,12 +1714,10 @@ function showPage(pageId) {
         alert("Driver not found. Please verify the exact Alias or Steam ID.");
     }
     
-    // Inline Autocomplete & Enter Key logic
     document.addEventListener("DOMContentLoaded", function() {
         const searchInput = document.getElementById('telemetrySearchInput');
         if(searchInput) {
             searchInput.addEventListener('input', function(e) {
-                // Ignore if the user is hitting backspace/delete
                 if (e.inputType === 'deleteContentBackward' || e.inputType === 'deleteContentForward') return;
                 
                 const val = this.value;
@@ -1800,39 +1745,38 @@ function showPage(pageId) {
         }
     });
 
-    // NEW: Track Records Renderer
     function renderProfileRecords() {
         if (!currentTelemetryDriver) return;
         const id = currentTelemetryDriver;
         
         let pRecords = dbLeaderboard.filter(entry => entry.SteamID === id);
         
-        // Populate filters if empty (only run once per driver load)
         const trackSelect = document.getElementById('profTrackFilter');
         const carSelect = document.getElementById('profCarFilter');
         
-        if(trackSelect.options.length <= 1 && pRecords.length > 0) { 
+        if(trackSelect && trackSelect.options.length <= 1 && pRecords.length > 0) { 
             const tracks = [...new Set(pRecords.map(x => x.Track || 'Unknown'))].sort();
             const cars = [...new Set(pRecords.map(x => x.Car || 'Unknown'))].sort();
             trackSelect.innerHTML = '<option value="">[ ALL TRACKS ]</option>' + tracks.map(t => `<option value="${t}">${t}</option>`).join('');
             carSelect.innerHTML = '<option value="">[ ALL CARS ]</option>' + cars.map(c => `<option value="${c}">${c}</option>`).join('');
         }
 
-        const tFilter = trackSelect.value;
-        const cFilter = carSelect.value;
-        const sFilter = document.getElementById('profSortFilter').value;
+        const tFilter = trackSelect ? trackSelect.value : "";
+        const cFilter = carSelect ? carSelect.value : "";
+        const sortF = document.getElementById('profSortFilter');
+        const sFilter = sortF ? sortF.value : "asc";
 
-        // Apply filters
         if(tFilter) pRecords = pRecords.filter(r => (r.Track || 'Unknown') === tFilter);
         if(cFilter) pRecords = pRecords.filter(r => (r.Car || 'Unknown') === cFilter);
 
-        // Sort
         pRecords.sort((a,b) => {
             if(sFilter === 'asc') return a.TotalMs - b.TotalMs;
             return b.TotalMs - a.TotalMs;
         });
 
         const recDiv = document.getElementById('profRecords');
+        if(!recDiv) return;
+        
         if(pRecords.length > 0) {
             recDiv.innerHTML = pRecords.map(r => {
                 let lapSetString = r.LapSetOn ? `<span style="font-size: 0.8rem; color: #555;">[ SET ON LAP ${r.LapSetOn} ]</span>` : '';
@@ -1861,7 +1805,6 @@ function showPage(pageId) {
         document.getElementById('profName').innerText = p.Name;
         document.getElementById('profSteamId').innerText = "STEAM_ID: " + id;
         
-        // --- TROPHY CABINET ---
         document.getElementById('profRating').innerText = p.DriverRating || 1500;
         
         let totalTitles = 0;
@@ -1906,7 +1849,6 @@ function showPage(pageId) {
         document.getElementById('profPtsPerRace').innerText = ptsPerRace;
         document.getElementById('profIncPerRace').innerText = incPerRace;
         
-        // --- RACECRAFT METRICS ---
         let avgS = starts > 0 ? (p.TotalStartPos / starts).toFixed(1) : "0.0";
         let avgF = starts > 0 ? (p.TotalFinishPos / starts).toFixed(1) : "0.0";
         document.getElementById('profAvgStart').innerText = "P" + avgS;
@@ -1939,18 +1881,15 @@ function showPage(pageId) {
             deltaBox.classList.remove('bad', 'gold');
         }
         
-// --- DRIVER PREFERENCES ---
         document.getElementById('profMostCar').innerText = p.MostDrivenCar && p.MostDrivenCar !== "None" ? p.MostDrivenCar : "NO DATA";
         document.getElementById('profMostTrack').innerText = p.MostDrivenTrack && p.MostDrivenTrack !== "None" ? p.MostDrivenTrack : "NO DATA";
 
-        // --- INCIDENT DIAGNOSTICS ---
         document.getElementById('profContacts').innerText = p.RaceContacts || 0;
         document.getElementById('profQualiScuffs').innerText = p.QualiIncidents || 0;
         document.getElementById('profTDScuffs').innerText = p.TrackdayScuffs || 0;
         document.getElementById('profPylons').innerText = p.Pylons || 0;
         document.getElementById('profDnfs').innerText = p.DNFs || 0;
         
-        // --- SEASON EVENTS ---
         const seasonDiv = document.getElementById('profSeasons');
         if (p.ServerStats && Object.keys(p.ServerStats).length > 0) {
             let sHtml = '';
@@ -1964,9 +1903,8 @@ function showPage(pageId) {
             seasonDiv.innerHTML = `<div style="color: #666; font-style: italic; text-align: center;">[ NO SEASON PARTICIPATION FOUND ]</div>`;
         }
 
-        // --- TRACK RECORDS ---
         currentTelemetryDriver = id;
-        document.getElementById('profTrackFilter').innerHTML = '<option value="">[ ALL TRACKS ]</option>'; // reset filters
+        document.getElementById('profTrackFilter').innerHTML = '<option value="">[ ALL TRACKS ]</option>'; 
         document.getElementById('profCarFilter').innerHTML = '<option value="">[ ALL CARS ]</option>';
         document.getElementById('profSortFilter').value = 'asc';
         renderProfileRecords();
@@ -1974,266 +1912,66 @@ function showPage(pageId) {
         showPage('profile');
     }
 
-    // ACCORDION MOCK DATA INJECTION
-    const raceServers = [
-        { 
-            name: "Season 4: GT3 Sprint - Q15/R30", 
-            track: "Spa-Francorchamps", 
-            p: "28/35", 
-            status: "Qualifying", 
-            img: "https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500",
-            roster: [
-                { pos: 1, name: "SpeedyG", car: "Porsche 911 GT3 R", lapTime: "2:14.331", isSessionBest: true, isPersonalBest: false, steamId: "mock1" },
-                { pos: 2, name: "V10_Scream", car: "Audi R8 LMS", lapTime: "2:14.890", isSessionBest: false, isPersonalBest: true, steamId: "mock5" },
-                { pos: 3, name: "LateBraker", car: "Ferrari 488 GT3", lapTime: "2:15.102", isSessionBest: false, isPersonalBest: false, steamId: "mock6" }
-            ]
-        },
-        { 
-            name: "Endurance Pro-Am - Q30/R60", 
-            track: "Mount Panorama [GP]", 
-            p: "32/35", 
-            status: "Practice", 
-            img: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=500",
-            roster: [
-                { pos: 1, name: "ApexHunter", car: "Aston Martin V8 Vantage", lapTime: "2:02.441", isSessionBest: true, isPersonalBest: false, steamId: "mock2" },
-                { pos: 2, name: "DriftKing99", car: "Mercedes AMG GT3", lapTime: "2:03.900", isSessionBest: false, isPersonalBest: false, steamId: "mock3" }
-            ]
-        },
-        { 
-            name: "90s JDM Touge Battle", 
-            track: "Suzuka Circuit", 
-            p: "24/32", 
-            status: "Race (Lap 2/10)", 
-            img: "https://images.unsplash.com/photo-1541443131876-44b03de101c5?q=80&w=500",
-            roster: [
-                { pos: 1, name: "TofuDelivery", car: "Toyota AE86", lapTime: "2:18.115", isSessionBest: true, isPersonalBest: true, steamId: "mock8" },
-                { pos: 2, name: "Godzilla", car: "Nissan Skyline R32", lapTime: "2:19.400", isSessionBest: false, isPersonalBest: false, steamId: "mock10" }
-            ]
-        }
-    ];
+    // --- UPLINK AUTOMATION ---
+    // Safely declare global arrays for interval functions
+    window.raceServers = [];
+    window.tdServers = [];
 
-    const tdServers = [
-        { 
-            name: "90s Night Nürburgring - Retro & Vintage", 
-            track: "Nurburgring [Touristenfahrten]", 
-            p: "5/64", 
-            status: "Practice",
-            img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=500",
-            roster: [
-                { pos: "-", name: "TofuDelivery", car: "Toyota AE86 Trueno", lapTime: "8:10.552", isSessionBest: true, isPersonalBest: true, steamId: "mock8" },
-                { pos: "-", name: "RotaryPower", car: "Mazda RX-7 FD", lapTime: "8:12.441", isSessionBest: false, isPersonalBest: false, steamId: "mock9" },
-                { pos: "-", name: "Godzilla", car: "Nissan Skyline R32 GT-R", lapTime: "8:15.001", isSessionBest: false, isPersonalBest: false, steamId: "mock10" },
-                { pos: "-", name: "EuroBeat", car: "BMW E30 M3", lapTime: "8:18.992", isSessionBest: false, isPersonalBest: false, steamId: "mock11" },
-                { pos: "-", name: "VTEC_Kick", car: "Honda Civic EG6", lapTime: "8:22.100", isSessionBest: false, isPersonalBest: false, steamId: "mock12" }
-            ]
-        },
-        { 
-            name: "Street Legal Nürburgring - Road Cars", 
-            track: "Nurburgring [Touristenfahrten]", 
-            p: "0/64", 
-            status: "Practice",
-            img: "https://images.unsplash.com/photo-1541443131876-44b03de101c5?q=80&w=500",
-            roster: []
-        },
-        { 
-            name: "Street Legal Seca - Road Cars", 
-            track: "Laguna Seca [GP]", 
-            p: "2/64", 
-            status: "Practice",
-            img: "https://images.unsplash.com/photo-1542281286-9e0a16bb7366?q=80&w=500",
-            roster: [
-                { pos: "-", name: "CorkscrewEnjoyer", car: "Porsche 911 GT3 RS", lapTime: "1:28.441", isSessionBest: true, isPersonalBest: false, steamId: "mock13" },
-                { pos: "-", name: "SandTrap", car: "Chevrolet Corvette C8", lapTime: "1:31.220", isSessionBest: false, isPersonalBest: false, steamId: "mock14" }
-            ]
-        },
-        { 
-            name: "Street Legal Bathurst - Road Cars", 
-            track: "Mount Panorama [GP]", 
-            p: "0/64", 
-            status: "Practice",
-            img: "https://images.unsplash.com/photo-1634044535359-543160a2b535?q=80&w=500",
-            roster: []
-        },
-        { 
-            name: "Street Legal Sebring - Road Cars", 
-            track: "Sebring International Raceway [GP]", 
-            p: "1/64", 
-            status: "Practice",
-            img: "https://images.unsplash.com/photo-1502945144109-84387d377b5a?q=80&w=500",
-            roster: [
-                { pos: "-", name: "BumpyRide", car: "Ford Mustang GT", lapTime: "2:05.112", isSessionBest: true, isPersonalBest: true, steamId: "mock15" }
-            ]
-        }
-    ];
+    async function fetchLiveStatus() {
+        try {
+            const response = await fetch('live_status.json?t=' + Date.now());
+            if (!response.ok) return;
+            const data = await response.json();
 
-    function renderServerList(containerId, servers, isRace) {
-        const container = document.getElementById(containerId);
-        if(!container) return;
-        
-        let html = '';
-        servers.forEach((s, idx) => {
-            const rowClass = isRace ? 'server-item race-mode' : 'server-item';
-            const srvId = `srv-${isRace ? 'r' : 't'}-${idx}`;
+            let liveRaceServers = [];
+            let liveTdServers = [];
+            const reservedRacePorts = ["9605", "9606", "9607"]; 
 
-            let rosterHtml = '';
-            if(s.roster && s.roster.length > 0) {
-                rosterHtml = `
-                    <div class="server-roster" id="roster-${srvId}" style="display: none; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
-                        <table class="server-roster-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 10%;">POS</th>
-                                    <th style="width: 35%;">DRIVER</th>
-                                    <th style="width: 35%;">CAR</th>
-                                    <th style="width: 20%; text-align: right;">BEST LAP</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${s.roster.map(r => {
-                                    let lapColor = '#fff';
-                                    if(r.isSessionBest) lapColor = '#bf00ff';
-                                    else if(r.isPersonalBest) lapColor = 'var(--neon-mint)';
-                                    return `
-                                    <tr onclick="event.stopPropagation(); openDriverCard('${r.steamId}')">
-                                        <td style="color: #888;">${r.pos}</td>
-                                        <td style="font-weight: bold; color: #fff;">${r.name}</td>
-                                        <td style="color: #aaa;">${r.car}</td>
-                                        <td style="text-align: right; color: ${lapColor}; font-weight: bold;">${r.lapTime}</td>
-                                    </tr>`;
-                                }).join('')}
-                            </tbody>
-                        </table>
-                        <div style="font-size: 0.7rem; color: #666; margin-top: 10px; font-family: 'Share Tech Mono';">
-                            <span style="color: #bf00ff; margin-right: 10px;">■ SESSION BEST</span>
-                            <span style="color: var(--neon-mint);">■ PERSONAL BEST</span>
-                        </div>
-                    </div>
-                `;
-            } else {
-                rosterHtml = `<div class="server-roster" id="roster-${srvId}" style="display: none; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center; color: #666; font-style: italic; font-family: 'Share Tech Mono';">[ SERVER EMPTY ]</div>`;
-            }
-
-            // Notice the id is set on the container to allow scrolling to it
-            html += `
-                <div class="${rowClass}" id="${srvId}" onclick="toggleRoster('${srvId}')">
-                    <div class="server-header-row">
-                        <div>
-                            <div style="font-size: 1.2rem; font-weight: bold; color: #fff;">${s.name}</div>
-                            <div style="color: #888; font-family: 'Share Tech Mono'; font-size: 0.9rem; margin-top: 3px;">TRACK: ${s.track} | STATUS: ${s.status}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="color: ${isRace ? 'var(--neon-gold)' : 'var(--neon-mint)'}; font-size: 1.5rem; font-family: 'Share Tech Mono'; font-weight: bold;">${s.p}</div>
-                            <div style="font-size: 0.75rem; color: #666; font-family: 'Share Tech Mono'; margin-top: 5px; transition: color 0.2s;" id="toggle-icon-${srvId}">▼ EXPAND</div>
-                        </div>
-                    </div>
-                    ${rosterHtml}
-                </div>
-            `;
-        });
-        container.innerHTML = html;
-    }
-
-const p_season = [
-        { label: "[ SEASON EVENTS ]", title: "SEASON 4: GT3 SPRINT", data: "ROUNDS: 6 | REG. OPEN", color: "var(--neon-pink)", action: () => goToServerAndExpand('srv-r-0', 'race'), img: "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" },
-        { label: "[ SEASON EVENTS ]", title: "90s JDM TOUGE BATTLE", data: "SPECIAL EVENT | THIS FRIDAY", color: "var(--neon-pink)", action: () => goToServerAndExpand('srv-r-2', 'race'), img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000" },
-        { label: "[ SEASON EVENTS ]", title: "ENDURANCE PRO-AM", data: "ROUND 2: Bathurst | REGISTER NOW", color: "var(--neon-pink)", action: () => goToServerAndExpand('srv-r-1', 'race'), img: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=1000" }
-    ];
-
-    // --- MANUAL BANNER NAVIGATION ---
-    function manualBannerChange(dir) {
-        globalBannerIdx += dir;
-        updateHeroBanner();
-        clearInterval(heroTimer);
-        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000);
-    }
-
-    function updateHeroBanner() {
-        const activePage = document.querySelector('.page.active').id;
-        
-        // 1. Build Dynamic Leaderboard HTML (Top 10 / 2-Columns)
-        let eloHtml = '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px;">[ LOAD PROFILES.JSON TO VIEW ]</div>';
-        if (Object.keys(dbProfiles).length > 0) {
-            const sortedElo = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]})).sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0, 10);
-            eloHtml = `<div style="font-family:'Share Tech Mono'; font-size:0.85rem; text-align:left; width: 100%; max-width:700px; margin: 5px auto 0 auto; background:rgba(0,0,0,0.8); border:1px solid var(--neon-cyan); padding:5px 15px; z-index: 10; box-sizing:border-box; display: grid; grid-template-columns: 1fr 1fr; column-gap: 30px;">`;
-            sortedElo.forEach((p, i) => {
-                eloHtml += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:2px 0; cursor:pointer;" onclick="event.stopPropagation(); openDriverCard('${p.id}')" onmouseover="this.style.color='var(--neon-pink)'" onmouseout="this.style.color=''"><span>${i+1}. ${p.Name}</span><span style="color:var(--neon-cyan); font-weight:bold;">${p.DriverRating||1500}</span></div>`;
+            data.Servers.forEach(server => {
+                const serverObj = {
+                    name: server.Name, track: server.Track, p: server.Players,
+                    status: server.Status.replace("🟢 ", "").replace("🔴 ", "").toUpperCase(),
+                    port: server.Port,
+                    img: "https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500", // Prevents Hero Banner crash
+                    roster: server.LiveDrivers.map((d, idx) => ({
+                        pos: idx + 1, name: d.Name, car: d.Car, lapTime: d.BestLap || "--:--.---",
+                        isSessionBest: false, isPersonalBest: false, steamId: d.SteamID
+                    }))
+                };
+                if (reservedRacePorts.includes(server.Port.toString()) || server.Name.toLowerCase().includes("race")) {
+                    liveRaceServers.push(serverObj);
+                } else { liveTdServers.push(serverObj); }
             });
-            eloHtml += `</div>`;
-        }
 
-        let trHtml = '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px;">[ LOAD LEADERBOARD.JSON TO VIEW ]</div>';
-        if (dbLeaderboard.length > 0) {
-            const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown Track'))];
-            const track = tracks[Math.floor(Date.now() / 15000) % tracks.length] || tracks[0]; 
-            const top10 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0, 10);
-            trHtml = `<div style="font-family:'Share Tech Mono'; font-size:0.85rem; text-align:left; width: 100%; max-width:700px; margin: 5px auto 0 auto; background:rgba(0,0,0,0.8); border:1px solid var(--neon-mint); padding:5px 15px; z-index: 10; box-sizing:border-box;"><div style="color:var(--neon-mint); font-size:0.75rem; margin-bottom:2px; border-bottom:1px solid #444; padding-bottom:2px; font-weight:bold;">> ${track.toUpperCase()}</div><div style="display: grid; grid-template-columns: 1fr 1fr; column-gap: 30px;">`;
-            top10.forEach((entry, i) => {
-                trHtml += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:2px 0; cursor:pointer;" onclick="event.stopPropagation(); openDriverCard('${entry.SteamID}')" onmouseover="this.style.color='var(--neon-pink)'" onmouseout="this.style.color=''"><span>${i+1}. ${entry.Name}</span><span style="color:var(--neon-mint); font-weight:bold;">${entry.LapTime}</span></div>`;
-            });
-            trHtml += `</div></div>`;
-        }
+            // Update Global Arrays
+            window.raceServers = liveRaceServers;
+            window.tdServers = liveTdServers;
 
-        const p_leaderboard = [
-            { label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" },
-            { label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=1000" }
-        ];
+            renderServerList('raceServersContainer', window.raceServers, true);
+            renderServerList('tdServersContainer', window.tdServers, false);
+        } catch (error) { console.error("📡 UPLINK ERROR:", error); }
+    }
 
-        const p_race = raceServers.map((s, i) => ({ label: "[ LIVE RACES ]", title: s.name.split(' - ')[0].toUpperCase(), data: `DRIVERS: ${s.p} | ${s.status.toUpperCase()}`, color: "var(--neon-gold)", action: () => goToServerAndExpand(`srv-r-${i}`, 'race'), img: s.img }));
-        const p_td = tdServers.map((s, i) => ({ label: "[ LIVE TRACK DAYS ]", title: s.name.split(' - ')[0].toUpperCase(), data: `DRIVERS: ${s.p} | PRACTICE`, color: "var(--neon-mint)", action: () => goToServerAndExpand(`srv-t-${i}`, 'trackday'), img: s.img }));
-
-        // 2. Filter Pool Based on Current Page
-        let pool = [];
-        if (activePage === 'home') pool = [...p_season, ...p_leaderboard];
-        else if (activePage === 'schedule') pool = [...p_td, ...p_leaderboard];
-        else if (activePage === 'race') pool = [...p_season, ...p_td, ...p_leaderboard];
-        else if (activePage === 'trackday') pool = [...p_season, ...p_race, ...p_leaderboard];
-        else pool = [...p_season, ...p_race, ...p_td, ...p_leaderboard];
-
-        if(pool.length === 0) return;
-        let safeIdx = ((globalBannerIdx % pool.length) + pool.length) % pool.length;
-        const slide = pool[safeIdx];
-        
-        document.querySelectorAll('.hero-banner-container').forEach(banner => {
-            banner.style.borderColor = slide.color;
-            banner.querySelector('.hero-label').innerText = slide.label;
-            banner.querySelector('.hero-label').style.color = slide.color;
-            banner.querySelector('.hero-title').innerText = slide.title;
-            banner.querySelector('.hero-data').innerHTML = slide.data;
-            banner.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${slide.img}')`;
-            banner.removeAttribute('onclick');
-            banner.onclick = slide.action;
-
-            if (!banner.querySelector('.banner-arrow.left')) {
-                const leftArr = document.createElement('div'); leftArr.className = 'banner-arrow left'; leftArr.innerHTML = '&#10094;';
-                leftArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(-1); };
-                const rightArr = document.createElement('div'); rightArr.className = 'banner-arrow right'; rightArr.innerHTML = '&#10095;';
-                rightArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(1); };
-                banner.appendChild(leftArr); banner.appendChild(rightArr);
+    async function initStaticData() {
+        try {
+            const profRes = await fetch('driver_profiles.json?t=' + Date.now());
+            if (profRes.ok) {
+                dbProfiles = await profRes.json();
+                updateHomeEliteLists(); 
             }
-        });
+            const lbRes = await fetch('leaderboard.json?t=' + Date.now());
+            if (lbRes.ok) {
+                dbLeaderboard = await lbRes.json();
+                populateLeaderboardFilters();
+                startHomeTrackCycle();
+                processLeaderboardData();
+            }
+            const bootloader = document.querySelector('.bootloader');
+            if (bootloader) bootloader.style.display = 'none';
+        } catch (err) { console.error("📡 STATIC SYNC ERROR:", err); }
     }
 
-    // Home Page Cycle Logic
-    let rIdx = 0; let tIdx = 0;
-    function initHomeGrids() {
-        const rBoxTitle = document.getElementById('race-ss-title');
-        if(rBoxTitle) {
-            rBoxTitle.innerText = raceServers[rIdx].name.toUpperCase();
-            document.getElementById('race-ss-data').innerText = `DRIVERS: ${raceServers[rIdx].p} | ${raceServers[rIdx].status.toUpperCase()}`;
-            const rBox = rBoxTitle.parentElement;
-            rBox.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${raceServers[rIdx].img}')`;
-            rBox.onclick = () => goToServerAndExpand('srv-r-' + rIdx, 'race');
-        }
-        const tBoxTitle = document.getElementById('td-ss-title');
-        if(tBoxTitle) {
-            tBoxTitle.innerText = tdServers[tIdx].name.toUpperCase();
-            document.getElementById('td-ss-data').innerText = `DRIVERS: ${tdServers[tIdx].p} | PRACTICE`;
-            const tBox = tBoxTitle.parentElement;
-            tBox.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${tdServers[tIdx].img}')`;
-            tBox.onclick = () => goToServerAndExpand('srv-t-' + tIdx, 'trackday');
-        }
-    }
-
+<<<<<<< HEAD
     // Boot Routines
     renderServerList('raceServersContainer', raceServers, true);
     renderServerList('tdServersContainer', tdServers, false);
@@ -2268,3 +2006,66 @@ const p_season = [
 	// --- LIVE TELEMETRY UPLINK SYSTEM ---
 
 t
+=======
+    // --- BOOT SEQUENCE ---
+    window.addEventListener('load', () => {
+        // Run initial data fetch
+        initStaticData();
+        fetchLiveStatus().then(() => {
+            // Once initial live data is fetched, setup intervals
+            let rIdx = 0; let tIdx = 0;
+            
+            // Immediately populate the home page banners
+            const rb = document.getElementById('race-ss-title');
+            if(rb && window.raceServers.length > 0) {
+                rb.innerText = window.raceServers[0].name.toUpperCase();
+                document.getElementById('race-ss-data').innerText = `DRIVERS: ${window.raceServers[0].p} | ${window.raceServers[0].status.toUpperCase()}`;
+                rb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${window.raceServers[0].img}')`;
+                rb.parentElement.onclick = () => goToServerAndExpand('srv-r-0', 'race');
+            }
+            
+            const tb = document.getElementById('td-ss-title');
+            if(tb && window.tdServers.length > 0) {
+                tb.innerText = window.tdServers[0].name.toUpperCase();
+                document.getElementById('td-ss-data').innerText = `DRIVERS: ${window.tdServers[0].p} | PRACTICE`;
+                tb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${window.tdServers[0].img}')`;
+                tb.parentElement.onclick = () => goToServerAndExpand('srv-t-0', 'trackday');
+            }
+
+            // Start home banner rotation safely
+            setInterval(() => {
+                if(window.raceServers && window.raceServers.length > 0) {
+                    rIdx = (rIdx + 1) % window.raceServers.length;
+                    if(rb) {
+                        rb.innerText = window.raceServers[rIdx].name.toUpperCase();
+                        document.getElementById('race-ss-data').innerText = `DRIVERS: ${window.raceServers[rIdx].p} | ${window.raceServers[rIdx].status.toUpperCase()}`;
+                        rb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${window.raceServers[rIdx].img}')`;
+                        rb.parentElement.onclick = () => goToServerAndExpand('srv-r-' + rIdx, 'race');
+                    }
+                }
+            }, 4000);
+
+            setInterval(() => {
+                if(window.tdServers && window.tdServers.length > 0) {
+                    tIdx = (tIdx + 1) % window.tdServers.length;
+                    if(tb) {
+                        tb.innerText = window.tdServers[tIdx].name.toUpperCase();
+                        document.getElementById('td-ss-data').innerText = `DRIVERS: ${window.tdServers[tIdx].p} | PRACTICE`;
+                        tb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${window.tdServers[tIdx].img}')`;
+                        tb.parentElement.onclick = () => goToServerAndExpand('srv-t-' + tIdx, 'trackday');
+                    }
+                }
+            }, 4500);
+        });
+
+        renderCalendar();
+        loadStandings('gt3', document.querySelector('.standings-tab.active'));
+
+        // Refresh heartbeat
+        setInterval(fetchLiveStatus, 120000);
+    });
+
+</script>
+</body>
+</html>
+>>>>>>> adf3cb65ebe6f81e69e0117ad29306adc0e7bd71
