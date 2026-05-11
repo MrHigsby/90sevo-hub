@@ -1,14 +1,26 @@
 {
-  "LastUpdated": "2026-05-11 15:25:42",
+  "LastUpdated": "2026-05-11 15:30:01",
   "Servers": [
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
-      "Port": "9604",
-      "Name": "90s Night N├╝rburgring - Retro & Vintage - Tourist Regulations",
       "Mode": "Practice",
-      "Status": "🟢 ONLINE",
+      "Port": "9604",
       "Players": "0 / 64",
-      "LiveDrivers": []
+      "Status": "🟢 ONLINE",
+      "LiveDrivers": [
+        {
+          "Rating": 1529,
+          "Car": "ALFA ROMEO 75 TURBO EVO",
+          "BestLap": "--:--.---",
+          "SteamID": "76561198158038393",
+          "Name": "Higsby Higs",
+          "SessionLaps": "0",
+          "Class": 0,
+          "Level": 1.0,
+          "SR": "3.16"
+        }
+      ],
+      "Name": "90s Night N├╝rburgring - Retro & Vintage - Tourist Regulations"
     },
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
@@ -30,24 +42,12 @@
     },
     {
       "Track": "Mount Panorama\r\n[GP]",
-      "Mode": "Practice",
       "Port": "9603",
-      "Players": "0 / 64",
+      "Name": "Street Legal Bathurst - Road Cars - Trackday",
+      "Mode": "Practice",
       "Status": "🟢 ONLINE",
-      "LiveDrivers": [
-        {
-          "Rating": 1529,
-          "Car": "ALPINE A110 S",
-          "BestLap": "--:--.---",
-          "SteamID": "76561198158038393",
-          "Name": "Higsby Higs",
-          "SessionLaps": "0",
-          "Class": 0,
-          "Level": 1.0,
-          "SR": "3.16"
-        }
-      ],
-      "Name": "Street Legal Bathurst - Road Cars - Trackday"
+      "Players": "0 / 64",
+      "LiveDrivers": []
     },
     {
       "Track": "Sebring International Raceway\r\n[GP]",
