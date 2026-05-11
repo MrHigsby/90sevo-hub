@@ -1,5 +1,5 @@
 {
-  "LastUpdated": "2026-05-11 14:33:57",
+  "LastUpdated": "2026-05-11 14:39:01",
   "Servers": [
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
@@ -27,12 +27,12 @@
       "Status": "🟢 ONLINE",
       "LiveDrivers": [
         {
-          "BestLap": "01:41.463",
+          "BestLap": "01:51.354",
           "Car": "HONDA NSX R",
           "Name": "Nano Racing /// MRT"
         },
         {
-          "BestLap": "01:41.451",
+          "BestLap": "01:50.349",
           "Car": "HONDA NSX R",
           "Name": "juanjo ///MRT"
         }
