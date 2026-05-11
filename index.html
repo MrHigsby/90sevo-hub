@@ -1956,17 +1956,19 @@ async function fetchLiveStatus() {
                 status: displayStatus, // This feeds the "STATUS: RACE" text
                 port: server.Port,
                 img: "https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500",
-                roster: (server.LiveDrivers || []).map((d, idx) => ({
-                    pos: idx + 1, 
-                    name: d.Name, 
-                    car: d.Car, 
-                    lapTime: d.BestLap || "--:--.---",
-                    laps: d.Laps || "0",
-                    // Simple logic to highlight the fastest person in the list
-                    isSessionBest: (idx === 0 && d.BestLap && d.BestLap !== "--:--.---"), 
-                    isPersonalBest: false, 
-                    steamId: d.SteamID
-                }))
+roster: (server.LiveDrivers || []).map((d, idx) => ({
+    pos: idx + 1, 
+    name: d.Name, 
+    car: d.Car, 
+    lapTime: d.BestLap || "--:--.---",
+    laps: d.SessionLaps || "0", // Changed from .Laps to .SessionLaps to match PS
+    rating: d.Rating,
+    sr: d.SR,
+    class: d.Class,
+    level: d.Level,
+    isSessionBest: (idx === 0 && d.BestLap && d.BestLap !== "--:--.---"), 
+    steamId: d.SteamID
+}))
             };
 
             // Sorting logic to put servers on the right page
@@ -2009,24 +2011,35 @@ function renderServerList(containerId, servers, isRace) {
                     <table class="server-roster-table">
                         <thead>
                             <tr>
-                                <th style="width: 10%;">POS</th>
-                                <th style="width: 30%;">DRIVER</th>
-                                <th style="width: 30%;">CAR</th>
-                                <th style="width: 10%; text-align: center;">LAPS</th>
-                                <th style="width: 20%; text-align: right;">BEST LAP</th>
+                                <th style="width: 5%;">#</th>
+                                <th style="width: 20%;">DRIVER</th>
+                                <th style="width: 25%;">RATINGS</th>
+                                <th style="width: 20%;">CAR</th>
+                                <th style="width: 10%; text-align: center;">SESS LAPS</th>
+                                <th style="width: 20%; text-align: right;">BEST</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${s.roster.map(r => {
-                                let lapColor = '#fff';
-                                if(r.isSessionBest) lapColor = '#bf00ff'; // Purple for fastest in server
+                                // Extract the data from the new PowerShell export
+                                const rating = r.rating || 1500;
+                                const sr = r.sr || "2.50";
+                                const lvl = r.level || 1;
+                                const classLetters = ["R", "D", "C", "B", "A", "S"];
+                                const className = classLetters[r.class || 0];
+
                                 return `
                                 <tr onclick="event.stopPropagation(); openDriverCard('${r.steamId}')">
                                     <td style="color: #888;">${r.pos}</td>
                                     <td style="font-weight: bold; color: #fff;">${r.name}</td>
-                                    <td style="color: #aaa;">${r.car}</td>
-                                    <td style="text-align: center; color: var(--neon-cyan);">${r.laps}</td>
-                                    <td style="text-align: right; color: ${lapColor}; font-weight: bold;">${r.lapTime}</td>
+                                    <td>
+                                        <span style="color: var(--neon-cyan); font-size: 0.8rem; font-family: 'Share Tech Mono';">${rating} ELO</span>
+                                        <span style="color: var(--neon-mint); font-size: 0.8rem; font-family: 'Share Tech Mono'; margin-left: 8px;">${className} ${sr}</span>
+                                        <span style="color: var(--neon-gold); font-size: 0.8rem; font-family: 'Share Tech Mono'; margin-left: 8px;">L${lvl}</span>
+                                    </td>
+                                    <td style="color: #aaa; font-size: 0.85rem;">${r.car}</td>
+                                    <td style="text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
+                                    <td style="text-align: right; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold;">${r.lapTime}</td>
                                 </tr>`;
                             }).join('')}
                         </tbody>
@@ -2046,7 +2059,7 @@ function renderServerList(containerId, servers, isRace) {
                     </div>
                     <div style="text-align: right;">
                         <div style="color: ${isRace ? 'var(--neon-gold)' : 'var(--neon-mint)'}; font-size: 1.5rem; font-family: 'Share Tech Mono'; font-weight: bold;">${s.p}</div>
-                        <div style="font-size: 0.75rem; color: #666; font-family: 'Share Tech Mono'; margin-top: 5px; transition: color 0.2s;" id="toggle-icon-${srvId}">▼ EXPAND</div>
+                        <div style="font-size: 0.75rem; color: #666; font-family: 'Share Tech Mono'; margin-top: 5px;" id="toggle-icon-${srvId}">▼ EXPAND</div>
                     </div>
                 </div>
                 ${rosterHtml}
