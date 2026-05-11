@@ -1,83 +1,83 @@
 {
-  "LastUpdated": "2026-05-11 14:21:27",
+  "LastUpdated": "2026-05-11 14:23:49",
   "Servers": [
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
-      "Status": "🟢 ONLINE",
-      "Name": "90s Nurburgring",
-      "Players": "0 / 32",
-      "LiveDrivers": [],
       "Port": "9604",
-      "Mode": "Practice"
+      "Name": "90s Nurburgring",
+      "Mode": "Practice",
+      "Status": "🟢 ONLINE",
+      "Players": "0 / 32",
+      "LiveDrivers": []
     },
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
+      "Mode": "Practice",
+      "Port": "9600",
       "Players": "0 / 32",
+      "Status": "🟢 ONLINE",
       "LiveDrivers": [
         {
+          "BestLap": "--:--.---",
           "Car": "ALPINE A110 S",
-          "Name": "Higsby Higs",
-          "BestLap": "--:--.---"
+          "Name": "Higsby Higs"
         }
       ],
-      "Status": "🟢 ONLINE",
-      "Port": "9600",
-      "Name": "SLNurb",
-      "Mode": "Practice"
+      "Name": "SLNurb"
     },
     {
       "Track": "Laguna Seca\r\n[GP]",
-      "Status": "🟢 ONLINE",
-      "Name": "SLSeca",
-      "Players": "0 / 32",
-      "LiveDrivers": [],
       "Port": "9601",
-      "Mode": "Practice"
+      "Name": "SLSeca",
+      "Mode": "Practice",
+      "Status": "🟢 ONLINE",
+      "Players": "0 / 32",
+      "LiveDrivers": []
     },
     {
       "Track": "Mount Panorama\r\n[GP]",
-      "Status": "🟢 ONLINE",
-      "Name": "SLBathurst",
-      "Players": "0 / 32",
-      "LiveDrivers": [],
       "Port": "9603",
-      "Mode": "Practice"
+      "Name": "SLBathurst",
+      "Mode": "Practice",
+      "Status": "🟢 ONLINE",
+      "Players": "0 / 32",
+      "LiveDrivers": []
     },
     {
       "Track": "Sebring International Raceway\r\n[GP]",
-      "Status": "🟢 ONLINE",
-      "Name": "SLSebring",
-      "Players": "0 / 32",
-      "LiveDrivers": [],
       "Port": "9602",
-      "Mode": "Practice"
+      "Name": "SLSebring",
+      "Mode": "Practice",
+      "Status": "🟢 ONLINE",
+      "Players": "0 / 32",
+      "LiveDrivers": []
     },
     {
       "Track": "Mount Panorama\r\n[GP]",
-      "Status": "🟢 ONLINE",
-      "Name": "Endurance Race - Alfa Sprint GTA - Q20/R40",
-      "Players": "0 / 35",
-      "LiveDrivers": [],
       "Port": "9605",
-      "Mode": "Practice"
+      "Name": "Endurance Race - Alfa Sprint GTA - Q20/R40",
+      "Mode": "Practice",
+      "Status": "🟢 ONLINE",
+      "Players": "0 / 35",
+      "LiveDrivers": []
     },
     {
       "Track": "Brands Hatch\r\n[GP]",
-      "Status": "🟢 ONLINE",
-      "Name": "Quick Race - BMW M2 CS Racing - Q10R15",
-      "Players": "0 / 32",
-      "LiveDrivers": [],
       "Port": "9606",
-      "Mode": "Qualifying"
+      "Name": "Quick Race - BMW M2",
+      "Mode": "Qualifying",
+      "Status": "🟢 ONLINE",
+      "Players": "0 / 32",
+      "LiveDrivers": []
     },
     {
       "Track": "Brands Hatch\r\n[GP]",
-      "Status": "🟢 ONLINE",
-      "Name": "Quick Race - GT3 Cars - Q10R15",
-      "Players": "0 / 32",
-      "LiveDrivers": [],
       "Port": "9707",
-      "Mode": "Qualifying"
+      "Name": "Quick Race - GT3 Cars - Q10R15",
+      "Mode": "Qualifying",
+      "Status": "🟢 ONLINE",
+      "Players": "0 / 32",
+      "LiveDrivers": []
     }
   ]
 }
