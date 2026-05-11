@@ -1,13 +1,13 @@
 {
-  "LastUpdated": "2026-05-11 13:20:14",
+  "LastUpdated": "2026-05-11 13:32:23",
   "Servers": [
     {
       "Mode": "Practice",
       "Track": "Nurburgring\r\n[Touristenfahrten]",
-      "Players": "1 / 64",
+      "Players": "0 / 32",
       "Port": "9604",
       "Status": "🟢 ONLINE",
-      "Name": "90s Night N├╝rburgring - Retro & Vintage - Tourist Regulations",
+      "Name": "90s Nurburgring",
       "LiveDrivers": [
         {
           "BestLap": "--:--.---",
@@ -21,8 +21,8 @@
       "Mode": "Practice",
       "Status": "🟢 ONLINE",
       "Port": "9600",
-      "Name": "Street Legal Nurburgring - Road Cars - Tourist Regulations",
-      "Players": "0 / 64",
+      "Name": "SLNurb",
+      "Players": "0 / 32",
       "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
@@ -30,8 +30,8 @@
       "Mode": "Practice",
       "Status": "🟢 ONLINE",
       "Port": "9601",
-      "Name": "Street Legal Seca - Road Cars - Trackday",
-      "Players": "0 / 64",
+      "Name": "SLSeca",
+      "Players": "0 / 32",
       "Track": "Laguna Seca\r\n[GP]"
     },
     {
@@ -39,8 +39,8 @@
       "Mode": "Practice",
       "Status": "🟢 ONLINE",
       "Port": "9603",
-      "Name": "Street Legal Bathurst - Road Cars - Trackday",
-      "Players": "0 / 64",
+      "Name": "SLBathurst",
+      "Players": "0 / 32",
       "Track": "Mount Panorama\r\n[GP]"
     },
     {
@@ -48,13 +48,13 @@
       "Mode": "Practice",
       "Status": "🟢 ONLINE",
       "Port": "9602",
-      "Name": "Street Legal Sebring - Road Cars - Trackday",
-      "Players": "0 / 64",
+      "Name": "SLSebring",
+      "Players": "0 / 32",
       "Track": "Sebring International Raceway\r\n[GP]"
     },
     {
       "LiveDrivers": [],
-      "Mode": "Qualifying",
+      "Mode": "Practice",
       "Status": "🟢 ONLINE",
       "Port": "9605",
       "Name": "Endurance Race - Alfa Sprint GTA - Q20/R40",
