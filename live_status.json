@@ -18,73 +18,81 @@
         }
       ],
       "Status": "🟢 ONLINE",
+      "Season": "None",
       "Mode": "Practice",
-      "Players": "1 / 32",
+      "Players": "0 / 32",
       "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
-      "LiveDrivers": [],
-      "Mode": "Practice",
-      "Status": "🟢 ONLINE",
-      "Players": "0 / 64",
-      "Track": "Nurburgring\r\n[Touristenfahrten]",
+      "Port": "9600",
       "Name": "Street Legal Nurburgring - Road Cars - Tourist Regulations",
-      "Port": "9600"
-    },
-    {
       "LiveDrivers": [],
-      "Mode": "Practice",
       "Status": "🟢 ONLINE",
-      "Players": "0 / 32",
-      "Track": "Laguna Seca\r\n[GP]",
-      "Name": "Street Legal Seca - Road Cars - Trackday",
-      "Port": "9601"
-    },
-    {
-      "LiveDrivers": [],
+      "Season": "None",
       "Mode": "Practice",
-      "Status": "🟢 ONLINE",
-      "Players": "0 / 32",
-      "Track": "Mount Panorama\r\n[GP]",
-      "Name": "Street Legal Bathurst - Road Cars - Trackday",
-      "Port": "9603"
-    },
-    {
-      "LiveDrivers": [],
-      "Mode": "Practice",
-      "Status": "🟢 ONLINE",
       "Players": "0 / 64",
-      "Track": "Sebring International Raceway\r\n[GP]",
+      "Track": "Nurburgring\r\n[Touristenfahrten]"
+    },
+    {
+      "Port": "9601",
+      "Name": "Street Legal Seca - Road Cars - Trackday",
+      "LiveDrivers": [],
+      "Status": "🟢 ONLINE",
+      "Season": "None",
+      "Mode": "Practice",
+      "Players": "0 / 32",
+      "Track": "Laguna Seca\r\n[GP]"
+    },
+    {
+      "Port": "9603",
+      "Name": "Street Legal Bathurst - Road Cars - Trackday",
+      "LiveDrivers": [],
+      "Status": "🟢 ONLINE",
+      "Season": "None",
+      "Mode": "Practice",
+      "Players": "0 / 32",
+      "Track": "Mount Panorama\r\n[GP]"
+    },
+    {
+      "Port": "9602",
       "Name": "Street Legal Sebring - Road Cars - Trackday",
-      "Port": "9602"
+      "LiveDrivers": [],
+      "Status": "🟢 ONLINE",
+      "Season": "None",
+      "Mode": "Practice",
+      "Players": "0 / 64",
+      "Track": "Sebring International Raceway\r\n[GP]"
     },
     {
-      "LiveDrivers": [],
-      "Mode": "Practice",
-      "Status": "🟢 ONLINE",
-      "Players": "0 / 35",
-      "Track": "Mount Panorama\r\n[GP]",
+      "Port": "9605",
       "Name": "Endurance Race - Alfa Sprint GTA - Q20/R40",
-      "Port": "9605"
+      "LiveDrivers": [],
+      "Status": "🟢 ONLINE",
+      "Season": "None",
+      "Mode": "Practice",
+      "Players": "0 / 35",
+      "Track": "Mount Panorama\r\n[GP]"
     },
     {
-      "LiveDrivers": [],
-      "Mode": "Practice",
-      "Status": "🟢 ONLINE",
-      "Players": "0 / 32",
-      "Track": "Brands Hatch\r\n[GP]",
+      "Port": "9606",
       "Name": "Quick Race - BMW M2 CS Racing - Q10R15",
-      "Port": "9606"
+      "LiveDrivers": [],
+      "Status": "🟢 ONLINE",
+      "Season": "BMW M2 CS Racing Challenge",
+      "Mode": "Practice",
+      "Players": "0 / 32",
+      "Track": "Brands Hatch\r\n[GP]"
     },
     {
-      "LiveDrivers": [],
-      "Mode": "Practice",
-      "Status": "🟢 ONLINE",
-      "Players": "0 / 32",
-      "Track": "Brands Hatch\r\n[GP]",
+      "Port": "9707",
       "Name": "Quick Race - GT3 Cars - Q10R15",
-      "Port": "9707"
+      "LiveDrivers": [],
+      "Status": "🟢 ONLINE",
+      "Season": "None",
+      "Mode": "Practice",
+      "Players": "0 / 32",
+      "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-11 22:23:00"
+  "LastUpdated": "2026-05-11 22:25:50"
 }
