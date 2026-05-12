@@ -1,5 +1,5 @@
 {
-  "LastUpdated": "2026-05-11 19:27:40",
+  "LastUpdated": "2026-05-11 19:31:53",
   "Servers": [
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
@@ -7,7 +7,7 @@
       "Name": "90s Night N├╝rburgring - Retro & Vintage - Tourist Regulations",
       "Mode": "Practice",
       "Status": "🟢 ONLINE",
-      "Players": "0 / 64",
+      "Players": "0 / 32",
       "LiveDrivers": []
     },
     {
@@ -34,7 +34,7 @@
       "Name": "Street Legal Bathurst - Road Cars - Trackday",
       "Mode": "Practice",
       "Status": "🟢 ONLINE",
-      "Players": "0 / 64",
+      "Players": "0 / 32",
       "LiveDrivers": []
     },
     {
@@ -68,7 +68,7 @@
       "Track": "Brands Hatch\r\n[GP]",
       "Port": "9707",
       "Name": "Quick Race - GT3 Cars - Q10R15",
-      "Mode": "Qualifying",
+      "Mode": "Practice",
       "Status": "🟢 ONLINE",
       "Players": "0 / 32",
       "LiveDrivers": []
