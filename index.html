@@ -2393,21 +2393,21 @@ const hRecords = document.getElementById('homeRecords');
             const isExpanded = expandedIds.includes(rosterId);
 
             let rosterHtml = '';
-            if(s.roster && s.roster.length > 0) {
+if(s.roster && s.roster.length > 0) {
                 rosterHtml = `
-                    <div class="server-roster" id="${rosterId}" style="display: ${isExpanded ? 'block' : 'none'}; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
-                        <table class="server-roster-table" style="width: 100%; border-collapse: collapse;">
+                    <div class="server-roster" id="${rosterId}" style="display: ${isExpanded ? 'block' : 'none'}; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; overflow-x: auto;">
+                        <table class="server-roster-table" style="width: 100%; border-collapse: collapse; min-width: 100%;">
                             <thead>
                                 <tr style="color: #666; font-size: 0.70rem; text-transform: uppercase; font-family: 'Share Tech Mono'; border-bottom: 1px solid #333;">
                                     <th style="text-align: left; padding: 8px 4px; width: 3%;">#</th>
                                     <th style="text-align: left; padding: 8px 4px; width: 20%;">DRIVER</th>
-                                    <th style="text-align: center; padding: 8px 4px;">RATING (ELO)</th>
+                                    <th class="hide-on-mobile" style="text-align: center; padding: 8px 4px;">RATING (ELO)</th>
                                     <th style="text-align: center; padding: 8px 4px;">SAFETY (SR)</th>
-                                    <th style="text-align: center; padding: 8px 4px;">TrackXP (TXP)</th>
-                                    <th style="text-align: center; padding: 8px 4px;">CAR</th>
-                                    <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC</th>
-                                    <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC/L</th>
-                                    <th style="text-align: center; padding: 8px 4px;">LAPS</th>
+                                    <th class="hide-on-mobile" style="text-align: center; padding: 8px 4px;">TrackXP (TXP)</th>
+                                    <th class="hide-on-mobile" style="text-align: center; padding: 8px 4px;">CAR</th>
+                                    <th class="hide-on-mobile" style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC</th>
+                                    <th class="hide-on-mobile" style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC/L</th>
+                                    <th class="hide-on-mobile" style="text-align: center; padding: 8px 4px;">LAPS</th>
                                     <th style="text-align: center; padding: 8px 4px; white-space: nowrap;">TIME</th>
                                 </tr>
                             </thead>
@@ -2427,7 +2427,7 @@ const hRecords = document.getElementById('homeRecords');
                                         <td style="padding: 8px 4px; color: #555; font-family: 'Share Tech Mono';">${r.pos}</td>
                                         <td style="padding: 8px 4px; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">${r.name}</td>
                                         
-                                        <td style="padding: 8px 4px; text-align: center; white-space: nowrap;">
+                                        <td class="hide-on-mobile" style="padding: 8px 4px; text-align: center; white-space: nowrap;">
                                             <span style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.8rem;">${r.rating}</span>
                                         </td>
                                         
@@ -2437,15 +2437,15 @@ const hRecords = document.getElementById('homeRecords');
                                             </span>
                                         </td>
                                         
-                                        <td style="padding: 8px 4px; text-align: center; white-space: nowrap;">
+                                        <td class="hide-on-mobile" style="padding: 8px 4px; text-align: center; white-space: nowrap;">
                                             <span style="color: var(--neon-gold); font-family: 'Share Tech Mono'; font-size: 0.70rem; background: rgba(255,215,0,0.05); padding: 1px 4px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${r.level}</span>
                                         </td>
                                         
-                                        <td style="padding: 8px 4px; text-align: left; color: #aaa; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">${r.car}</td>
+                                        <td class="hide-on-mobile" style="padding: 8px 4px; text-align: left; color: #aaa; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">${r.car}</td>
                                         
-                                        <td style="padding: 8px 4px; text-align: center; color: #888; font-family: 'Share Tech Mono';">${r.incidents}x</td>
-                                        <td style="padding: 8px 4px; text-align: center; color: ${incColor}; font-weight: bold; font-family: 'Share Tech Mono';">${incPerLap}</td>
-                                        <td style="padding: 8px 4px; text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
+                                        <td class="hide-on-mobile" style="padding: 8px 4px; text-align: center; color: #888; font-family: 'Share Tech Mono';">${r.incidents}x</td>
+                                        <td class="hide-on-mobile" style="padding: 8px 4px; text-align: center; color: ${incColor}; font-weight: bold; font-family: 'Share Tech Mono';">${incPerLap}</td>
+                                        <td class="hide-on-mobile" style="padding: 8px 4px; text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
                                         
                                         <td style="padding: 8px 4px; text-align: center; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold; font-family: 'Share Tech Mono'; white-space: nowrap;">${r.lapTime}</td>
                                     </tr>`;
