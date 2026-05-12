@@ -2267,6 +2267,7 @@ data.Servers.forEach(server => {
             renderServerList('raceServersContainer', window.raceServers, true);
             renderServerList('tdServersContainer', window.tdServers, false);
 			updateSeasonSections([...window.raceServers, ...window.tdServers]);
+			updateHeroBanner();
         } catch (error) { console.error("📡 FIREBASE FETCH ERROR:", error); }
     }
 
