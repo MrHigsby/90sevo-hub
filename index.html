@@ -1630,17 +1630,16 @@ function updateHeroBanner() {
         const col1 = items.slice(0, 5);
         const col2 = items.slice(5, 10);
         
-        // Expanded to 10 precise columns to fit all data
+        // Grid template order updated and widths tweaked slightly for the new order
         const headerHtml = isFull ? `
-            <div class="tele-row tele-header" style="display: grid; grid-template-columns: 20px 85px 40px 65px 30px 75px 55px 20px 25px 30px; gap: 4px; border-bottom: 1px solid #555; color: #555; font-size: 0.55rem; font-weight: bold; padding-bottom: 2px; margin-bottom: 3px;">
-                <span>#</span><span>DRIVER</span><span>ELO</span><span>SR</span><span>LVL</span><span>CAR</span><span style="text-align:right">LAP</span><span style="text-align:center">L</span><span style="text-align:center">INC</span><span style="text-align:center">I/L</span>
+            <div class="tele-row tele-header" style="display: grid; grid-template-columns: 20px 85px 40px 65px 35px 75px 25px 30px 30px 55px; gap: 4px; border-bottom: 1px solid #555; color: #555; font-size: 0.55rem; font-weight: bold; padding-bottom: 2px; margin-bottom: 3px;">
+                <span>#</span><span>DRIVER</span><span style="text-align:center;">ELO</span><span style="text-align:center;">SR</span><span style="text-align:center;">LVL</span><span>CAR</span><span style="text-align:center;">INC</span><span style="text-align:center;">I/L</span><span style="text-align:center;">LAPS</span><span style="text-align:right;">LAP TIME</span>
             </div>` : '';
 
         const renderRow = (p, i, offset) => {
             const name = p.name || p.Name || "Unknown";
             const elo = p.rating || p.DriverRating || 1500;
             
-            // Format SR for the progress bar
             const srRaw = p.sr || (p.SafetyRating ? p.SafetyRating : 2.50);
             const srValue = parseFloat(srRaw).toFixed(2);
             const srFillPct = getSrFill(srRaw);
@@ -1653,7 +1652,6 @@ function updateHeroBanner() {
             const cls = classLetters[clsIndex] || "R";
             const colorStr = getStickerColor(cls);
 
-            // Incident Math
             const lapsCount = p.laps || p.Laps || "0";
             const incCount = p.incidents || p.Incidents || "0";
             let parsedLaps = parseInt(lapsCount) || 0;
@@ -1665,20 +1663,21 @@ function updateHeroBanner() {
 
             if (isFull) {
                 return `
-                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="display: grid; grid-template-columns: 20px 85px 40px 65px 30px 75px 55px 20px 25px 30px; gap: 4px; align-items: center; border-bottom: 1px dashed #333; padding: 4px 0; font-size: 0.6rem; font-family: 'Share Tech Mono';">
+                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="display: grid; grid-template-columns: 20px 85px 40px 65px 35px 75px 25px 30px 30px 55px; gap: 4px; align-items: center; border-bottom: 1px dashed #333; padding: 4px 0; font-size: 0.6rem; font-family: 'Share Tech Mono';">
                     <span style="color:#555;">${i + offset}</span>
                     <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:85px;">${name}</span>
-                    <span style="color:var(--neon-cyan);">${elo}</span>
                     
-                    <span style="display: inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFillPct}%, #111 ${srFillPct}%); padding: 0 4px; border-radius: 2px; font-size: 0.55rem; color: #fff; text-shadow: 1px 1px 1px #000; white-space: nowrap;">${cls} [${srValue}]</span>
+                    <span style="color:var(--neon-cyan); text-align:center;">${elo}</span>
+                    <span style="justify-self:center; display: inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFillPct}%, #111 ${srFillPct}%); padding: 0 4px; border-radius: 2px; font-size: 0.55rem; color: #fff; text-shadow: 1px 1px 1px #000; white-space: nowrap;">${cls} [${srValue}]</span>
+                    <span style="justify-self:center; color:var(--neon-gold); font-size: 0.6rem; background: rgba(255,215,0,0.05); padding: 1px 3px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${lvl}</span>
                     
-                    <span style="color:var(--neon-gold); font-size: 0.6rem; background: rgba(255,215,0,0.05); padding: 1px 3px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${lvl}</span>
                     <span style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:75px;">${car}</span>
-                    <span style="color:var(--neon-mint); text-align:right; font-weight:bold; white-space:nowrap;">${lap}</span>
                     
-                    <span style="color:#888; text-align:center;">${lapsCount}</span>
                     <span style="color:#888; text-align:center;">${incCount}</span>
                     <span style="color:${incColor}; text-align:center; font-weight:bold;">${incPerLap}</span>
+                    <span style="color:var(--neon-cyan); text-align:center;">${lapsCount}</span>
+                    
+                    <span style="color:var(--neon-mint); text-align:right; font-weight:bold; white-space:nowrap;">${lap}</span>
                 </div>`;
             } else {
                 const val = type === 'elo' ? elo : lap;
@@ -2356,21 +2355,21 @@ function renderServerList(containerId, servers, isRace) {
             rosterHtml = `
                 <div class="server-roster" id="${rosterId}" style="display: ${isExpanded ? 'block' : 'none'}; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
 <table class="server-roster-table" style="width: 100%; border-collapse: collapse;">
-                        <thead>
+<thead>
                             <tr style="color: #666; font-size: 0.70rem; text-transform: uppercase; font-family: 'Share Tech Mono'; border-bottom: 1px solid #333;">
                                 <th style="text-align: left; padding: 8px 4px; width: 3%;">#</th>
                                 <th style="text-align: left; padding: 8px 4px; width: 20%;">DRIVER</th>
-                                <th style="text-align: left; padding: 8px 4px;">RATING</th>
-                                <th style="text-align: left; padding: 8px 4px;">SR</th>
-                                <th style="text-align: left; padding: 8px 4px;">LVL</th>
+                                <th style="text-align: center; padding: 8px 4px;">RATING</th>
+                                <th style="text-align: center; padding: 8px 4px;">SR</th>
+                                <th style="text-align: center; padding: 8px 4px;">LVL</th>
                                 <th style="text-align: left; padding: 8px 4px;">CAR</th>
-                                <th style="text-align: right; padding: 8px 4px; white-space: nowrap;">LAP TIME</th>
-                                <th style="text-align: center; padding: 8px 4px;">LAPS</th>
                                 <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC</th>
                                 <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC/L</th>
+                                <th style="text-align: center; padding: 8px 4px;">LAPS</th>
+                                <th style="text-align: right; padding: 8px 4px; white-space: nowrap;">LAP TIME</th>
                             </tr>
                         </thead>
-<tbody>
+                        <tbody>
                             ${s.roster.map(r => {
                                 const classStyle = getSRStyles(r.class);
                                 
@@ -2387,27 +2386,27 @@ function renderServerList(containerId, servers, isRace) {
                                     <td style="padding: 8px 4px; color: #555; font-family: 'Share Tech Mono';">${r.pos}</td>
                                     <td style="padding: 8px 4px; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">${r.name}</td>
                                     
-                                    <td style="padding: 8px 4px; text-align: left; white-space: nowrap;">
+                                    <td style="padding: 8px 4px; text-align: center; white-space: nowrap;">
                                         <span style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.8rem;">${r.rating}</span>
                                     </td>
                                     
-                                    <td style="padding: 8px 4px; text-align: left; white-space: nowrap;">
+                                    <td style="padding: 8px 4px; text-align: center; white-space: nowrap;">
                                         <span style="display: inline-block; border: 1px solid ${classStyle.color}; background: linear-gradient(to right, ${classStyle.color} ${getSrFill(r.sr)}%, #111 ${getSrFill(r.sr)}%); padding: 1px 6px; border-radius: 2px; font-family: 'Share Tech Mono'; font-size: 0.65rem; font-weight: bold; color: #fff; text-shadow: 1px 1px 1px #000;">
                                             ${classStyle.name} [${r.sr}]
                                         </span>
                                     </td>
                                     
-                                    <td style="padding: 8px 4px; text-align: left; white-space: nowrap;">
+                                    <td style="padding: 8px 4px; text-align: center; white-space: nowrap;">
                                         <span style="color: var(--neon-gold); font-family: 'Share Tech Mono'; font-size: 0.70rem; background: rgba(255,215,0,0.05); padding: 1px 4px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${r.level}</span>
                                     </td>
                                     
                                     <td style="padding: 8px 4px; text-align: left; color: #aaa; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">${r.car}</td>
                                     
-                                    <td style="padding: 8px 4px; text-align: right; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold; font-family: 'Share Tech Mono'; white-space: nowrap;">${r.lapTime}</td>
-                                    
-                                    <td style="padding: 8px 4px; text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
                                     <td style="padding: 8px 4px; text-align: center; color: #888; font-family: 'Share Tech Mono';">${r.incidents}x</td>
                                     <td style="padding: 8px 4px; text-align: center; color: ${incColor}; font-weight: bold; font-family: 'Share Tech Mono';">${incPerLap}</td>
+                                    <td style="padding: 8px 4px; text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
+                                    
+                                    <td style="padding: 8px 4px; text-align: right; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold; font-family: 'Share Tech Mono'; white-space: nowrap;">${r.lapTime}</td>
                                 </tr>`;
                             }).join('')}
                         </tbody>
