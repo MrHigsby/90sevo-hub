@@ -565,23 +565,23 @@
   },
   "76561198349319050": {
     "MostDrivenTrack": "Laguna Seca\r\n[GP]",
-    "TrackdayXP": 78.0,
+    "TrackdayXP": 135.0,
     "RaceContacts": 0,
     "LicenseClass": 0,
-    "Laps": 3,
+    "Laps": 5,
     "TotalStartPos": 0,
     "Pylons": 1,
     "LapsPerTrack": {
-      "Laguna Seca\r\n[GP]": 3
+      "Laguna Seca\r\n[GP]": 5
     },
     "QualiIncidents": 0,
     "DNFs": 0,
     "Name": "Alberto sierra",
     "MostDrivenCar": "AUDI RS 3 SPORTBACK",
     "DriverRating": 1500,
-    "SafetyRating": 2.544055,
+    "SafetyRating": 2.5734250000000003,
     "LapsPerCar": {
-      "AUDI RS 3 SPORTBACK": 3
+      "AUDI RS 3 SPORTBACK": 5
     },
     "Poles": 0,
     "ServerStats": {},
