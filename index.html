@@ -2001,12 +2001,17 @@ function renderServerList(containerId, servers, isRace) {
         return;
     }
 
+    // Helper to get Safety Rating color (Matching your leaderboard logic)
+    const getSRColor = (cls) => {
+        const colors = ['#888', '#55efc4', '#74b9ff', '#a29bfe', '#ffe135', '#ff7675'];
+        return colors[cls] || '#888';
+    };
+
     servers.forEach((s, idx) => {
         const rowClass = isRace ? 'server-item race-mode' : 'server-item';
         const srvId = `srv-${isRace ? 'r' : 't'}-${idx}`;
         const rosterId = `roster-${srvId}`;
         
-        // 2. APPLY MEMORY: Check if this server should stay open
         const isExpanded = expandedIds.includes(rosterId);
         const displayStyle = isExpanded ? 'block' : 'none';
         const iconText = isExpanded ? '▲ COLLAPSE' : '▼ EXPAND';
@@ -2018,26 +2023,32 @@ function renderServerList(containerId, servers, isRace) {
                     <table class="server-roster-table" style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr style="color: #666; font-size: 0.75rem; text-transform: uppercase; font-family: 'Share Tech Mono';">
-                                <th style="text-align: left; padding-bottom: 10px;">#</th>
-                                <th style="text-align: left; padding-bottom: 10px;">DRIVER</th>
-                                <th style="text-align: left; padding-bottom: 10px;">RATING & CLASS</th>
-                                <th style="text-align: left; padding-bottom: 10px;">CAR</th>
-                                <th style="text-align: center; padding-bottom: 10px;">SESS LAPS</th>
-                                <th style="text-align: right; padding-bottom: 10px;">BEST</th>
+                                <th style="text-align: left; padding-bottom: 10px; width: 5%;">#</th>
+                                <th style="text-align: left; padding-bottom: 10px; width: 25%;">DRIVER</th>
+                                <th style="text-align: left; padding-bottom: 10px; width: 35%;">RANKING</th>
+                                <th style="text-align: left; padding-bottom: 10px; width: 15%;">CAR</th>
+                                <th style="text-align: center; padding-bottom: 10px; width: 10%;">SESS LAPS</th>
+                                <th style="text-align: right; padding-bottom: 10px; width: 10%;">BEST</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${s.roster.map(r => {
                                 const classLetters = ["R", "D", "C", "B", "A", "S"];
                                 const className = classLetters[r.class] || "R";
+                                const badgeColor = getSRColor(r.class);
+
                                 return `
                                 <tr onclick="event.stopPropagation(); openDriverCard('${r.steamId}')" style="border-bottom: 1px solid #222; cursor: pointer;">
-                                    <td style="padding: 8px 0; color: #555;">${r.pos}</td>
+                                    <td style="padding: 8px 0; color: #555; font-family: 'Share Tech Mono';">${r.pos}</td>
                                     <td style="padding: 8px 0; font-weight: bold; color: #fff;">${r.name}</td>
                                     <td style="padding: 8px 0;">
-                                        <span style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.85rem;">${r.rating}</span>
-                                        <span style="color: var(--neon-mint); font-family: 'Share Tech Mono'; font-size: 0.85rem; margin-left: 10px;">[${className}] ${r.sr}</span>
-                                        <span style="color: var(--neon-gold); font-family: 'Share Tech Mono'; font-size: 0.85rem; margin-left: 10px;">LVL ${r.level}</span>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <span style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.85rem; background: rgba(0,255,255,0.1); padding: 2px 6px; border-radius: 3px; border: 1px solid rgba(0,255,255,0.3);">${r.rating} ELO</span>
+                                            
+                                            <span style="color: ${badgeColor}; font-family: 'Share Tech Mono'; font-size: 0.85rem; background: ${badgeColor}22; padding: 2px 6px; border-radius: 3px; border: 1px solid ${badgeColor}66;">[${className}] ${r.sr}</span>
+                                            
+                                            <span style="color: var(--neon-gold); font-family: 'Share Tech Mono'; font-size: 0.85rem; background: rgba(255,215,0,0.1); padding: 2px 6px; border-radius: 3px; border: 1px solid rgba(255,215,0,0.3);">LVL ${r.level}</span>
+                                        </div>
                                     </td>
                                     <td style="padding: 8px 0; color: #aaa; font-size: 0.85rem;">${r.car}</td>
                                     <td style="padding: 8px 0; text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
@@ -2053,15 +2064,15 @@ function renderServerList(containerId, servers, isRace) {
         }
 
         html += `
-            <div class="${rowClass}" id="${srvId}" onclick="toggleRoster('${srvId}')" style="margin-bottom: 10px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 4px; border-left: 4px solid ${isRace ? 'var(--neon-gold)' : 'var(--neon-mint)'};">
+            <div class="${rowClass}" id="${srvId}" onclick="toggleRoster('${srvId}')" style="margin-bottom: 10px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 4px; border-left: 4px solid ${isRace ? 'var(--neon-gold)' : 'var(--neon-mint)'}; transition: all 0.2s;">
                 <div class="server-header-row" style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <div style="font-size: 1.1rem; font-weight: bold; color: #fff; text-transform: uppercase;">${s.name}</div>
+                        <div style="font-size: 1.1rem; font-weight: bold; color: #fff; text-transform: uppercase; letter-spacing: 1px;">${s.name}</div>
                         <div style="color: #666; font-family: 'Share Tech Mono'; font-size: 0.8rem; margin-top: 4px;">TRACK: ${s.track} | STATUS: ${s.status}</div>
                     </div>
                     <div style="text-align: right;">
                         <div style="color: #fff; font-size: 1.4rem; font-family: 'Share Tech Mono'; font-weight: bold;">${s.p}</div>
-                        <div style="font-size: 0.65rem; color: #444; font-family: 'Share Tech Mono'; text-transform: uppercase;" id="toggle-icon-${srvId}">${iconText}</div>
+                        <div style="font-size: 0.65rem; color: #444; font-family: 'Share Tech Mono'; text-transform: uppercase; letter-spacing: 1px;" id="toggle-icon-${srvId}">${iconText}</div>
                     </div>
                 </div>
                 ${rosterHtml}
