@@ -36,13 +36,13 @@
       "LiveDrivers": [
         {
           "Class": 0,
-          "BestLap": "03:08.592",
-          "SR": "3.38",
-          "Incidents": 2,
+          "BestLap": "--:--.---",
+          "SR": "3.40",
+          "Incidents": 4,
           "SteamID": "76561198158038393",
           "Name": "Higsby Higs",
-          "SessionLaps": 3,
-          "Car": "RENAULT 5 GT TURBO",
+          "SessionLaps": "0",
+          "Car": "PORSCHE 992 GT3 RS",
           "Level": 3.0,
           "Rating": 1529
         }
@@ -94,5 +94,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 15:52:32"
+  "LastUpdated": "2026-05-12 15:57:36"
 }
