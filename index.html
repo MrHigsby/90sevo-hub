@@ -1684,13 +1684,14 @@ const buildTwoColumnList = (items, type) => {
         const top10 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0, 10);
         trHtml = `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${track.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps');
     }
+
     // 2. SLIDE POOL CONSTRUCTION
     let pool = [];
+    let randomPool = []; // Temporary bucket for items we want to shuffle
 
-    // --- STEP 1: MAKE NURBURGRING THE DEFAULT (TOP PRIORITY) ---
+    // --- STEP 1: MAKE NURBURGRING THE DEFAULT (TOP PRIORITY - NO SHUFFLE) ---
     const nurbServer = [...(window.raceServers||[]), ...(window.tdServers||[])].find(s => s.port == "9604");
     if (nurbServer) {
-        // We sort the roster so the fastest laps appear at the top of our new detail view
         const sortedRoster = [...(nurbServer.roster || [])].sort((a, b) => {
             if (a.lapTime === "--:--.---") return 1;
             if (b.lapTime === "--:--.---") return -1;
@@ -1707,10 +1708,12 @@ const buildTwoColumnList = (items, type) => {
         });
     }
 
-    // --- STEP 2: ADD ACTIVE SEASONS ---
+    // --- STEP 2: COLLECT REMAINING SLIDES INTO RANDOM BUCKET ---
+    
+    // Add Seasons
     const activeSeasons = (window.raceServers || []).filter(s => s.season && s.season !== "None");
     activeSeasons.forEach((s, i) => {
-        pool.push({
+        randomPool.push({
             label: "[ SEASON EVENTS ]",
             title: s.season.toUpperCase(),
             data: `<div style="text-align:center; font-size:1.2rem; margin-top:20px; font-family:'Share Tech Mono';"> TRACK: ${s.track.toUpperCase()}<br>STATUS: ${s.status}</div>`,
@@ -1720,9 +1723,35 @@ const buildTwoColumnList = (items, type) => {
         });
     });
 
-    // --- STEP 3: ADD RANKINGS & RECORDS ---
-    pool.push({ label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" });
-    pool.push({ label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=1000" });
+    // Add Global Rankings
+    randomPool.push({ 
+        label: "[ GLOBAL RANKINGS ]", 
+        title: "TOP 10 DRIVERS (ELO)", 
+        data: eloHtml, 
+        color: "var(--neon-cyan)", 
+        action: () => openLeaderboard('stats'), 
+        img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" 
+    });
+
+    // Add Track Records
+    randomPool.push({ 
+        label: "[ TRACK RECORDS ]", 
+        title: "FASTEST LAPS", 
+        data: trHtml, 
+        color: "var(--neon-mint)", 
+        action: () => openLeaderboard('laps'), 
+        img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" 
+    });
+
+    // --- STEP 3: SHUFFLE THE RANDOM BUCKET ONLY ---
+    for (let i = randomPool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [randomPool[i], randomPool[j]] = [randomPool[j], randomPool[i]];
+    }
+
+    // --- STEP 4: MERGE (Nurburgring first, then everything else) ---
+    pool = pool.concat(randomPool);
+
     if(pool.length === 0) return;
     let safeIdx = ((globalBannerIdx % pool.length) + pool.length) % pool.length;
     const slide = pool[safeIdx];
