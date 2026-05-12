@@ -109,9 +109,20 @@
             box-sizing: border-box;
         }
 
-        /* --- ALL MOBILE RESPONSIVE RULES GO HERE --- */
+/* --- 1. DESKTOP DEFAULT RULES (2 Columns) --- */
+        .home-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Side-by-side on PC */
+            gap: 20px;
+            width: 100%;
+        }
+
+        .home-stats-grid > div {
+            min-width: 0; /* Critical: Allows content to shrink/truncate instead of pushing width */
+        }
+
+        /* --- 2. MOBILE RESPONSIVE RULES (1 Column) --- */
         @media (max-width: 768px) {
-            /* Mobile Telemetry Grid */
             .telemetry-grid {
                 grid-template-columns: 25px 1fr 75px 65px;
                 gap: 5px;
@@ -121,19 +132,16 @@
                 display: none !important; 
             }
             
-            /* Stacks the sub-banners */
-            .sub-banner-grid {
-                grid-template-columns: 1fr; 
+            /* Cleanly stacks everything on mobile */
+            .sub-banner-grid, 
+            .hero-grid-container, 
+            .home-stats-grid {
+                grid-template-columns: 1fr !important; 
+                gap: 15px;
             }
 
-            /* Stacks the Global Rankings & Fast Laps into a vertical Top 10 on mobile */
-            .hero-grid-container {
-                grid-template-columns: 1fr !important;
-            } /* <--- THIS WAS THE MISSING BRACKET! */
-
-            .home-stats-grid {
-                grid-template-columns: 1fr !important;
-                gap: 10px;
+            .hero-banner-container {
+                min-height: 500px; /* Gives more height for the stacked Top 10 */
             }
         }
 
