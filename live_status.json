@@ -1,13 +1,26 @@
 {
   "Servers": [
     {
-      "LiveDrivers": [],
-      "Mode": "Practice",
-      "Status": "🟢 ONLINE",
-      "Players": "0 / 32",
-      "Track": "Nurburgring\r\n[Touristenfahrten]",
+      "Port": "9604",
       "Name": "90s Night N├╝rburgring - Retro & Vintage - Tourist Regulations",
-      "Port": "9604"
+      "LiveDrivers": [
+        {
+          "Class": 0,
+          "BestLap": "--:--.---",
+          "SR": "3.16",
+          "Incidents": 0,
+          "SteamID": "76561198158038393",
+          "Name": "Higsby Higs",
+          "SessionLaps": "0",
+          "Car": "LAMBORGHINI COUNTACH",
+          "Level": 1.0,
+          "Rating": 1529
+        }
+      ],
+      "Status": "🟢 ONLINE",
+      "Mode": "Practice",
+      "Players": "1 / 32",
+      "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
       "LiveDrivers": [],
@@ -73,5 +86,5 @@
       "Port": "9707"
     }
   ],
-  "LastUpdated": "2026-05-11 21:17:09"
+  "LastUpdated": "2026-05-11 21:22:12"
 }
