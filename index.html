@@ -1621,14 +1621,20 @@
         const topRating = [...sorted].sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0,5);
         const topLevel = [...sorted].sort((a,b) => (b.TrackdayXP||0) - (a.TrackdayXP||0)).slice(0,5);
 
-        const homeRating = document.getElementById('homeRatingList');
+const homeRating = document.getElementById('homeRatingList');
         if(homeRating) homeRating.innerHTML = topRating.map((p, i) => `
-            <div class="lb-row" onclick="openDriverCard('${p.id}')"><span>${i+1}. ${p.Name}</span><span style="color: var(--neon-cyan);">${p.DriverRating||1500} ELO</span></div>
+            <div class="lb-row" onclick="openDriverCard('${p.id}')">
+                <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${i+1}. ${p.Name}</span>
+                <span style="color: var(--neon-cyan); flex-shrink: 0;">${p.DriverRating||1500} ELO</span>
+            </div>
         `).join('');
 
         const homeLevel = document.getElementById('homeLevelList');
         if(homeLevel) homeLevel.innerHTML = topLevel.map((p, i) => `
-            <div class="lb-row" onclick="openDriverCard('${p.id}')"><span>${i+1}. ${p.Name}</span><span style="color: var(--neon-gold);">LVL ${Math.floor(Math.sqrt((p.TrackdayXP||0) / 50)) + 1}</span></div>
+            <div class="lb-row" onclick="openDriverCard('${p.id}')">
+                <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${i+1}. ${p.Name}</span>
+                <span style="color: var(--neon-gold); flex-shrink: 0;">LVL ${Math.floor(Math.sqrt((p.TrackdayXP||0) / 50)) + 1}</span>
+            </div>
         `).join('');
     }
 
@@ -1645,10 +1651,10 @@
             if(tName) tName.innerText = `> ${track.toUpperCase()}`;
             const top5 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0,5);
             
-            const hRecords = document.getElementById('homeRecords');
+const hRecords = document.getElementById('homeRecords');
             if(hRecords) hRecords.innerHTML = top5.map((entry, i) => `
                 <div class="lb-row" onclick="openDriverCard('${entry.SteamID}')">
-                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${i+1}. ${entry.Name} <span style="font-size: 0.75rem; color: #888; font-family: 'Share Tech Mono'; margin-left: 5px;">[${entry.Car}]</span></span>
+                    <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${i+1}. ${entry.Name} <span style="font-size: 0.75rem; color: #888; font-family: 'Share Tech Mono'; margin-left: 5px;">[${entry.Car}]</span></span>
                     <span style="color: var(--neon-mint); flex-shrink: 0;">${entry.LapTime}</span>
                 </div>
             `).join('');
