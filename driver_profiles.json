@@ -1773,14 +1773,14 @@
     "MostDrivenTrack": "Laguna Seca\r\n[GP]",
     "TotalFinishPos": 2,
     "Top5s": 1,
-    "Laps": 33,
+    "Laps": 34,
     "TrackdayScuffs": 14,
     "Pylons": 3,
     "TotalStartPos": 2,
     "LapsPerCar": {
-      "RENAULT 5 GT TURBO": 12
+      "RENAULT 5 GT TURBO": 13
     },
-    "SafetyRating": 3.337053999999999,
+    "SafetyRating": 3.351738999999999,
     "Name": "Higsby Higs",
     "Poles": 0,
     "DNFs": 0,
@@ -1789,12 +1789,13 @@
     "LicenseClass": 0,
     "ServerStats": {},
     "QualiIncidents": 0,
-    "TrackdayXP": 310.0,
+    "TrackdayXP": 335.0,
     "RaceContacts": 4,
     "Wins": 0,
     "LapsPerTrack": {
       "Laguna Seca\r\n[GP]": 11,
-      "Sebring International Raceway\r\n[GP]": 1
+      "Sebring International Raceway\r\n[GP]": 1,
+      "Mount Panorama\r\n[GP]": 1
     }
   },
   "76561198105200964": {
