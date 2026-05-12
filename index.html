@@ -342,6 +342,47 @@
         .mini-stat { background: rgba(0,0,0,0.5); padding: 6px 8px; border: 1px dashed #333; display: flex; justify-content: space-between; font-family: 'Share Tech Mono'; font-size: 0.8rem; align-items: center;}
         .mini-stat-label { color: #888; }
 
+/* HERO TELEMETRY GRID STYLES */
+        .hero-grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 940px; /* Increased to fit more stats */
+            margin: 5px auto 0 auto;
+            box-sizing: border-box;
+        }
+
+        .tele-row {
+            display: grid;
+            /* Layout: # | Name | ELO | SR | LVL | LAP | LAPS */
+            grid-template-columns: 20px 85px 35px 75px 30px 1fr 20px;
+            gap: 5px;
+            align-items: center;
+            border-bottom: 1px dashed #333;
+            padding: 4px 0;
+            font-size: 0.7rem; /* Slightly smaller to fit everything */
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .tele-row:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tele-header {
+            border-bottom: 1px solid #555;
+            color: #555;
+            font-size: 0.6rem;
+            font-weight: bold;
+            padding-bottom: 2px;
+            margin-bottom: 3px;
+        }
+
     </style>
 </head>
 <body>
@@ -1210,7 +1251,6 @@
 
 <script>
     // --- GLOBAL VARIABLES ---
-	// --- THE MASTER IMAGE DICTIONARY ---
 // --- THE MASTER IMAGE DICTIONARY ---
     const IMAGE_DICT = {
         // --- YOUR CURRENT SEASONS ---
@@ -1541,47 +1581,71 @@ const eventCard = `
 function updateHeroBanner() {
     const activePage = document.querySelector('.page.active').id;
     
-    // HELPER: Builds the 1-5 / 6-10 columns
+// HELPER: Builds the 1-5 / 6-10 columns with support for full telemetry
     const buildTwoColumnList = (items, type) => {
         if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
         
+        const isFull = (type === 'full');
         const col1 = items.slice(0, 5);
         const col2 = items.slice(5, 10);
         
-        let html = `<div style="font-family:'Share Tech Mono'; font-size:0.85rem; text-align:left; width: 100%; max-width:750px; margin: 5px auto 0 auto; background:rgba(0,0,0,0.8); border:1px solid ${type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)'}; padding:10px 15px; z-index: 10; box-sizing:border-box; display: grid; grid-template-columns: 1fr 1fr; column-gap: 40px;">`;
+        // Headers only show for the Featured Server slide
+        const headerHtml = isFull ? `
+            <div class="tele-row tele-header">
+                <span>#</span><span>DRIVER</span><span>ELO</span><span>SR</span><span>LVL</span><span style="text-align:right">LAP</span><span style="text-align:right">L</span>
+            </div>` : '';
+
+        const renderRow = (p, i, offset) => {
+            const name = p.name || p.Name || "Unknown";
+            const elo = p.rating || p.DriverRating || 1500;
+            const sr = p.sr || (p.SafetyRating ? p.SafetyRating.toFixed(2) : "2.50");
+            const lvl = p.level || (p.TrackdayXP ? (Math.floor(Math.sqrt(p.TrackdayXP / 50)) + 1) : 1);
+            const lap = p.lapTime || p.LapTime || "--:--.---";
+            const laps = p.laps || p.Laps || "0";
+            const clsIndex = (p.class !== undefined) ? p.class : (p.LicenseClass !== undefined ? p.LicenseClass : 0);
+            const cls = classLetters[clsIndex];
+
+            if (isFull) {
+                return `
+                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')">
+                    <span style="color:#555;">${i + offset}</span>
+                    <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
+                    <span style="color:var(--neon-cyan);">${elo}</span>
+                    <span style="background:#111; border:1px solid ${getStickerColor(cls)}; padding:0 2px; border-radius:2px; font-size:0.6rem; text-align:center;">${cls} [${sr}]</span>
+                    <span style="color:var(--neon-gold); text-align:center;">${lvl}</span>
+                    <span style="color:var(--neon-mint); text-align:right;">${lap}</span>
+                    <span style="color:#666; text-align:right;">${laps}</span>
+                </div>`;
+            } else {
+                const val = type === 'elo' ? elo : lap;
+                const color = type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)';
+                return `
+                <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:4px 0; cursor:pointer; font-size:0.8rem;" onclick="event.stopPropagation(); openDriverCard('${p.id || p.steamId}')">
+                    <span>${i + offset}. ${name}</span>
+                    <span style="color:${color}; font-weight:bold;">${val}</span>
+                </div>`;
+            }
+        };
+
+        // We use the hero-grid-container class we added to the CSS
+        let html = `<div class="hero-grid-container">`;
+        html += `<div>${headerHtml}${col1.map((p, i) => renderRow(p, i, 1)).join('')}</div>`;
+        html += `<div>${headerHtml}${col2.map((p, i) => renderRow(p, i, 6)).join('')}</div>`;
+        html += `</div>`;
         
-        // Left Column (1-5)
-        html += `<div>`;
-        col1.forEach((p, i) => {
-            const val = type === 'elo' ? p.DriverRating || p.rating || 1500 : p.LapTime;
-            html += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:3px 0; cursor:pointer;" onclick="event.stopPropagation(); openDriverCard('${p.id || p.steamId}')" onmouseover="this.style.color='var(--neon-pink)'" onmouseout="this.style.color=''"><span>${i+1}. ${p.Name || p.name}</span><span style="color:${type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)'}; font-weight:bold;">${val}</span></div>`;
-        });
-        html += `</div>`;
-
-        // Right Column (6-10)
-        html += `<div>`;
-        col2.forEach((p, i) => {
-            const val = type === 'elo' ? p.DriverRating || p.rating || 1500 : p.LapTime;
-            html += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:3px 0; cursor:pointer;" onclick="event.stopPropagation(); openDriverCard('${p.id || p.steamId}')" onmouseover="this.style.color='var(--neon-pink)'" onmouseout="this.style.color=''"><span>${i+6}. ${p.Name || p.name}</span><span style="color:${type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)'}; font-weight:bold;">${val}</span></div>`;
-        });
-        html += `</div>`;
-
-        html += `</div>`;
         return html;
     };
-
-    // 1. DATA PREP
+// 1. DATA PREP
     const sortedElo = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]})).sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0, 10);
     const eloHtml = buildTwoColumnList(sortedElo, 'elo');
 
-    let trHtml = '[ LOAD LEADERBOARD.JSON ]';
+    let trHtml = '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ LOAD LEADERBOARD.JSON ]</div>';
     if (dbLeaderboard.length > 0) {
         const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown Track'))];
         const track = tracks[Math.floor(Date.now() / 15000) % tracks.length] || tracks[0]; 
         const top10 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0, 10);
         trHtml = `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${track.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps');
     }
-
     // 2. SLIDE POOL CONSTRUCTION
     let pool = [];
 
@@ -1598,13 +1662,21 @@ function updateHeroBanner() {
         });
     });
 
-    // 90s NURBURGRING (Port 9604)
+// 90s NURBURGRING (Port 9604)
     const nurbServer = [...(window.raceServers||[]), ...(window.tdServers||[])].find(s => s.port == "9604");
-    if (nurbServer) {
+    if (nurbServer && nurbServer.roster) {
+        // --- ADD THIS SORTING LOGIC ---
+        // It sorts by Best Lap (handling the --:--.--- cases so they stay at the bottom)
+        const sortedRoster = [...nurbServer.roster].sort((a, b) => {
+            if (a.lapTime === "--:--.---") return 1;
+            if (b.lapTime === "--:--.---") return -1;
+            return a.lapTime.localeCompare(b.lapTime);
+        });
+
         pool.push({ 
             label: "[ FEATURED SERVER ]", 
             title: "90s NURBURGRING TOURISTENFAHRTEN", 
-            data: `<div style="color:var(--neon-gold); text-align:center; font-family:'Share Tech Mono'; font-size:0.8rem; margin-bottom:5px;">LIVE ONLINE DRIVERS (${nurbServer.p})</div>` + buildTwoColumnList(nurbServer.roster.slice(0, 10), 'elo'), 
+            data: `<div style="color:var(--neon-gold); text-align:center; font-family:'Share Tech Mono'; font-size:0.8rem; margin-bottom:5px;">LIVE ONLINE TELEMETRY (${nurbServer.p})</div>` + buildTwoColumnList(sortedRoster.slice(0, 10), 'full'), 
             color: "var(--neon-gold)", 
             action: () => goToServerAndExpand('srv-t-0', 'trackday'), 
             img: IMAGE_DICT["Nordschleife"] 
