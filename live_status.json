@@ -36,24 +36,24 @@
       "LiveDrivers": [
         {
           "Class": 0,
-          "BestLap": "03:00.480",
-          "SR": "3.44",
+          "BestLap": "02:20.856",
+          "SR": "3.47",
           "Incidents": 4,
           "SteamID": "76561198158038393",
           "Name": "Higsby Higs",
-          "SessionLaps": 3,
+          "SessionLaps": 5,
           "Car": "PORSCHE 992 GT3 RS",
-          "Level": 3.0,
+          "Level": 4.0,
           "Rating": 1529
         },
         {
           "Class": 0,
-          "BestLap": "02:11.082",
-          "SR": "2.51",
-          "Incidents": 6,
+          "BestLap": "02:10.851",
+          "SR": "2.53",
+          "Incidents": 10,
           "SteamID": "76561198316370021",
           "Name": "Matheus Machado",
-          "SessionLaps": 1,
+          "SessionLaps": 2,
           "Car": "PORSCHE 992 GT3 RS",
           "Level": 1.0,
           "Rating": 1500
@@ -106,5 +106,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 16:07:44"
+  "LastUpdated": "2026-05-12 16:12:47"
 }

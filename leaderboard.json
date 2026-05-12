@@ -3356,19 +3356,19 @@
     "SteamID": "76561198158038393",
     "Name": "Higsby Higs",
     "Car": "PORSCHE 992 GT3 RS",
+    "LapTime": "02:18.144",
+    "TotalMs": 138144.0,
     "Track": "Mount Panorama\r\n[GP]",
-    "LapTime": "02:20.907",
-    "TotalMs": 140907.0,
-    "LapSetOn": 38
+    "LapSetOn": 41
   },
   {
     "ServerPort": "9603",
     "SteamID": "76561198316370021",
     "Name": "Matheus Machado",
     "Car": "PORSCHE 992 GT3 RS",
+    "LapTime": "02:10.851",
+    "TotalMs": 130851.0,
     "Track": "Mount Panorama\r\n[GP]",
-    "LapTime": "02:11.082",
-    "TotalMs": 131082.0,
-    "LapSetOn": 1
+    "LapSetOn": 2
   }
 ]
