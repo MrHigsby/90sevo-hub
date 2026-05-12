@@ -129,9 +129,6 @@
             /* Stacks the Global Rankings & Fast Laps into a vertical Top 10 on mobile */
             .hero-grid-container {
                 grid-template-columns: 1fr !important;
-        .home-stats-grid {
-                grid-template-columns: 1fr !important;
-                gap: 10px;
             }
         }
 
@@ -576,26 +573,28 @@
                 </div>
             </div>
 
-<div class="panel" style="grid-column: 1 / -1;">
+            <div class="panel" style="grid-column: 1 / -1;">
                 <div class="panel-header" style="color: var(--neon-gold); cursor: pointer; transition: 0.2s;" onclick="openLeaderboard('stats')" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--neon-gold)'">[ TOP 5 ] GLOBAL RATINGS</div>
-                
-                <!-- Here is the clean wrapper with our new class -->
-                <div class="leaderboard-cycle home-stats-grid">
-                    
-                    <!-- Left Column: ELO -->
+                <div class="leaderboard-cycle" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div>
                         <div style="color: #888; margin-bottom: 10px;">> Top Driver Rating</div>
                         <div id="homeRatingList"><div style="color: #444;">[ LOAD PROFILES.JSON ]</div></div>
                     </div>
-                    
-                    <!-- Right Column: Level -->
                     <div>
                         <div style="color: #888; margin-bottom: 10px;">> Top TrackXP Level</div>
                         <div id="homeLevelList"><div style="color: #444;">[ LOAD PROFILES.JSON ]</div></div>
                     </div>
-                    
                 </div>
             </div>
+        </div>
+
+        <div class="bootloader" style="margin-top: 30px;">
+            <h3 style="color: #fff; margin-top: 0;">> DATA DRIVE: OFFLINE</h3>
+            <div style="color: #888; font-size: 0.8rem; margin-bottom: 10px;">Select your PowerShell JSONs to populate the hub.</div>
+            <div class="file-input-wrapper">1. DRIVER_PROFILES: <input type="file" id="uploadProfiles" accept=".json"></div>
+            <div class="file-input-wrapper" style="color: var(--neon-mint);">2. LEADERBOARD: <input type="file" id="uploadLeaderboard" accept=".json"></div>
+            <div id="bootStatus" style="margin-top: 10px; color: var(--neon-gold); font-size: 0.9rem;">[ SYSTEM READY ]</div>
+        </div>
 
     </div>
 
@@ -1586,6 +1585,34 @@
         });
         document.getElementById('standingsBody').innerHTML = html;
     }
+
+    // --- MANUAL FILE UPLOADS (FALLBACK) ---
+    document.getElementById('uploadProfiles').addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            dbProfiles = JSON.parse(e.target.result);
+            document.getElementById('bootStatus').innerText = "DISC 1 MOUNTED: PROFILES SYNCED";
+            const datalist = document.getElementById('telemetryDriversList');
+            if(datalist) {
+                datalist.innerHTML = '';
+                for(let k in dbProfiles) {
+                    let opt = document.createElement('option'); opt.value = dbProfiles[k].Name; datalist.appendChild(opt);
+                }
+            }
+            updateHomeEliteLists(); processLeaderboardData(); 
+        };
+        reader.readAsText(e.target.files[0]);
+    });
+
+    document.getElementById('uploadLeaderboard').addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            dbLeaderboard = JSON.parse(e.target.result);
+            document.getElementById('bootStatus').innerText = "DISCS MOUNTED: LEADERBOARD SYNCED";
+            populateLeaderboardFilters(); startHomeTrackCycle(); processLeaderboardData();
+        };
+        reader.readAsText(e.target.files[0]);
+    });
 
     // --- HOMEPAGE ELITE ---
     function updateHomeEliteLists() {
