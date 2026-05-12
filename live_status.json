@@ -7,6 +7,18 @@
         {
           "Class": 0,
           "BestLap": "--:--.---",
+          "SR": "2.78",
+          "Incidents": 0,
+          "SteamID": "76561198203031740",
+          "Name": "Justin Case",
+          "SessionLaps": "0",
+          "Car": "PORSCHE 964 TURBO 3 6",
+          "Level": 1.0,
+          "Rating": 1471
+        },
+        {
+          "Class": 0,
+          "BestLap": "--:--.---",
           "SR": "3.16",
           "Incidents": 0,
           "SteamID": "76561198158038393",
@@ -20,7 +32,7 @@
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "1 / 32",
+      "Players": "0 / 32",
       "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
@@ -30,7 +42,7 @@
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "0 / 64",
+      "Players": "0 / 32",
       "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
@@ -94,5 +106,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-11 23:26:37"
+  "LastUpdated": "2026-05-11 23:39:22"
 }
