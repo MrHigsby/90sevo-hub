@@ -1611,17 +1611,18 @@ const eventCard = `
         homeTrackInterval = setInterval(renderTrack, 5000); 
     }
 
-    function manualBannerChange(dir) {
+function manualBannerChange(dir) {
         globalBannerIdx += dir;
-        updateHeroBanner();
+        updateHeroBanner(); // No more 'true' needed
         clearInterval(heroTimer);
-        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 20000);
+        // Reset the timer to 15 seconds after a manual click
+        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000); 
     }
 	let persistentPool = []; // This stores our shuffled order
 	
 
-function updateHeroBanner(silent = false) {
-    // --- 1. HELPER FUNCTION (This was missing!) ---
+function updateHeroBanner() {
+    // --- 1. HELPER FUNCTION ---
     const buildTwoColumnList = (items, type) => {
         if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
         
@@ -1725,8 +1726,9 @@ function updateHeroBanner(silent = false) {
     currentAvailableSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
     currentAvailableSlides.push({ id: 'records', label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
 
-    // --- 4. LOCK THE ORDER (Shuffle only once per session) ---
-    if (!lockedOrderPool && currentAvailableSlides.length > 0) {
+    // --- 4. LOCK THE ORDER ---
+    // If the pool is empty, OR if a server went offline/online (changing the amount of slides), re-shuffle and lock
+    if (!lockedOrderPool || lockedOrderPool.length !== currentAvailableSlides.length) {
         let first = currentAvailableSlides.find(s => s.id === 'nurb');
         let others = currentAvailableSlides.filter(s => s.id !== 'nurb');
 
@@ -1738,10 +1740,10 @@ function updateHeroBanner(silent = false) {
         lockedOrderPool = first ? [first.id, ...others.map(o => o.id)] : others.map(o => o.id);
     }
 
-    // --- 5. RENDER LOGIC ---
-    if (!silent) { globalBannerIdx++; }
-    if (!lockedOrderPool) return;
+    if (!lockedOrderPool || lockedOrderPool.length === 0) return;
 
+    // --- 5. RENDER LOGIC ---
+    // Look here! No more counting logic! It just uses whatever globalBannerIdx currently is.
     let safeIdx = ((globalBannerIdx % lockedOrderPool.length) + lockedOrderPool.length) % lockedOrderPool.length;
     let currentId = lockedOrderPool[safeIdx];
     let slide = currentAvailableSlides.find(s => s.id === currentId);
