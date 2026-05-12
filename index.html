@@ -1687,25 +1687,11 @@ const buildTwoColumnList = (items, type) => {
     // 2. SLIDE POOL CONSTRUCTION
     let pool = [];
 
-    // SEASONS
-    const activeSeasons = (window.raceServers || []).filter(s => s.season && s.season !== "None");
-    activeSeasons.forEach((s, i) => {
-        pool.push({
-            label: "[ SEASON EVENTS ]",
-            title: s.season.toUpperCase(),
-            data: `<div style="text-align:center; font-size:1.2rem; margin-top:20px; font-family:'Share Tech Mono';"> TRACK: ${s.track.toUpperCase()}<br>STATUS: ${s.status}</div>`,
-            color: "var(--neon-pink)",
-            action: () => goToServerAndExpand(`srv-r-${i}`, 'race'),
-            img: s.img
-        });
-    });
-
-// 90s NURBURGRING (Port 9604)
+    // --- STEP 1: MAKE NURBURGRING THE DEFAULT (TOP PRIORITY) ---
     const nurbServer = [...(window.raceServers||[]), ...(window.tdServers||[])].find(s => s.port == "9604");
-    if (nurbServer && nurbServer.roster) {
-        // --- ADD THIS SORTING LOGIC ---
-        // It sorts by Best Lap (handling the --:--.--- cases so they stay at the bottom)
-        const sortedRoster = [...nurbServer.roster].sort((a, b) => {
+    if (nurbServer) {
+        // We sort the roster so the fastest laps appear at the top of our new detail view
+        const sortedRoster = [...(nurbServer.roster || [])].sort((a, b) => {
             if (a.lapTime === "--:--.---") return 1;
             if (b.lapTime === "--:--.---") return -1;
             return a.lapTime.localeCompare(b.lapTime);
@@ -1721,10 +1707,22 @@ const buildTwoColumnList = (items, type) => {
         });
     }
 
-    // RANKINGS
+    // --- STEP 2: ADD ACTIVE SEASONS ---
+    const activeSeasons = (window.raceServers || []).filter(s => s.season && s.season !== "None");
+    activeSeasons.forEach((s, i) => {
+        pool.push({
+            label: "[ SEASON EVENTS ]",
+            title: s.season.toUpperCase(),
+            data: `<div style="text-align:center; font-size:1.2rem; margin-top:20px; font-family:'Share Tech Mono';"> TRACK: ${s.track.toUpperCase()}<br>STATUS: ${s.status}</div>`,
+            color: "var(--neon-pink)",
+            action: () => goToServerAndExpand(`srv-r-${i}`, 'race'),
+            img: s.img
+        });
+    });
+
+    // --- STEP 3: ADD RANKINGS & RECORDS ---
     pool.push({ label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" });
     pool.push({ label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=1000" });
-
     if(pool.length === 0) return;
     let safeIdx = ((globalBannerIdx % pool.length) + pool.length) % pool.length;
     const slide = pool[safeIdx];
