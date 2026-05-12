@@ -40,7 +40,7 @@
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "0 / 32",
+      "Players": "0 / 64",
       "Track": "Laguna Seca\r\n[GP]"
     },
     {
@@ -94,5 +94,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 01:46:01"
+  "LastUpdated": "2026-05-12 01:51:05"
 }
