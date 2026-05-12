@@ -32,13 +32,26 @@
       "Port": "9600"
     },
     {
-      "LiveDrivers": [],
-      "Mode": "Practice",
-      "Status": "🟢 ONLINE",
-      "Players": "0 / 32",
-      "Track": "Laguna Seca\r\n[GP]",
+      "Port": "9601",
       "Name": "Street Legal Seca - Road Cars - Trackday",
-      "Port": "9601"
+      "LiveDrivers": [
+        {
+          "Class": 0,
+          "BestLap": "--:--.---",
+          "SR": "2.50",
+          "Incidents": 0,
+          "SteamID": "76561198743642509",
+          "Name": "blue santamaria",
+          "SessionLaps": "0",
+          "Car": "BMW M3 E30 EVO III",
+          "Level": 1,
+          "Rating": 1500
+        }
+      ],
+      "Status": "🟢 ONLINE",
+      "Mode": "Practice",
+      "Players": "1 / 32",
+      "Track": "Laguna Seca\r\n[GP]"
     },
     {
       "LiveDrivers": [],
@@ -86,5 +99,5 @@
       "Port": "9707"
     }
   ],
-  "LastUpdated": "2026-05-11 21:32:21"
+  "LastUpdated": "2026-05-11 21:37:24"
 }
