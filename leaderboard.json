@@ -2235,9 +2235,10 @@
     "SteamID": "76561198168865594",
     "Name": "steph rioux",
     "Car": "PORSCHE 992 GT3 RS",
-    "Track": "Nurburgring",
-    "LapTime": "08:04.563",
-    "TotalMs": 484563.0
+    "LapTime": "07:39.216",
+    "TotalMs": 459216.0,
+    "Track": "Nurburgring\r\n[Touristenfahrten]",
+    "LapSetOn": 2
   },
   {
     "ServerPort": "9600",

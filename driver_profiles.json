@@ -1624,16 +1624,18 @@
     "LapsPerTrack": {}
   },
   "76561198168865594": {
-    "MostDrivenCar": "None",
-    "MostDrivenTrack": "None",
+    "MostDrivenCar": "PORSCHE 992 GT3 RS",
+    "MostDrivenTrack": "Nurburgring\r\n[Touristenfahrten]",
     "TotalFinishPos": 0,
     "Top5s": 0,
-    "Laps": 1,
+    "Laps": 2,
     "TrackdayScuffs": 16,
     "Pylons": 20,
     "TotalStartPos": 0,
-    "LapsPerCar": {},
-    "SafetyRating": 2.514685,
+    "LapsPerCar": {
+      "PORSCHE 992 GT3 RS": 1
+    },
+    "SafetyRating": 2.52937,
     "Name": "steph rioux",
     "Poles": 0,
     "DNFs": 0,
@@ -1642,10 +1644,12 @@
     "LicenseClass": 0,
     "ServerStats": {},
     "QualiIncidents": 0,
-    "TrackdayXP": 15,
+    "TrackdayXP": 40.0,
     "RaceContacts": 0,
     "Wins": 0,
-    "LapsPerTrack": {}
+    "LapsPerTrack": {
+      "Nurburgring\r\n[Touristenfahrten]": 1
+    }
   },
   "76561199522137835": {
     "MostDrivenCar": "None",

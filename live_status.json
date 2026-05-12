@@ -28,12 +28,12 @@
         },
         {
           "Class": 0,
-          "BestLap": "--:--.---",
-          "SR": "2.51",
+          "BestLap": "07:39.216",
+          "SR": "2.53",
           "Incidents": 0,
           "SteamID": "76561198168865594",
           "Name": "steph rioux",
-          "SessionLaps": "0",
+          "SessionLaps": 1,
           "Car": "PORSCHE 992 GT3 RS",
           "Level": 1.0,
           "Rating": 1500
@@ -106,5 +106,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 17:46:35"
+  "LastUpdated": "2026-05-12 17:51:42"
 }
