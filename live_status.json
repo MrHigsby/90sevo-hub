@@ -46,12 +46,12 @@
       "LiveDrivers": [
         {
           "Class": 0,
-          "BestLap": "--:--.---",
-          "SR": "3.32",
+          "BestLap": "03:01.957",
+          "SR": "3.34",
           "Incidents": 0,
           "SteamID": "76561198158038393",
           "Name": "Higsby Higs",
-          "SessionLaps": "0",
+          "SessionLaps": 1,
           "Car": "RENAULT 5 GT TURBO",
           "Level": 3.0,
           "Rating": 1529
@@ -94,5 +94,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 15:32:17"
+  "LastUpdated": "2026-05-12 15:37:20"
 }
