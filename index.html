@@ -497,7 +497,17 @@
                 grid-template-columns: 1fr; 
             }
         }
-		
+		/* --- FINAL TRUNCATION SAFETY PATCH --- */
+        .panel, .home-grid, .home-stats-grid, .lb-row, .leaderboard-cycle {
+            min-width: 0 !important; /* Forces CSS Grid to respect the screen edge */
+            max-width: 100% !important; /* Hard boundary */
+            box-sizing: border-box;
+        }
+        
+        #home-track-name {
+            white-space: normal; /* Allows super long track names to safely wrap to a new line */
+            word-wrap: break-word;
+        }
 
     </style>
 </head>
