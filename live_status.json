@@ -36,21 +36,33 @@
       "LiveDrivers": [
         {
           "Class": 0,
-          "BestLap": "--:--.---",
-          "SR": "3.40",
+          "BestLap": "02:20.907",
+          "SR": "3.41",
           "Incidents": 4,
           "SteamID": "76561198158038393",
           "Name": "Higsby Higs",
-          "SessionLaps": "0",
+          "SessionLaps": 1,
           "Car": "PORSCHE 992 GT3 RS",
           "Level": 3.0,
           "Rating": 1529
+        },
+        {
+          "Class": 0,
+          "BestLap": "--:--.---",
+          "SR": "2.50",
+          "Incidents": 0,
+          "SteamID": "76561198316370021",
+          "Name": "Matheus Machado",
+          "SessionLaps": "0",
+          "Car": "PORSCHE 992 GT3 RS",
+          "Level": 1,
+          "Rating": 1500
         }
       ],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "1 / 64",
+      "Players": "2 / 64",
       "Track": "Mount Panorama\r\n[GP]"
     },
     {
@@ -94,5 +106,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 15:57:36"
+  "LastUpdated": "2026-05-12 16:02:41"
 }
