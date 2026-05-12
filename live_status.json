@@ -56,7 +56,7 @@
       "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "Old Timer Endurance Challenge",
-      "Mode": "Practice",
+      "Mode": "Qualifying",
       "Players": "0 / 35",
       "Track": "Mount Panorama\r\n[GP]"
     },
@@ -81,5 +81,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 12:39:56"
+  "LastUpdated": "2026-05-12 12:44:58"
 }
