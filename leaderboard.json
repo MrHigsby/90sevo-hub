@@ -3326,9 +3326,9 @@
     "SteamID": "76561198158038393",
     "Name": "Higsby Higs",
     "Car": "RENAULT 5 GT TURBO",
+    "LapTime": "02:01.836",
+    "TotalMs": 121836.0,
     "Track": "Laguna Seca\r\n[GP]",
-    "LapTime": "02:21.042",
-    "TotalMs": 141042.0,
-    "LapSetOn": 22
+    "LapSetOn": 25
   }
 ]
