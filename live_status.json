@@ -1,5 +1,5 @@
 {
-  "LastUpdated": "2026-05-11 19:51:30",
+  "LastUpdated": "2026-05-11 19:55:33",
   "Servers": [
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
@@ -50,7 +50,7 @@
       "Track": "Mount Panorama\r\n[GP]",
       "Port": "9605",
       "Name": "Endurance Race - Alfa Sprint GTA - Q20/R40",
-      "Mode": "Qualifying",
+      "Mode": "Practice",
       "Status": "🟢 ONLINE",
       "Players": "0 / 35",
       "LiveDrivers": []
@@ -59,7 +59,7 @@
       "Track": "Brands Hatch\r\n[GP]",
       "Port": "9606",
       "Name": "Quick Race - BMW M2 CS Racing - Q10R15",
-      "Mode": "Qualifying",
+      "Mode": "Practice",
       "Status": "🟢 ONLINE",
       "Players": "0 / 32",
       "LiveDrivers": []
