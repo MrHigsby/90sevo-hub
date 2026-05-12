@@ -33,25 +33,15 @@
     {
       "Port": "9603",
       "Name": "Street Legal Bathurst - Road Cars - Trackday",
-      "LiveDrivers": [],
-      "Status": "🟢 ONLINE",
-      "Season": "None",
-      "Mode": "Practice",
-      "Players": "0 / 64",
-      "Track": "Mount Panorama\r\n[GP]"
-    },
-    {
-      "Port": "9602",
-      "Name": "Street Legal Sebring - Road Cars - Trackday",
       "LiveDrivers": [
         {
           "Class": 0,
-          "BestLap": "03:01.957",
+          "BestLap": "--:--.---",
           "SR": "3.34",
           "Incidents": 0,
           "SteamID": "76561198158038393",
           "Name": "Higsby Higs",
-          "SessionLaps": 1,
+          "SessionLaps": "0",
           "Car": "RENAULT 5 GT TURBO",
           "Level": 3.0,
           "Rating": 1529
@@ -61,6 +51,16 @@
       "Season": "None",
       "Mode": "Practice",
       "Players": "1 / 64",
+      "Track": "Mount Panorama\r\n[GP]"
+    },
+    {
+      "Port": "9602",
+      "Name": "Street Legal Sebring - Road Cars - Trackday",
+      "LiveDrivers": [],
+      "Status": "🟢 ONLINE",
+      "Season": "None",
+      "Mode": "Practice",
+      "Players": "0 / 64",
       "Track": "Sebring International Raceway\r\n[GP]"
     },
     {
@@ -94,5 +94,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 15:37:20"
+  "LastUpdated": "2026-05-12 15:42:24"
 }
