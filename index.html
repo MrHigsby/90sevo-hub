@@ -1538,9 +1538,10 @@ const eventCard = `
         heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000);
     }
 
-    function updateHeroBanner() {
+function updateHeroBanner() {
         const activePage = document.querySelector('.page.active').id;
         
+        // 1. Prepare Leaderboard Slides (Same as before)
         let eloHtml = '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px;">[ LOAD PROFILES.JSON TO VIEW ]</div>';
         if (Object.keys(dbProfiles).length > 0) {
             const sortedElo = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]})).sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0, 10);
@@ -1564,11 +1565,25 @@ const eventCard = `
             { label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=1000" }
         ];
 
-        const p_season = [
-            { label: "[ SEASON EVENTS ]", title: "SEASON 4: GT3 SPRINT", data: "ROUNDS: 6 | REG. OPEN", color: "var(--neon-pink)", action: () => goToServerAndExpand('srv-r-0', 'race'), img: "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" }
-        ];
+        // --- THE DYNAMIC FIX ---
+        // 2. Generate Real Season Slides based on window.raceServers
+        let p_season = [];
+        const activeSeasons = (window.raceServers || []).filter(s => s.season && s.season !== "None");
 
-        // Ensure raceServers and tdServers have fallbacks to prevent crash
+        if (activeSeasons.length > 0) {
+            p_season = activeSeasons.map((s, i) => ({
+                label: "[ SEASON EVENTS ]",
+                title: s.season.toUpperCase(),
+                data: `> ${s.track.toUpperCase()} | STATUS: ${s.status}`,
+                color: "var(--neon-pink)",
+                action: () => goToServerAndExpand(`srv-r-${i}`, 'race'),
+                img: s.img || "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000"
+            }));
+        } else {
+            // Fallback slide if no season is found in the live data
+            p_season = [{ label: "[ SYSTEM ]", title: "NO ACTIVE SEASONS", data: "Official league events appear here when live.", color: "var(--neon-pink)", action: () => showPage('home'), img: IMAGE_DICT["DEFAULT"] }];
+        }
+
         const activeRace = window.raceServers && window.raceServers.length > 0 ? window.raceServers : [{name: "AWAITING RACES", p: "0/0", status: "OFFLINE", img: "https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500"}];
         const activeTd = window.tdServers && window.tdServers.length > 0 ? window.tdServers : [{name: "AWAITING TRACK DAYS", p: "0/0", status: "OFFLINE", img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=500"}];
 
