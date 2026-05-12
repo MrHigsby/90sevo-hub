@@ -32,38 +32,13 @@
       "Port": "9600"
     },
     {
-      "Port": "9601",
-      "Name": "Street Legal Seca - Road Cars - Trackday",
-      "LiveDrivers": [
-        {
-          "Class": 0,
-          "BestLap": "01:55.725",
-          "SR": "2.51",
-          "Incidents": 0,
-          "SteamID": "76561198743642509",
-          "Name": "blue santamaria",
-          "SessionLaps": 1,
-          "Car": "BMW M3 E30 EVO III",
-          "Level": 1.0,
-          "Rating": 1500
-        },
-        {
-          "Class": 0,
-          "BestLap": "01:37.491",
-          "SR": "2.53",
-          "Incidents": 0,
-          "SteamID": "76561198436617476",
-          "Name": "Rambo Lives",
-          "SessionLaps": 2,
-          "Car": "PORSCHE 992 GT3 RS",
-          "Level": 2.0,
-          "Rating": 1500
-        }
-      ],
-      "Status": "🟢 ONLINE",
+      "LiveDrivers": [],
       "Mode": "Practice",
-      "Players": "2 / 32",
-      "Track": "Laguna Seca\r\n[GP]"
+      "Status": "🟢 ONLINE",
+      "Players": "0 / 32",
+      "Track": "Laguna Seca\r\n[GP]",
+      "Name": "Street Legal Seca - Road Cars - Trackday",
+      "Port": "9601"
     },
     {
       "LiveDrivers": [],
@@ -111,5 +86,5 @@
       "Port": "9707"
     }
   ],
-  "LastUpdated": "2026-05-11 21:42:27"
+  "LastUpdated": "2026-05-11 21:47:33"
 }

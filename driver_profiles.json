@@ -1656,28 +1656,28 @@
   },
   "76561198743642509": {
     "MostDrivenTrack": "Laguna Seca\r\n[GP]",
-    "TrackdayXP": 25.0,
+    "TrackdayXP": 51.0,
     "RaceContacts": 0,
     "LicenseClass": 0,
-    "Laps": 1,
+    "Laps": 3,
     "TotalStartPos": 0,
     "Pylons": 0,
     "LapsPerTrack": {
-      "Laguna Seca\r\n[GP]": 1
+      "Laguna Seca\r\n[GP]": 3
     },
     "QualiIncidents": 0,
     "DNFs": 0,
     "Name": "blue santamaria",
     "MostDrivenCar": "BMW M3 E30 EVO III",
     "DriverRating": 1500,
-    "SafetyRating": 2.514685,
+    "SafetyRating": 2.544055,
     "LapsPerCar": {
-      "BMW M3 E30 EVO III": 1
+      "BMW M3 E30 EVO III": 3
     },
     "Poles": 0,
     "ServerStats": {},
     "Top5s": 0,
-    "TrackdayScuffs": 0,
+    "TrackdayScuffs": 1,
     "Wins": 0,
     "TotalFinishPos": 0
   },

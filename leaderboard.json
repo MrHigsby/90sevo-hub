@@ -3276,10 +3276,10 @@
     "SteamID": "76561198743642509",
     "Name": "blue santamaria",
     "Car": "BMW M3 E30 EVO III",
+    "LapTime": "01:53.601",
+    "TotalMs": 113601.0,
     "Track": "Laguna Seca\r\n[GP]",
-    "LapTime": "01:55.725",
-    "TotalMs": 115725.0,
-    "LapSetOn": 1
+    "LapSetOn": 3
   },
   {
     "ServerPort": "9601",
