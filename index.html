@@ -109,6 +109,29 @@
             box-sizing: border-box;
         }
 
+        /* --- ALL MOBILE RESPONSIVE RULES GO HERE --- */
+        @media (max-width: 768px) {
+            /* Mobile Telemetry Grid */
+            .telemetry-grid {
+                grid-template-columns: 25px 1fr 75px 65px;
+                gap: 5px;
+                font-size: 0.75rem !important;
+            }
+            .hide-on-mobile {
+                display: none !important; 
+            }
+            
+            /* Stacks the sub-banners */
+            .sub-banner-grid {
+                grid-template-columns: 1fr; 
+            }
+
+            /* Stacks the Global Rankings & Fast Laps into a vertical Top 10 on mobile */
+            .hero-grid-container {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
 .hero-grid-container > div {
     min-height: 120px; /* This prevents the box from shrinking when you only have a few drivers */
 }
