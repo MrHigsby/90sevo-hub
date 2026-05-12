@@ -65,11 +65,50 @@
 .panel { background: var(--panel-bg); border: 2px solid #333; padding: 15px; position: relative; margin-bottom: 20px; }
         .panel-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 5px; }
         
-        .attract-mode { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(0, 243, 255, 0.1); text-align: center; display: flex; flex-direction: column; justify-content: center;}
+/* UPDATED: Increased padding and centered content */
+        .attract-mode { 
+            border-color: var(--neon-cyan); 
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.1); 
+            text-align: center; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; /* Centers everything vertically */
+            padding: 30px !important; /* Pushes content away from the edges */
+        }
         
-        /* NEW: FIXED HEIGHT FOR HERO BANNER TO PREVENT RESIZING */
-        .hero-banner-container { height: 260px; box-sizing: border-box; transition: border-color 0.3s; cursor: pointer; overflow: hidden; background-color: #111; background-size: cover; background-position: center; position: relative;}
-        
+        .hero-banner-container { 
+            height: 320px; /* Increased height slightly for better spacing */
+            box-sizing: border-box; 
+            transition: border-color 0.3s; 
+            cursor: pointer; 
+            overflow: hidden; 
+            background-color: #111; 
+            background-size: cover; 
+            background-position: center; 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* ADD THIS: New rule for the data grid inside the banner */
+        .hero-grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 30px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 4px;
+            width: 95%;
+            max-width: 1000px;
+            margin: 20px auto 0 auto; /* 20px margin-top pushes it down from the Title */
+            box-sizing: border-box;
+        }
+
+.hero-grid-container > div {
+    min-height: 120px; /* This prevents the box from shrinking when you only have a few drivers */
+}
         /* BANNER NAVIGATION ARROWS */
         .banner-arrow { position: absolute; top: 50%; transform: translateY(-50%); font-size: 2rem; color: rgba(255,255,255,0.3); cursor: pointer; z-index: 20; padding: 15px; transition: 0.2s; user-select: none; font-family: sans-serif; }
         .banner-arrow:hover { color: #fff; text-shadow: 0 0 10px var(--neon-cyan); transform: translateY(-50%) scale(1.2); }
@@ -1692,6 +1731,9 @@ const buildTwoColumnList = (items, type) => {
     
     document.querySelectorAll('.hero-banner-container').forEach(banner => {
         banner.style.borderColor = slide.color;
+		banner.style.display = "flex";
+banner.style.flexDirection = "column";
+banner.style.justifyContent = "center"; // This forces vertical centering
         banner.querySelector('.hero-label').innerText = slide.label;
         banner.querySelector('.hero-label').style.color = slide.color;
         banner.querySelector('.hero-title').innerText = slide.title;
