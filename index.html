@@ -1622,7 +1622,7 @@ function manualBannerChange(dir) {
 	
 
 function updateHeroBanner() {
-    // --- 1. HELPER FUNCTION ---
+// --- 1. HELPER FUNCTION ---
     const buildTwoColumnList = (items, type) => {
         if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
         
@@ -1630,31 +1630,55 @@ function updateHeroBanner() {
         const col1 = items.slice(0, 5);
         const col2 = items.slice(5, 10);
         
+        // Expanded to 10 precise columns to fit all data
         const headerHtml = isFull ? `
-            <div class="tele-row tele-header" style="display: grid; grid-template-columns: 20px 80px 35px 75px 30px 80px 1fr; gap: 5px; border-bottom: 1px solid #555; color: #555; font-size: 0.6rem; font-weight: bold; padding-bottom: 2px; margin-bottom: 3px;">
-                <span>#</span><span>DRIVER</span><span>ELO</span><span>SR</span><span>LVL</span><span>CAR</span><span style="text-align:right">LAP</span>
+            <div class="tele-row tele-header" style="display: grid; grid-template-columns: 20px 85px 40px 65px 30px 75px 55px 20px 25px 30px; gap: 4px; border-bottom: 1px solid #555; color: #555; font-size: 0.55rem; font-weight: bold; padding-bottom: 2px; margin-bottom: 3px;">
+                <span>#</span><span>DRIVER</span><span>ELO</span><span>SR</span><span>LVL</span><span>CAR</span><span style="text-align:right">LAP</span><span style="text-align:center">L</span><span style="text-align:center">INC</span><span style="text-align:center">I/L</span>
             </div>` : '';
 
         const renderRow = (p, i, offset) => {
             const name = p.name || p.Name || "Unknown";
             const elo = p.rating || p.DriverRating || 1500;
-            const sr = p.sr || (p.SafetyRating ? p.SafetyRating.toFixed(2) : "2.50");
+            
+            // Format SR for the progress bar
+            const srRaw = p.sr || (p.SafetyRating ? p.SafetyRating : 2.50);
+            const srValue = parseFloat(srRaw).toFixed(2);
+            const srFillPct = getSrFill(srRaw);
+            
             const lvl = p.level || (p.TrackdayXP ? (Math.floor(Math.sqrt(p.TrackdayXP / 50)) + 1) : 1);
             const lap = p.lapTime || p.LapTime || "--:--.---";
             const car = p.car || p.Car || "---"; 
+            
             const clsIndex = (p.class !== undefined) ? p.class : (p.LicenseClass !== undefined ? p.LicenseClass : 0);
-            const cls = classLetters[clsIndex];
+            const cls = classLetters[clsIndex] || "R";
+            const colorStr = getStickerColor(cls);
+
+            // Incident Math
+            const lapsCount = p.laps || p.Laps || "0";
+            const incCount = p.incidents || p.Incidents || "0";
+            let parsedLaps = parseInt(lapsCount) || 0;
+            let incPerLap = "0.00";
+            if (parsedLaps > 0) {
+                incPerLap = (parseInt(incCount) / parsedLaps).toFixed(2);
+            }
+            let incColor = incPerLap >= 1.5 ? 'var(--neon-pink)' : '#fff';
 
             if (isFull) {
                 return `
-                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="display: grid; grid-template-columns: 20px 80px 35px 75px 30px 80px 1fr; gap: 5px; align-items: center; border-bottom: 1px dashed #333; padding: 4px 0; font-size: 0.65rem; font-family: 'Share Tech Mono';">
+                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="display: grid; grid-template-columns: 20px 85px 40px 65px 30px 75px 55px 20px 25px 30px; gap: 4px; align-items: center; border-bottom: 1px dashed #333; padding: 4px 0; font-size: 0.6rem; font-family: 'Share Tech Mono';">
                     <span style="color:#555;">${i + offset}</span>
-                    <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
+                    <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:85px;">${name}</span>
                     <span style="color:var(--neon-cyan);">${elo}</span>
-                    <span style="background:#111; border:1px solid ${getStickerColor(cls)}; padding:0 2px; border-radius:2px; font-size:0.55rem; text-align:center;">${cls} [${sr}]</span>
-                    <span style="color:var(--neon-gold); text-align:center;">L${lvl}</span>
-                    <span style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:0.6rem;">${car}</span>
-                    <span style="color:var(--neon-mint); text-align:right;">${lap}</span>
+                    
+                    <span style="display: inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFillPct}%, #111 ${srFillPct}%); padding: 0 4px; border-radius: 2px; font-size: 0.55rem; color: #fff; text-shadow: 1px 1px 1px #000; white-space: nowrap;">${cls} [${srValue}]</span>
+                    
+                    <span style="color:var(--neon-gold); font-size: 0.6rem; background: rgba(255,215,0,0.05); padding: 1px 3px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${lvl}</span>
+                    <span style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:75px;">${car}</span>
+                    <span style="color:var(--neon-mint); text-align:right; font-weight:bold; white-space:nowrap;">${lap}</span>
+                    
+                    <span style="color:#888; text-align:center;">${lapsCount}</span>
+                    <span style="color:#888; text-align:center;">${incCount}</span>
+                    <span style="color:${incColor}; text-align:center; font-weight:bold;">${incPerLap}</span>
                 </div>`;
             } else {
                 const val = type === 'elo' ? elo : lap;
@@ -2346,7 +2370,7 @@ function renderServerList(containerId, servers, isRace) {
                                 <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC/L</th>
                             </tr>
                         </thead>
-                        <tbody>
+<tbody>
                             ${s.roster.map(r => {
                                 const classStyle = getSRStyles(r.class);
                                 
@@ -2368,14 +2392,9 @@ function renderServerList(containerId, servers, isRace) {
                                     </td>
                                     
                                     <td style="padding: 8px 4px; text-align: left; white-space: nowrap;">
-                                        <div style="display: inline-flex; border: 1px solid ${classStyle.color}; border-radius: 2px; overflow: hidden; font-family: 'Share Tech Mono'; font-size: 0.65rem; font-weight: bold;">
-                                            <div style="background-color: ${classStyle.color}; color: #000; padding: 1px 5px; text-transform: uppercase;">
-                                                ${classStyle.name}
-                                            </div>
-                                            <div style="background-color: #111; color: #fff; padding: 1px 5px;">
-                                                ${r.sr}
-                                            </div>
-                                        </div>
+                                        <span style="display: inline-block; border: 1px solid ${classStyle.color}; background: linear-gradient(to right, ${classStyle.color} ${getSrFill(r.sr)}%, #111 ${getSrFill(r.sr)}%); padding: 1px 6px; border-radius: 2px; font-family: 'Share Tech Mono'; font-size: 0.65rem; font-weight: bold; color: #fff; text-shadow: 1px 1px 1px #000;">
+                                            ${classStyle.name} [${r.sr}]
+                                        </span>
                                     </td>
                                     
                                     <td style="padding: 8px 4px; text-align: left; white-space: nowrap;">
