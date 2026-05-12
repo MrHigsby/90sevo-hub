@@ -1,11 +1,11 @@
 {
-  "LastUpdated": "2026-05-11 18:01:33",
+  "LastUpdated": "2026-05-11 18:06:35",
   "Servers": [
     {
       "Track": "Nurburgring\r\n[Touristenfahrten]",
       "Mode": "Practice",
       "Port": "9604",
-      "Players": "0 / 64",
+      "Players": "1 / 64",
       "Status": "🟢 ONLINE",
       "LiveDrivers": [
         {
