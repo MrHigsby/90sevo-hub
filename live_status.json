@@ -33,36 +33,11 @@
     {
       "Port": "9603",
       "Name": "Street Legal Bathurst - Road Cars - Trackday",
-      "LiveDrivers": [
-        {
-          "Class": 0,
-          "BestLap": "02:20.856",
-          "SR": "3.47",
-          "Incidents": 4,
-          "SteamID": "76561198158038393",
-          "Name": "Higsby Higs",
-          "SessionLaps": 5,
-          "Car": "PORSCHE 992 GT3 RS",
-          "Level": 4.0,
-          "Rating": 1529
-        },
-        {
-          "Class": 0,
-          "BestLap": "02:10.851",
-          "SR": "2.53",
-          "Incidents": 10,
-          "SteamID": "76561198316370021",
-          "Name": "Matheus Machado",
-          "SessionLaps": 2,
-          "Car": "PORSCHE 992 GT3 RS",
-          "Level": 1.0,
-          "Rating": 1500
-        }
-      ],
+      "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "2 / 64",
+      "Players": "0 / 64",
       "Track": "Mount Panorama\r\n[GP]"
     },
     {
@@ -106,5 +81,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 16:12:47"
+  "LastUpdated": "2026-05-12 16:17:53"
 }
