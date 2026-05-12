@@ -3,32 +3,7 @@
     {
       "Port": "9604",
       "Name": "90s Night N├╝rburgring - Retro & Vintage - Tourist Regulations",
-      "LiveDrivers": [
-        {
-          "Class": 0,
-          "BestLap": "--:--.---",
-          "SR": "2.78",
-          "Incidents": 0,
-          "SteamID": "76561198203031740",
-          "Name": "Justin Case",
-          "SessionLaps": "0",
-          "Car": "PORSCHE 964 TURBO 3 6",
-          "Level": 1.0,
-          "Rating": 1471
-        },
-        {
-          "Class": 0,
-          "BestLap": "--:--.---",
-          "SR": "3.16",
-          "Incidents": 0,
-          "SteamID": "76561198158038393",
-          "Name": "Higsby Higs",
-          "SessionLaps": "0",
-          "Car": "LAMBORGHINI COUNTACH",
-          "Level": 1.0,
-          "Rating": 1529
-        }
-      ],
+      "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
@@ -91,7 +66,7 @@
       "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "BMW M2 CS Racing Challenge",
-      "Mode": "Practice",
+      "Mode": "Qualifying",
       "Players": "0 / 32",
       "Track": "Brands Hatch\r\n[GP]"
     },
@@ -106,5 +81,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-11 23:39:22"
+  "LastUpdated": "2026-05-11 23:44:25"
 }
