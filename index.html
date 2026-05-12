@@ -1967,7 +1967,8 @@ async function fetchLiveStatus() {
                         class: d.Class || 0,
                         level: d.Level || 1,
                         isSessionBest: (idx === 0 && d.BestLap && d.BestLap !== "--:--.---"), 
-                        steamId: d.SteamID
+                        steamId: d.SteamID,
+						incidents: d.Incidents || 0
                     }))
                 };
                 if (reservedRacePorts.includes(server.Port.toString()) || server.Name.toLowerCase().includes("race")) {
@@ -2022,7 +2023,7 @@ function renderServerList(containerId, servers, isRace) {
         if(s.roster && s.roster.length > 0) {
             rosterHtml = `
                 <div class="server-roster" id="${rosterId}" style="display: ${isExpanded ? 'block' : 'none'}; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
-                    <table class="server-roster-table" style="width: 100%; border-collapse: collapse;">
+<table class="server-roster-table" style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr style="color: #666; font-size: 0.70rem; text-transform: uppercase; font-family: 'Share Tech Mono'; border-bottom: 1px solid #333;">
                                 <th style="text-align: left; padding: 8px 4px; width: 3%;">#</th>
@@ -2033,11 +2034,25 @@ function renderServerList(containerId, servers, isRace) {
                                 <th style="text-align: center; padding: 8px 4px;">CAR</th>
                                 <th style="text-align: center; padding: 8px 4px;">LAP TIME</th>
                                 <th style="text-align: center; padding: 8px 4px;">SESSION LAPS</th>
+                                <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INCIDENTS</th>
+                                <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC/LAP</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${s.roster.map(r => {
                                 const classStyle = getSRStyles(r.class);
+                                
+                                // --- THE NEW MATH LOGIC ---
+                                let parsedLaps = parseInt(r.laps) || 0;
+                                let incPerLap = "0.00";
+                                if (parsedLaps > 0) {
+                                    incPerLap = (r.incidents / parsedLaps).toFixed(2);
+                                }
+                                
+                                // Color it red if they are driving terribly (averaging more than 1.5 incidents a lap)
+                                let incColor = incPerLap >= 1.5 ? 'var(--neon-pink)' : '#fff';
+                                // --------------------------
+
                                 return `
                                 <tr onclick="event.stopPropagation(); openDriverCard('${r.steamId}')" style="border-bottom: 1px solid #222; cursor: pointer;">
                                     <td style="padding: 8px 4px; color: #555; font-family: 'Share Tech Mono';">${r.pos}</td>
@@ -2065,6 +2080,9 @@ function renderServerList(containerId, servers, isRace) {
                                     <td style="padding: 8px 4px; text-align: center; color: #aaa; font-size: 0.80rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">${r.car}</td>
                                     <td style="padding: 8px 4px; text-align: center; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold; font-family: 'Share Tech Mono';">${r.lapTime}</td>
                                     <td style="padding: 8px 4px; text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
+                                    
+                                    <td style="padding: 8px 4px; text-align: center; color: #888; font-family: 'Share Tech Mono';">${r.incidents}x</td>
+                                    <td style="padding: 8px 4px; text-align: center; color: ${incColor}; font-weight: bold; font-family: 'Share Tech Mono';">${incPerLap}</td>
                                 </tr>`;
                             }).join('')}
                         </tbody>
