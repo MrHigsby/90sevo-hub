@@ -215,16 +215,73 @@
         .chapter-text li { margin-bottom: 10px; }
         .chapter-highlight { color: var(--neon-pink); font-family: 'Share Tech Mono'; font-weight: bold; }
 
-        /* SEASON / CALENDAR STYLES */
-        .event-card-grid { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
-        .event-card { border: 1px solid var(--neon-gold); flex: 1; min-width: 200px; max-width: 300px; position: relative; overflow: hidden; cursor: pointer; transition: 0.3s; min-height: 120px; display: flex; align-items: flex-end;}
-        .event-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255, 183, 0, 0.3); border-color: #fff;}
-        .event-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0.4; transition: 0.3s; z-index: 0;}
-        .event-card:hover .event-bg { opacity: 0.7; transform: scale(1.05);}
-        .event-content { position: relative; z-index: 1; padding: 15px; background: linear-gradient(transparent, rgba(0,0,0,0.9) 30%, #000); width: 100%; box-sizing: border-box;}
-        .event-content h3 { color: #fff; margin: 0 0 5px 0; font-family: 'Chakra Petch'; text-transform: uppercase; font-size: 1.1rem; text-shadow: 1px 1px 2px #000;}
-        .event-track { color: var(--neon-gold); font-size: 0.85rem; font-family: 'Share Tech Mono'; font-weight: bold; }
-        .event-status { color: #aaa; font-size: 0.75rem; font-family: 'Share Tech Mono'; margin-top: 3px;}
+/* SEASON / CALENDAR STYLES - UPDATED */
+        .event-card-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 20px; 
+            margin-bottom: 30px; 
+        }
+
+        .event-card { 
+            border: 1px solid var(--neon-gold); 
+            background: #000;
+            position: relative; 
+            overflow: hidden; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            display: flex; 
+            flex-direction: column; /* Stack image on top of text */
+            border-radius: 4px;
+        }
+
+        .event-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 5px 15px rgba(255, 183, 0, 0.3); 
+            border-color: #fff;
+        }
+
+        /* This targets the <img> tag created by our JavaScript */
+        .event-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid #222;
+            transition: 0.3s;
+        }
+
+        .event-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .event-content { 
+            padding: 15px; 
+            background: #000; 
+            width: 100%; 
+            box-sizing: border-box;
+        }
+
+        .event-content h3 { 
+            color: #fff; 
+            margin: 0 0 5px 0; 
+            font-family: 'Chakra Petch'; 
+            text-transform: uppercase; 
+            font-size: 1.1rem; 
+        }
+
+        .event-track { 
+            color: var(--neon-gold); 
+            font-size: 0.85rem; 
+            font-family: 'Share Tech Mono'; 
+            font-weight: bold; 
+        }
+
+        .event-status { 
+            color: #aaa; 
+            font-size: 0.75rem; 
+            font-family: 'Share Tech Mono'; 
+            margin-top: 3px;
+        }
         
         .standings-tab-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
         .standings-tab { flex: 1; background: #000; border: 1px solid #444; color: #888; padding: 12px; font-family: 'Chakra Petch'; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: 0.2s; min-width: 200px; text-align: center;}
@@ -1175,13 +1232,13 @@ function getServerImage(server) {
 
     activeSeasons.forEach(srv => {
         // Create the Event Card HTML
-        const eventCard = `
+const eventCard = `
             <div class="event-card" onclick="goToServerAndExpand('srv-${srv.port}', 'race')">
-                <img src="${srv.img}" alt="${srv.season}" style="width:100%; height:150px; object-fit:cover;">
-                <div class="event-card-content">
+                <img src="${srv.img}" alt="${srv.season}">
+                <div class="event-content">
                     <h3>${srv.season.toUpperCase()}</h3>
-                    <p class="track-name">> ${srv.track.toUpperCase()}</p>
-                    <p class="status">STATUS: <span class="pulse">${srv.status}</span></p>
+                    <div class="event-track">> ${srv.track.toUpperCase()}</div>
+                    <div class="event-status">STATUS: ${srv.status}</div>
                 </div>
             </div>
         `;
