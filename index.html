@@ -2024,15 +2024,15 @@ function renderServerList(containerId, servers, isRace) {
                 <div class="server-roster" id="${rosterId}" style="display: ${isExpanded ? 'block' : 'none'}; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
                     <table class="server-roster-table" style="width: 100%; border-collapse: collapse;">
                         <thead>
-                            <tr style="color: #666; font-size: 0.70rem; text-transform: uppercase; font-family: 'Share Tech Mono';">
-                                <th style="text-align: left; padding-bottom: 8px; width: 5%;">#</th>
-                                <th style="text-align: left; padding-bottom: 8px; width: 20%;">DRIVER</th>
-                                <th style="text-align: left; padding-bottom: 8px; width: 10%;">RATING</th>
-                                <th style="text-align: left; padding-bottom: 8px; width: 18%;">SAFETY</th>
-                                <th style="text-align: left; padding-bottom: 8px; width: 8%;">XP</th>
-                                <th style="text-align: left; padding-bottom: 8px; width: 19%;">CAR</th>
-                                <th style="text-align: center; padding-bottom: 8px; width: 10%;">LAPS</th>
-                                <th style="text-align: right; padding-bottom: 8px; width: 10%;">BEST</th>
+                            <tr style="color: #666; font-size: 0.70rem; text-transform: uppercase; font-family: 'Share Tech Mono'; border-bottom: 1px solid #333;">
+                                <th style="text-align: left; padding: 8px 4px; width: 3%;">#</th>
+                                <th style="text-align: left; padding: 8px 4px; width: 22%;">DRIVER</th>
+                                <th style="text-align: center; padding: 8px 10px;">RATING (ELO)</th>
+                                <th style="text-align: center; padding: 8px 10px;">SAFETY RATING (SR)</th>
+                                <th style="text-align: center; padding: 8px 10px;">TRACKXP (TXP)</th>
+                                <th style="text-align: left; padding: 8px 4px;">CAR</th>
+                                <th style="text-align: right; padding: 8px 4px;">LAP TIME</th>
+                                <th style="text-align: center; padding: 8px 4px;">SESSION LAPS</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2040,14 +2040,14 @@ function renderServerList(containerId, servers, isRace) {
                                 const classStyle = getSRStyles(r.class);
                                 return `
                                 <tr onclick="event.stopPropagation(); openDriverCard('${r.steamId}')" style="border-bottom: 1px solid #222; cursor: pointer;">
-                                    <td style="padding: 8px 0; color: #555; font-family: 'Share Tech Mono';">${r.pos}</td>
-                                    <td style="padding: 8px 0; font-weight: bold; color: #fff;">${r.name}</td>
+                                    <td style="padding: 8px 4px; color: #555; font-family: 'Share Tech Mono';">${r.pos}</td>
+                                    <td style="padding: 8px 4px; font-weight: bold; color: #fff; white-space: nowrap;">${r.name}</td>
                                     
-                                    <td style="padding: 8px 0; white-space: nowrap;">
-                                        <span style="color: #fff; font-family: 'Share Tech Mono'; font-size: 0.70rem; background: #222; padding: 2px 5px; border-radius: 3px; border: 1px solid #444;">${r.rating} ELO</span>
+                                    <td style="padding: 8px 10px; text-align: center; white-space: nowrap;">
+                                        <span style="color: #fff; font-family: 'Share Tech Mono'; font-size: 0.70rem; background: #222; padding: 2px 6px; border-radius: 3px; border: 1px solid #444;">${r.rating}</span>
                                     </td>
                                     
-                                    <td style="padding: 8px 0; white-space: nowrap;">
+                                    <td style="padding: 8px 10px; text-align: center; white-space: nowrap;">
                                         <div style="display: inline-flex; border: 2px solid ${classStyle.color}; border-radius: 3px; overflow: hidden; font-family: 'Share Tech Mono'; font-size: 0.70rem; font-weight: bold;">
                                             <div style="background-color: ${classStyle.color}; color: #fff; padding: 1px 5px; text-transform: uppercase; text-shadow: 1px 1px 0 #000;">
                                                 CLASS ${classStyle.name}
@@ -2058,13 +2058,13 @@ function renderServerList(containerId, servers, isRace) {
                                         </div>
                                     </td>
                                     
-                                    <td style="padding: 8px 0; white-space: nowrap;">
-                                        <span style="color: var(--neon-gold); font-family: 'Share Tech Mono'; font-size: 0.70rem; background: rgba(255,215,0,0.05); padding: 2px 5px; border-radius: 3px; border: 1px solid var(--neon-gold);">LVL ${r.level}</span>
+                                    <td style="padding: 8px 10px; text-align: center; white-space: nowrap;">
+                                        <span style="color: var(--neon-gold); font-family: 'Share Tech Mono'; font-size: 0.70rem; background: rgba(255,215,0,0.05); padding: 2px 6px; border-radius: 3px; border: 1px solid var(--neon-gold);">LVL ${r.level}</span>
                                     </td>
                                     
-                                    <td style="padding: 8px 0; color: #aaa; font-size: 0.80rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">${r.car}</td>
-                                    <td style="padding: 8px 0; text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
-                                    <td style="padding: 8px 0; text-align: right; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold; font-family: 'Share Tech Mono';">${r.lapTime}</td>
+                                    <td style="padding: 8px 4px; color: #aaa; font-size: 0.80rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">${r.car}</td>
+                                    <td style="padding: 8px 4px; text-align: right; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold; font-family: 'Share Tech Mono';">${r.lapTime}</td>
+                                    <td style="padding: 8px 4px; text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
                                 </tr>`;
                             }).join('')}
                         </tbody>
