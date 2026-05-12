@@ -30,7 +30,7 @@
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "0 / 32",
+      "Players": "0 / 64",
       "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
@@ -50,7 +50,7 @@
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "0 / 32",
+      "Players": "0 / 64",
       "Track": "Mount Panorama\r\n[GP]"
     },
     {
@@ -60,7 +60,7 @@
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "0 / 32",
+      "Players": "0 / 64",
       "Track": "Sebring International Raceway\r\n[GP]"
     },
     {
@@ -94,5 +94,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 14:26:20"
+  "LastUpdated": "2026-05-12 14:31:24"
 }
