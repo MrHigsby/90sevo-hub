@@ -1539,99 +1539,112 @@ const eventCard = `
     }
 
 function updateHeroBanner() {
-        const activePage = document.querySelector('.page.active').id;
+    const activePage = document.querySelector('.page.active').id;
+    
+    // HELPER: Builds the 1-5 / 6-10 columns
+    const buildTwoColumnList = (items, type) => {
+        if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
         
-        // HELPER: Function to build 2-column lists (1-5 left, 6-10 right)
-        const buildTwoColumnList = (items, type) => {
-            if (items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px;">[ NO DATA FOUND ]</div>';
-            
-            const col1 = items.slice(0, 5);
-            const col2 = items.slice(5, 10);
-            
-            let html = `<div style="font-family:'Share Tech Mono'; font-size:0.85rem; text-align:left; width: 100%; max-width:750px; margin: 5px auto 0 auto; background:rgba(0,0,0,0.8); border:1px solid ${type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)'}; padding:10px 15px; z-index: 10; box-sizing:border-box; display: grid; grid-template-columns: 1fr 1fr; column-gap: 40px;">`;
-            
-            // Left Column (1-5)
-            html += `<div>`;
-            col1.forEach((p, i) => {
-                const val = type === 'elo' ? p.DriverRating || 1500 : p.LapTime;
-                html += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:3px 0; cursor:pointer;" onclick="event.stopPropagation(); openDriverCard('${p.id || p.SteamID}')" onmouseover="this.style.color='var(--neon-pink)'" onmouseout="this.style.color=''"><span>${i+1}. ${p.Name}</span><span style="color:${type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)'}; font-weight:bold;">${val}</span></div>`;
-            });
-            html += `</div>`;
+        const col1 = items.slice(0, 5);
+        const col2 = items.slice(5, 10);
+        
+        let html = `<div style="font-family:'Share Tech Mono'; font-size:0.85rem; text-align:left; width: 100%; max-width:750px; margin: 5px auto 0 auto; background:rgba(0,0,0,0.8); border:1px solid ${type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)'}; padding:10px 15px; z-index: 10; box-sizing:border-box; display: grid; grid-template-columns: 1fr 1fr; column-gap: 40px;">`;
+        
+        // Left Column (1-5)
+        html += `<div>`;
+        col1.forEach((p, i) => {
+            const val = type === 'elo' ? p.DriverRating || p.rating || 1500 : p.LapTime;
+            html += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:3px 0; cursor:pointer;" onclick="event.stopPropagation(); openDriverCard('${p.id || p.steamId}')" onmouseover="this.style.color='var(--neon-pink)'" onmouseout="this.style.color=''"><span>${i+1}. ${p.Name || p.name}</span><span style="color:${type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)'}; font-weight:bold;">${val}</span></div>`;
+        });
+        html += `</div>`;
 
-            // Right Column (6-10)
-            html += `<div>`;
-            col2.forEach((p, i) => {
-                const val = type === 'elo' ? p.DriverRating || 1500 : p.LapTime;
-                html += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:3px 0; cursor:pointer;" onclick="event.stopPropagation(); openDriverCard('${p.id || p.SteamID}')" onmouseover="this.style.color='var(--neon-pink)'" onmouseout="this.style.color=''"><span>${i+6}. ${p.Name}</span><span style="color:${type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)'}; font-weight:bold;">${val}</span></div>`;
-            });
-            html += `</div>`;
+        // Right Column (6-10)
+        html += `<div>`;
+        col2.forEach((p, i) => {
+            const val = type === 'elo' ? p.DriverRating || p.rating || 1500 : p.LapTime;
+            html += `<div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:3px 0; cursor:pointer;" onclick="event.stopPropagation(); openDriverCard('${p.id || p.steamId}')" onmouseover="this.style.color='var(--neon-pink)'" onmouseout="this.style.color=''"><span>${i+6}. ${p.Name || p.name}</span><span style="color:${type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)'}; font-weight:bold;">${val}</span></div>`;
+        });
+        html += `</div>`;
 
-            html += `</div>`;
-            return html;
-        };
+        html += `</div>`;
+        return html;
+    };
 
-        // 1. Prepare Data
-        const sortedElo = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]})).sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0, 10);
-        const eloHtml = buildTwoColumnList(sortedElo, 'elo');
+    // 1. DATA PREP
+    const sortedElo = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]})).sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0, 10);
+    const eloHtml = buildTwoColumnList(sortedElo, 'elo');
 
-        let trHtml = '[ LOAD LEADERBOARD.JSON ]';
-        if (dbLeaderboard.length > 0) {
-            const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown Track'))];
-            const track = tracks[Math.floor(Date.now() / 15000) % tracks.length] || tracks[0]; 
-            const top10 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0, 10);
-            trHtml = `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${track.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps');
-        }
+    let trHtml = '[ LOAD LEADERBOARD.JSON ]';
+    if (dbLeaderboard.length > 0) {
+        const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown Track'))];
+        const track = tracks[Math.floor(Date.now() / 15000) % tracks.length] || tracks[0]; 
+        const top10 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0, 10);
+        trHtml = `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${track.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps');
+    }
 
-        // 2. BUILD THE SLIDE POOL
-        const p_leaderboard = [
-            { label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" },
-            { label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=1000" }
-        ];
+    // 2. SLIDE POOL CONSTRUCTION
+    let pool = [];
 
-        // 3. NEW: 90s Nurburgring (Port 9604) Slide
-        let p_nurb = [];
-        const nurbServer = [...(window.raceServers||[]), ...(window.tdServers||[])].find(s => s.port == "9604");
-        if (nurbServer) {
-            const roster = nurbServer.roster || [];
-            const rosterHtml = buildTwoColumnList(roster.slice(0, 10), 'elo');
-            p_nurb = [{ 
-                label: "[ FEATURED SERVER ]", 
-                title: "90s NIGHT NURBURGRING", 
-                data: `<div style="color:var(--neon-gold); text-align:center; font-family:'Share Tech Mono'; font-size:0.8rem; margin-bottom:5px;">LIVE ONLINE DRIVERS (${nurbServer.p})</div>` + rosterHtml, 
-                color: "var(--neon-gold)", 
-                action: () => goToServerAndExpand('srv-t-0', 'trackday'), 
-                img: IMAGE_DICT["Nordschleife"] 
-            }];
-        }
-
-        // 4. Real Seasons Slides
-        const activeSeasons = (window.raceServers || []).filter(s => s.season && s.season !== "None");
-        const p_season = activeSeasons.map((s, i) => ({
+    // SEASONS
+    const activeSeasons = (window.raceServers || []).filter(s => s.season && s.season !== "None");
+    activeSeasons.forEach((s, i) => {
+        pool.push({
             label: "[ SEASON EVENTS ]",
             title: s.season.toUpperCase(),
-            data: `<div style="text-align:center; font-size:1.2rem; margin-top:20px;">> ${s.track.toUpperCase()}<br>STATUS: ${s.status}</div>`,
+            data: `<div style="text-align:center; font-size:1.2rem; margin-top:20px; font-family:'Share Tech Mono';"> TRACK: ${s.track.toUpperCase()}<br>STATUS: ${s.status}</div>`,
             color: "var(--neon-pink)",
             action: () => goToServerAndExpand(`srv-r-${i}`, 'race'),
             img: s.img
-        }));
+        });
+    });
 
-        // Combine into the final pool
-        let pool = [...p_season, ...p_nurb, ...p_leaderboard];
-
-        if(pool.length === 0) return;
-        let safeIdx = ((globalBannerIdx % pool.length) + pool.length) % pool.length;
-        const slide = pool[safeIdx];
-        
-        document.querySelectorAll('.hero-banner-container').forEach(banner => {
-            banner.style.borderColor = slide.color;
-            banner.querySelector('.hero-label').innerText = slide.label;
-            banner.querySelector('.hero-label').style.color = slide.color;
-            banner.querySelector('.hero-title').innerText = slide.title;
-            banner.querySelector('.hero-data').innerHTML = slide.data;
-            banner.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${slide.img}')`;
-            banner.onclick = slide.action;
+    // 90s NURBURGRING (Port 9604)
+    const nurbServer = [...(window.raceServers||[]), ...(window.tdServers||[])].find(s => s.port == "9604");
+    if (nurbServer) {
+        pool.push({ 
+            label: "[ FEATURED SERVER ]", 
+            title: "90s NURBURGRING TOURISTENFAHRTEN", 
+            data: `<div style="color:var(--neon-gold); text-align:center; font-family:'Share Tech Mono'; font-size:0.8rem; margin-bottom:5px;">LIVE ONLINE DRIVERS (${nurbServer.p})</div>` + buildTwoColumnList(nurbServer.roster.slice(0, 10), 'elo'), 
+            color: "var(--neon-gold)", 
+            action: () => goToServerAndExpand('srv-t-0', 'trackday'), 
+            img: IMAGE_DICT["Nordschleife"] 
         });
     }
+
+    // RANKINGS
+    pool.push({ label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" });
+    pool.push({ label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=1000" });
+
+    if(pool.length === 0) return;
+    let safeIdx = ((globalBannerIdx % pool.length) + pool.length) % pool.length;
+    const slide = pool[safeIdx];
+    
+    document.querySelectorAll('.hero-banner-container').forEach(banner => {
+        banner.style.borderColor = slide.color;
+        banner.querySelector('.hero-label').innerText = slide.label;
+        banner.querySelector('.hero-label').style.color = slide.color;
+        banner.querySelector('.hero-title').innerText = slide.title;
+        banner.querySelector('.hero-data').innerHTML = slide.data;
+        banner.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${slide.img}')`;
+        banner.onclick = slide.action;
+
+        // --- ARROW LOGIC (RE-ADDED) ---
+        if (!banner.querySelector('.banner-arrow.left')) {
+            const leftArr = document.createElement('div'); 
+            leftArr.className = 'banner-arrow left'; 
+            leftArr.innerHTML = '&#10094;';
+            leftArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(-1); };
+            
+            const rightArr = document.createElement('div'); 
+            rightArr.className = 'banner-arrow right'; 
+            rightArr.innerHTML = '&#10095;';
+            rightArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(1); };
+            
+            banner.appendChild(leftArr); 
+            banner.appendChild(rightArr);
+        }
+    });
+}
 
     // --- LEADERBOARD & TABLES ---
     const lbMode = document.getElementById('lbMode');
