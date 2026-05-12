@@ -20,7 +20,7 @@
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "0 / 32",
+      "Players": "1 / 32",
       "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
@@ -68,7 +68,7 @@
       "Name": "Endurance Race - Alfa Sprint GTA - Q20/R40",
       "LiveDrivers": [],
       "Status": "🟢 ONLINE",
-      "Season": "None",
+      "Season": "Old Timer Endurance Challenge",
       "Mode": "Practice",
       "Players": "0 / 35",
       "Track": "Mount Panorama\r\n[GP]"
@@ -88,11 +88,11 @@
       "Name": "Quick Race - GT3 Cars - Q10R15",
       "LiveDrivers": [],
       "Status": "🟢 ONLINE",
-      "Season": "None",
+      "Season": "GT3 Endurance Challenge",
       "Mode": "Practice",
       "Players": "0 / 32",
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-11 22:25:50"
+  "LastUpdated": "2026-05-11 22:30:52"
 }
