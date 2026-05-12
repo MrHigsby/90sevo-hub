@@ -1153,6 +1153,36 @@
 
 <script>
     // --- GLOBAL VARIABLES ---
+	// --- THE MASTER IMAGE DICTIONARY ---
+    const IMAGE_DICT = {
+        // --- SEASON IMAGES ---
+        // Must match exactly what you type in the PowerShell "Manage Season" box
+        "GT3 SPRINT (SEASON 4)": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Vote.png",
+        "MX5 CUP": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/MX5_CUP_Vote.png",
+        "90s JDM TOUGE": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/AE86_Vote.png",
+        
+        // --- TRACK IMAGES ---
+        // Used for Practice/Track Day servers. Must match the Track Name.
+        "Nordschleife": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/tracklayout/TouristenfahrtenLayout.png",
+        "Spa-Francorchamps": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/tracklayout/SpaGPLayout.png",
+        "Suzuka Circuit": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/tracklayout/SuzukaGPLayout.png",
+        "Mount Panorama": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/tracklayout/MountPanoramaGPLayout.png",
+        
+        // --- THE FALLBACK ---
+        // A generic image if no match is found
+        "DEFAULT": "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" 
+    };
+
+    // Auto-Matcher Function
+    function getServerImage(server) {
+        if (server.season && server.season !== "None" && IMAGE_DICT[server.season]) {
+            return IMAGE_DICT[server.season];
+        }
+        if (server.track && IMAGE_DICT[server.track]) {
+            return IMAGE_DICT[server.track];
+        }
+        return IMAGE_DICT["DEFAULT"];
+    }
     let dbProfiles = {};
     let dbLeaderboard = [];
     const classLetters = ["R", "D", "C", "B", "A", "S"];
@@ -1948,14 +1978,15 @@ async function fetchLiveStatus() {
             let liveTdServers = [];
             const reservedRacePorts = ["9605", "9606", "9607"]; 
 
-            data.Servers.forEach(server => {
+data.Servers.forEach(server => {
                 const serverObj = {
                     name: server.Name, 
                     track: server.Track, 
                     p: server.Players,
                     status: server.Mode ? server.Mode.toUpperCase() : "ONLINE",
                     port: server.Port,
-                    img: "https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500",
+                    season: server.Season || "None", // <--- Pulls Season from Firebase
+                    img: "",                         // <--- Placeholder
                     roster: (server.LiveDrivers || []).map((d, idx) => ({
                         pos: idx + 1, 
                         name: d.Name, 
@@ -1968,9 +1999,13 @@ async function fetchLiveStatus() {
                         level: d.Level || 1,
                         isSessionBest: (idx === 0 && d.BestLap && d.BestLap !== "--:--.---"), 
                         steamId: d.SteamID,
-						incidents: d.Incidents || 0
+                        incidents: d.Incidents || 0
                     }))
                 };
+                
+                // Assign the image automatically using our dictionary!
+                serverObj.img = getServerImage(serverObj);
+
                 if (reservedRacePorts.includes(server.Port.toString()) || server.Name.toLowerCase().includes("race")) {
                     liveRaceServers.push(serverObj);
                 } else { liveTdServers.push(serverObj); }
