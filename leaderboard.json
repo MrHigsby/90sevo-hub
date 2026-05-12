@@ -3290,5 +3290,15 @@
     "TotalMs": 97491.0,
     "Track": "Laguna Seca\r\n[GP]",
     "LapSetOn": 2
+  },
+  {
+    "ServerPort": "9601",
+    "SteamID": "76561199195912503",
+    "Name": "Andrew Senju",
+    "Car": "PORSCHE 992 GT3 RS",
+    "Track": "Laguna Seca\r\n[GP]",
+    "LapTime": "01:47.712",
+    "TotalMs": 107712.0,
+    "LapSetOn": 1
   }
 ]

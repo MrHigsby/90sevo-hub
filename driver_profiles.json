@@ -267,6 +267,33 @@
       "Laguna Seca\r\n[GP]": 3
     }
   },
+  "76561199195912503": {
+    "MostDrivenTrack": "Laguna Seca\r\n[GP]",
+    "TrackdayXP": 25.0,
+    "RaceContacts": 0,
+    "LicenseClass": 0,
+    "Laps": 1,
+    "TotalStartPos": 0,
+    "Pylons": 0,
+    "LapsPerTrack": {
+      "Laguna Seca\r\n[GP]": 1
+    },
+    "QualiIncidents": 0,
+    "DNFs": 0,
+    "Name": "Andrew Senju",
+    "MostDrivenCar": "PORSCHE 992 GT3 RS",
+    "DriverRating": 1500,
+    "SafetyRating": 2.514685,
+    "LapsPerCar": {
+      "PORSCHE 992 GT3 RS": 1
+    },
+    "Poles": 0,
+    "ServerStats": {},
+    "Top5s": 0,
+    "TrackdayScuffs": 0,
+    "Wins": 0,
+    "TotalFinishPos": 0
+  },
   "76561198348266870": {
     "MostDrivenCar": "None",
     "MostDrivenTrack": "None",
