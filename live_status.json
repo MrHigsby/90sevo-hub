@@ -25,12 +25,24 @@
           "Car": "CHEVROLET CAMARO ZL1",
           "Level": 4.0,
           "Rating": 1529
+        },
+        {
+          "Class": 0,
+          "BestLap": "--:--.---",
+          "SR": "2.51",
+          "Incidents": 0,
+          "SteamID": "76561198168865594",
+          "Name": "steph rioux",
+          "SessionLaps": "0",
+          "Car": "PORSCHE 992 GT3 RS",
+          "Level": 1.0,
+          "Rating": 1500
         }
       ],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "1 / 64",
+      "Players": "2 / 64",
       "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
@@ -94,5 +106,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 17:36:30"
+  "LastUpdated": "2026-05-12 17:41:33"
 }
