@@ -129,7 +129,9 @@
             /* Stacks the Global Rankings & Fast Laps into a vertical Top 10 on mobile */
             .hero-grid-container {
                 grid-template-columns: 1fr !important;
-        .home-stats-grid {
+            } /* <--- THIS WAS THE MISSING BRACKET! */
+
+            .home-stats-grid {
                 grid-template-columns: 1fr !important;
                 gap: 10px;
             }
@@ -592,13 +594,13 @@
                     <div>
                         <div style="color: #888; margin-bottom: 10px;">> Top TrackXP Level</div>
                         <div id="homeLevelList"><div style="color: #444;">[ LOAD PROFILES.JSON ]</div></div>
-                    </div>
+</div>
                     
                 </div>
             </div>
 
-        </div> <!-- Closes the .home-grid -->
-    </div> <!-- THE MISSING BRICK! This closes the entire Home Page! -->
+        </div> <!-- CLOSES THE HOME-GRID -->
+    </div> <!-- CLOSES THE ENTIRE HOME PAGE -->
 
     <div id="news" class="page">
         <div class="panel attract-mode hero-banner-container" style="margin-bottom: 20px; cursor: pointer; transition: border-color 0.3s;" onclick="goToHeroPage()">
