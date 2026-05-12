@@ -1582,17 +1582,17 @@ function updateHeroBanner() {
     const activePage = document.querySelector('.page.active').id;
     
 // HELPER: Builds the 1-5 / 6-10 columns with support for full telemetry
-    const buildTwoColumnList = (items, type) => {
+const buildTwoColumnList = (items, type) => {
         if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
         
         const isFull = (type === 'full');
         const col1 = items.slice(0, 5);
         const col2 = items.slice(5, 10);
         
-        // Headers only show for the Featured Server slide
+        // Header updated to include CAR
         const headerHtml = isFull ? `
-            <div class="tele-row tele-header">
-                <span>#</span><span>DRIVER</span><span>ELO</span><span>SR</span><span>LVL</span><span style="text-align:right">LAP</span><span style="text-align:right">L</span>
+            <div class="tele-row tele-header" style="display: grid; grid-template-columns: 20px 80px 35px 75px 30px 80px 1fr; gap: 5px; border-bottom: 1px solid #555; color: #555; font-size: 0.6rem; font-weight: bold; padding-bottom: 2px; margin-bottom: 3px;">
+                <span>#</span><span>DRIVER</span><span>ELO</span><span>SR</span><span>LVL</span><span>CAR</span><span style="text-align:right">LAP</span>
             </div>` : '';
 
         const renderRow = (p, i, offset) => {
@@ -1601,20 +1601,20 @@ function updateHeroBanner() {
             const sr = p.sr || (p.SafetyRating ? p.SafetyRating.toFixed(2) : "2.50");
             const lvl = p.level || (p.TrackdayXP ? (Math.floor(Math.sqrt(p.TrackdayXP / 50)) + 1) : 1);
             const lap = p.lapTime || p.LapTime || "--:--.---";
-            const laps = p.laps || p.Laps || "0";
+            const car = p.car || p.Car || "---"; // Get the car name
             const clsIndex = (p.class !== undefined) ? p.class : (p.LicenseClass !== undefined ? p.LicenseClass : 0);
             const cls = classLetters[clsIndex];
 
             if (isFull) {
                 return `
-                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')">
+                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="display: grid; grid-template-columns: 20px 80px 35px 75px 30px 80px 1fr; gap: 5px; align-items: center; border-bottom: 1px dashed #333; padding: 4px 0; font-size: 0.65rem; font-family: 'Share Tech Mono';">
                     <span style="color:#555;">${i + offset}</span>
                     <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
                     <span style="color:var(--neon-cyan);">${elo}</span>
-                    <span style="background:#111; border:1px solid ${getStickerColor(cls)}; padding:0 2px; border-radius:2px; font-size:0.6rem; text-align:center;">${cls} [${sr}]</span>
-                    <span style="color:var(--neon-gold); text-align:center;">${lvl}</span>
+                    <span style="background:#111; border:1px solid ${getStickerColor(cls)}; padding:0 2px; border-radius:2px; font-size:0.55rem; text-align:center;">${cls} [${sr}]</span>
+                    <span style="color:var(--neon-gold); text-align:center;">L${lvl}</span>
+                    <span style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:0.6rem;">${car}</span>
                     <span style="color:var(--neon-mint); text-align:right;">${lap}</span>
-                    <span style="color:#666; text-align:right;">${laps}</span>
                 </div>`;
             } else {
                 const val = type === 'elo' ? elo : lap;
@@ -1627,8 +1627,7 @@ function updateHeroBanner() {
             }
         };
 
-        // We use the hero-grid-container class we added to the CSS
-        let html = `<div class="hero-grid-container">`;
+        let html = `<div class="hero-grid-container" style="max-width: 1000px;">`; // Slightly wider to accommodate car names
         html += `<div>${headerHtml}${col1.map((p, i) => renderRow(p, i, 1)).join('')}</div>`;
         html += `<div>${headerHtml}${col2.map((p, i) => renderRow(p, i, 6)).join('')}</div>`;
         html += `</div>`;
