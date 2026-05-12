@@ -1936,59 +1936,52 @@
     window.tdServers = [];
 
 async function fetchLiveStatus() {
-    try {
-        const response = await fetch('live_status.json?t=' + Date.now());
-        if (!response.ok) return;
-        const data = await response.json();
+        try {
+            // We now fetch from your LIVE Firebase URL
+            const response = await fetch('https://sevo-hub-default-rtdb.firebaseio.com/live_status.json');
+            if (!response.ok) return;
+            const data = await response.json();
 
-        let liveRaceServers = [];
-        let liveTdServers = [];
-        const reservedRacePorts = ["9605", "9606", "9607"]; 
+            if (!data || !data.Servers) return;
 
-        data.Servers.forEach(server => {
-            // Determine the display status (Mode)
-            const displayStatus = server.Mode ? server.Mode.toUpperCase() : "ONLINE";
+            let liveRaceServers = [];
+            let liveTdServers = [];
+            const reservedRacePorts = ["9605", "9606", "9607"]; 
 
-            const serverObj = {
-                name: server.Name, 
-                track: server.Track, 
-                p: server.Players,
-                status: displayStatus, // This feeds the "STATUS: RACE" text
-                port: server.Port,
-                img: "https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500",
-roster: (server.LiveDrivers || []).map((d, idx) => ({
-    pos: idx + 1, 
-    name: d.Name, 
-    car: d.Car, 
-    lapTime: d.BestLap || "--:--.---",
-    laps: d.SessionLaps || "0", // Changed from .Laps to .SessionLaps to match PS
-    rating: d.Rating,
-    sr: d.SR,
-    class: d.Class,
-    level: d.Level,
-    isSessionBest: (idx === 0 && d.BestLap && d.BestLap !== "--:--.---"), 
-    steamId: d.SteamID
-}))
-            };
+            data.Servers.forEach(server => {
+                const serverObj = {
+                    name: server.Name, 
+                    track: server.Track, 
+                    p: server.Players,
+                    status: server.Mode ? server.Mode.toUpperCase() : "ONLINE",
+                    port: server.Port,
+                    img: "https://images.unsplash.com/photo-1594732151034-793579178401?q=80&w=500",
+                    roster: (server.LiveDrivers || []).map((d, idx) => ({
+                        pos: idx + 1, 
+                        name: d.Name, 
+                        car: d.Car, 
+                        lapTime: d.BestLap || "--:--.---",
+                        laps: d.SessionLaps || "0",
+                        rating: d.Rating || 1500,
+                        sr: d.SR || "2.50",
+                        class: d.Class || 0,
+                        level: d.Level || 1,
+                        isSessionBest: (idx === 0 && d.BestLap && d.BestLap !== "--:--.---"), 
+                        steamId: d.SteamID
+                    }))
+                };
+                if (reservedRacePorts.includes(server.Port.toString()) || server.Name.toLowerCase().includes("race")) {
+                    liveRaceServers.push(serverObj);
+                } else { liveTdServers.push(serverObj); }
+            });
 
-            // Sorting logic to put servers on the right page
-            if (reservedRacePorts.includes(server.Port.toString()) || server.Name.toLowerCase().includes("race")) {
-                liveRaceServers.push(serverObj);
-            } else { 
-                liveTdServers.push(serverObj); 
-            }
-        });
+            window.raceServers = liveRaceServers;
+            window.tdServers = liveTdServers;
 
-        // Sync to global memory for the homepage banners
-        window.raceServers = liveRaceServers;
-        window.tdServers = liveTdServers;
-
-        // Draw the lists on the Race and Track Day pages
-        renderServerList('raceServersContainer', window.raceServers, true);
-        renderServerList('tdServersContainer', window.tdServers, false);
-
-    } catch (error) { console.error("📡 UPLINK ERROR:", error); }
-}
+            renderServerList('raceServersContainer', window.raceServers, true);
+            renderServerList('tdServersContainer', window.tdServers, false);
+        } catch (error) { console.error("📡 FIREBASE FETCH ERROR:", error); }
+    }
 
 function renderServerList(containerId, servers, isRace) {
     const container = document.getElementById(containerId);
@@ -2143,7 +2136,7 @@ function renderServerList(containerId, servers, isRace) {
         loadStandings('gt3', document.querySelector('.standings-tab.active'));
 
         // Refresh heartbeat
-        setInterval(fetchLiveStatus, 120000);
+        setInterval(fetchLiveStatus, 3000);
     });
 
 </script>
