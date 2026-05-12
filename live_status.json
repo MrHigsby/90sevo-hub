@@ -46,12 +46,12 @@
       "LiveDrivers": [
         {
           "Class": 0,
-          "BestLap": "--:--.---",
-          "SR": "3.48",
+          "BestLap": "02:24.900",
+          "SR": "3.51",
           "Incidents": 0,
           "SteamID": "76561198158038393",
           "Name": "Higsby Higs",
-          "SessionLaps": "0",
+          "SessionLaps": 2,
           "Car": "CHEVROLET CAMARO ZL1",
           "Level": 4.0,
           "Rating": 1529
@@ -94,5 +94,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 16:22:56"
+  "LastUpdated": "2026-05-12 16:27:59"
 }
