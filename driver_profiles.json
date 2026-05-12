@@ -1769,16 +1769,18 @@
     "LapsPerTrack": {}
   },
   "76561198158038393": {
-    "MostDrivenCar": "None",
-    "MostDrivenTrack": "None",
+    "MostDrivenCar": "RENAULT 5 GT TURBO",
+    "MostDrivenTrack": "Laguna Seca\r\n[GP]",
     "TotalFinishPos": 2,
     "Top5s": 1,
-    "Laps": 21,
+    "Laps": 22,
     "TrackdayScuffs": 14,
     "Pylons": 3,
     "TotalStartPos": 2,
-    "LapsPerCar": {},
-    "SafetyRating": 3.160833999999998,
+    "LapsPerCar": {
+      "RENAULT 5 GT TURBO": 1
+    },
+    "SafetyRating": 3.175518999999998,
     "Name": "Higsby Higs",
     "Poles": 0,
     "DNFs": 0,
@@ -1787,10 +1789,12 @@
     "LicenseClass": 0,
     "ServerStats": {},
     "QualiIncidents": 0,
-    "TrackdayXP": 30,
+    "TrackdayXP": 55.0,
     "RaceContacts": 4,
     "Wins": 0,
-    "LapsPerTrack": {}
+    "LapsPerTrack": {
+      "Laguna Seca\r\n[GP]": 1
+    }
   },
   "76561198105200964": {
     "MostDrivenCar": "None",

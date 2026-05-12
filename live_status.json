@@ -23,11 +23,24 @@
     {
       "Port": "9601",
       "Name": "Street Legal Seca - Road Cars - Trackday",
-      "LiveDrivers": [],
+      "LiveDrivers": [
+        {
+          "Class": 0,
+          "BestLap": "02:21.042",
+          "SR": "3.18",
+          "Incidents": 0,
+          "SteamID": "76561198158038393",
+          "Name": "Higsby Higs",
+          "SessionLaps": 1,
+          "Car": "RENAULT 5 GT TURBO",
+          "Level": 2.0,
+          "Rating": 1529
+        }
+      ],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "0 / 64",
+      "Players": "1 / 64",
       "Track": "Laguna Seca\r\n[GP]"
     },
     {
@@ -81,5 +94,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 15:01:51"
+  "LastUpdated": "2026-05-12 15:06:54"
 }
