@@ -1621,7 +1621,59 @@ const eventCard = `
 	
 
 function updateHeroBanner(silent = false) {
-    // 1. Prepare the live data (ELO and Track Records)
+    // --- 1. HELPER FUNCTION (This was missing!) ---
+    const buildTwoColumnList = (items, type) => {
+        if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
+        
+        const isFull = (type === 'full');
+        const col1 = items.slice(0, 5);
+        const col2 = items.slice(5, 10);
+        
+        const headerHtml = isFull ? `
+            <div class="tele-row tele-header" style="display: grid; grid-template-columns: 20px 80px 35px 75px 30px 80px 1fr; gap: 5px; border-bottom: 1px solid #555; color: #555; font-size: 0.6rem; font-weight: bold; padding-bottom: 2px; margin-bottom: 3px;">
+                <span>#</span><span>DRIVER</span><span>ELO</span><span>SR</span><span>LVL</span><span>CAR</span><span style="text-align:right">LAP</span>
+            </div>` : '';
+
+        const renderRow = (p, i, offset) => {
+            const name = p.name || p.Name || "Unknown";
+            const elo = p.rating || p.DriverRating || 1500;
+            const sr = p.sr || (p.SafetyRating ? p.SafetyRating.toFixed(2) : "2.50");
+            const lvl = p.level || (p.TrackdayXP ? (Math.floor(Math.sqrt(p.TrackdayXP / 50)) + 1) : 1);
+            const lap = p.lapTime || p.LapTime || "--:--.---";
+            const car = p.car || p.Car || "---"; 
+            const clsIndex = (p.class !== undefined) ? p.class : (p.LicenseClass !== undefined ? p.LicenseClass : 0);
+            const cls = classLetters[clsIndex];
+
+            if (isFull) {
+                return `
+                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="display: grid; grid-template-columns: 20px 80px 35px 75px 30px 80px 1fr; gap: 5px; align-items: center; border-bottom: 1px dashed #333; padding: 4px 0; font-size: 0.65rem; font-family: 'Share Tech Mono';">
+                    <span style="color:#555;">${i + offset}</span>
+                    <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
+                    <span style="color:var(--neon-cyan);">${elo}</span>
+                    <span style="background:#111; border:1px solid ${getStickerColor(cls)}; padding:0 2px; border-radius:2px; font-size:0.55rem; text-align:center;">${cls} [${sr}]</span>
+                    <span style="color:var(--neon-gold); text-align:center;">L${lvl}</span>
+                    <span style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:0.6rem;">${car}</span>
+                    <span style="color:var(--neon-mint); text-align:right;">${lap}</span>
+                </div>`;
+            } else {
+                const val = type === 'elo' ? elo : lap;
+                const color = type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)';
+                return `
+                <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:4px 0; cursor:pointer; font-size:0.8rem;" onclick="event.stopPropagation(); openDriverCard('${p.id || p.steamId}')">
+                    <span>${i + offset}. ${name}</span>
+                    <span style="color:${color}; font-weight:bold;">${val}</span>
+                </div>`;
+            }
+        };
+
+        let html = `<div class="hero-grid-container" style="max-width: 1000px;">`; 
+        html += `<div>${headerHtml}${col1.map((p, i) => renderRow(p, i, 1)).join('')}</div>`;
+        html += `<div>${headerHtml}${col2.map((p, i) => renderRow(p, i, 6)).join('')}</div>`;
+        html += `</div>`;
+        return html;
+    };
+
+    // --- 2. PREPARE LIVE DATA ---
     const sortedElo = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]})).sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0, 10);
     const eloHtml = buildTwoColumnList(sortedElo, 'elo');
 
@@ -1633,7 +1685,7 @@ function updateHeroBanner(silent = false) {
         trHtml = `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${track.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps');
     }
 
-    // 2. Build the list of potential slides
+    // --- 3. BUILD AVAILABLE SLIDES ---
     let currentAvailableSlides = [];
     
     // Feature Server (Port 9604)
@@ -1673,23 +1725,20 @@ function updateHeroBanner(silent = false) {
     currentAvailableSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
     currentAvailableSlides.push({ id: 'records', label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
 
-    // 3. LOCK THE ORDER (Shuffle only once)
+    // --- 4. LOCK THE ORDER (Shuffle only once per session) ---
     if (!lockedOrderPool && currentAvailableSlides.length > 0) {
-        // Grab the nurb slide if it exists to keep it at index 0
         let first = currentAvailableSlides.find(s => s.id === 'nurb');
         let others = currentAvailableSlides.filter(s => s.id !== 'nurb');
 
-        // Shuffle the others
         for (let i = others.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [others[i], others[j]] = [others[j], others[i]];
         }
         
-        // Lock it in for the rest of the session
         lockedOrderPool = first ? [first.id, ...others.map(o => o.id)] : others.map(o => o.id);
     }
 
-    // 4. RENDER logic
+    // --- 5. RENDER LOGIC ---
     if (!silent) { globalBannerIdx++; }
     if (!lockedOrderPool) return;
 
@@ -1697,7 +1746,7 @@ function updateHeroBanner(silent = false) {
     let currentId = lockedOrderPool[safeIdx];
     let slide = currentAvailableSlides.find(s => s.id === currentId);
 
-    if (!slide) return; // Safety check
+    if (!slide) return; 
 
     document.querySelectorAll('.hero-banner-container').forEach(banner => {
         banner.style.borderColor = slide.color;
@@ -1707,8 +1756,27 @@ function updateHeroBanner(silent = false) {
         banner.querySelector('.hero-data').innerHTML = slide.data;
         banner.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${slide.img}')`;
         banner.onclick = slide.action;
+
+        // --- ADD ARROWS BACK IN ---
+        if (!banner.querySelector('.banner-arrow.left')) {
+            const leftArr = document.createElement('div'); 
+            leftArr.className = 'banner-arrow left'; 
+            leftArr.innerHTML = '&#10094;';
+            leftArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(-1); };
+            
+            const rightArr = document.createElement('div'); 
+            rightArr.className = 'banner-arrow right'; 
+            rightArr.innerHTML = '&#10095;';
+            rightArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(1); };
+            
+            banner.appendChild(leftArr); 
+            banner.appendChild(rightArr);
+        }
     });
 }
+
+// Dummy function to prevent console errors if a user clicks before data loads
+function goToHeroPage() { return; }
 
     // --- LEADERBOARD & TABLES ---
     const lbMode = document.getElementById('lbMode');
