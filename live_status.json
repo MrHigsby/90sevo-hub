@@ -3,24 +3,11 @@
     {
       "Port": "9604",
       "Name": "90s Night N├╝rburgring - Retro & Vintage - Tourist Regulations",
-      "LiveDrivers": [
-        {
-          "Class": 0,
-          "BestLap": "--:--.---",
-          "SR": "3.16",
-          "Incidents": 0,
-          "SteamID": "76561198158038393",
-          "Name": "Higsby Higs",
-          "SessionLaps": "0",
-          "Car": "RENAULT 5 GT TURBO",
-          "Level": 1.0,
-          "Rating": 1529
-        }
-      ],
+      "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "1 / 32",
+      "Players": "0 / 64",
       "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
@@ -94,5 +81,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 14:51:44"
+  "LastUpdated": "2026-05-12 14:56:48"
 }
