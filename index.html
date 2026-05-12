@@ -1665,11 +1665,18 @@
                 </div>`;
             };
 
-            // Using display:block overrides the CSS grid so it spans 100% horizontally!
+// Using display:block overrides the CSS grid so it spans 100% horizontally!
             let html = `<div class="hero-grid-container" style="max-width: 1000px; display: block; border: 1px solid #444;">`; 
+            
+            // THE FIX: We wrap the header and rows in ONE div so they don't all individually stretch to 120px!
+            html += `<div>`; 
+            
             html += headerHtml;
             html += topRows.map((p, i) => renderRow(p, i)).join('');
-            html += `</div>`;
+            
+            html += `</div>`; // Close the wrapper
+            html += `</div>`; // Close the main container
+            
             return html;
             
         } else {
