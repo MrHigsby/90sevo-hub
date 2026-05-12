@@ -1613,7 +1613,7 @@
             
             const headerHtml = isFull ? `
                 <div class="tele-row tele-header" style="display: grid; grid-template-columns: 15px 1.5fr 30px 45px 25px 1fr 20px 25px 22px 48px; gap: 3px; border-bottom: 1px solid #555; color: #555; font-size: 0.5rem; font-weight: bold; padding-bottom: 2px; margin-bottom: 3px;">
-                    <span>#</span><span>DRIVER</span><span style="text-align:center;">ELO</span><span style="text-align:center;">SR</span><span style="text-align:center;">LVL</span><span>CAR</span><span style="text-align:center;">INC</span><span style="text-align:center;">I/L</span><span style="text-align:center;">LAP</span><span style="text-align:right;">TIME</span>
+                    <span>#</span><span>DRIVER</span><span style="text-align:center;">ELO</span><span style="text-align:center;">SR</span><span style="text-align:center;">LVL</span><span>CAR</span><span style="text-align:center;">INC</span><span style="text-align:center;">I/L</span><span style="text-align:center;">LAP</span><span style="text-align:center;">TIME</span>
                 </div>` : '';
 
             const renderRow = (p, i, offset) => {
@@ -1653,7 +1653,7 @@
                         <span style="color:#888; text-align:center;">${incCount}</span>
                         <span style="color:${incColor}; text-align:center; font-weight:bold;">${incPerLap}</span>
                         <span style="color:var(--neon-cyan); text-align:center;">${lapsCount}</span>
-                        <span style="color:var(--neon-mint); text-align:right; font-weight:bold; white-space:nowrap;">${lap}</span>
+                        <span style="color:var(--neon-mint); text-align:center; font-weight:bold; white-space:nowrap;">${lap}</span>
                     </div>`;
                 } else {
                     const val = type === 'elo' ? elo : lap;
@@ -2302,14 +2302,14 @@
                                 <tr style="color: #666; font-size: 0.70rem; text-transform: uppercase; font-family: 'Share Tech Mono'; border-bottom: 1px solid #333;">
                                     <th style="text-align: left; padding: 8px 4px; width: 3%;">#</th>
                                     <th style="text-align: left; padding: 8px 4px; width: 20%;">DRIVER</th>
-                                    <th style="text-align: center; padding: 8px 4px;">RATING</th>
-                                    <th style="text-align: center; padding: 8px 4px;">SR</th>
-                                    <th style="text-align: center; padding: 8px 4px;">LVL</th>
-                                    <th style="text-align: left; padding: 8px 4px;">CAR</th>
+                                    <th style="text-align: center; padding: 8px 4px;">RATING (ELO)</th>
+                                    <th style="text-align: center; padding: 8px 4px;">SAFETY (SR)</th>
+                                    <th style="text-align: center; padding: 8px 4px;">TrackXP (TXP)</th>
+                                    <th style="text-align: center; padding: 8px 4px;">CAR</th>
                                     <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC</th>
                                     <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC/L</th>
                                     <th style="text-align: center; padding: 8px 4px;">LAPS</th>
-                                    <th style="text-align: right; padding: 8px 4px; white-space: nowrap;">LAP TIME</th>
+                                    <th style="text-align: center; padding: 8px 4px; white-space: nowrap;">TIME</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2348,7 +2348,7 @@
                                         <td style="padding: 8px 4px; text-align: center; color: ${incColor}; font-weight: bold; font-family: 'Share Tech Mono';">${incPerLap}</td>
                                         <td style="padding: 8px 4px; text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
                                         
-                                        <td style="padding: 8px 4px; text-align: right; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold; font-family: 'Share Tech Mono'; white-space: nowrap;">${r.lapTime}</td>
+                                        <td style="padding: 8px 4px; text-align: center; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold; font-family: 'Share Tech Mono'; white-space: nowrap;">${r.lapTime}</td>
                                     </tr>`;
                                 }).join('')}
                             </tbody>
