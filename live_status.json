@@ -23,24 +23,11 @@
     {
       "Port": "9601",
       "Name": "Street Legal Seca - Road Cars - Trackday",
-      "LiveDrivers": [
-        {
-          "Class": 0,
-          "BestLap": "02:03.480",
-          "SR": "3.32",
-          "Incidents": 0,
-          "SteamID": "76561198158038393",
-          "Name": "Higsby Higs",
-          "SessionLaps": 11,
-          "Car": "RENAULT 5 GT TURBO",
-          "Level": 3.0,
-          "Rating": 1529
-        }
-      ],
+      "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "1 / 64",
+      "Players": "0 / 64",
       "Track": "Laguna Seca\r\n[GP]"
     },
     {
@@ -56,11 +43,24 @@
     {
       "Port": "9602",
       "Name": "Street Legal Sebring - Road Cars - Trackday",
-      "LiveDrivers": [],
+      "LiveDrivers": [
+        {
+          "Class": 0,
+          "BestLap": "--:--.---",
+          "SR": "3.32",
+          "Incidents": 0,
+          "SteamID": "76561198158038393",
+          "Name": "Higsby Higs",
+          "SessionLaps": "0",
+          "Car": "RENAULT 5 GT TURBO",
+          "Level": 3.0,
+          "Rating": 1529
+        }
+      ],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "0 / 64",
+      "Players": "1 / 64",
       "Track": "Sebring International Raceway\r\n[GP]"
     },
     {
@@ -94,5 +94,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 15:27:11"
+  "LastUpdated": "2026-05-12 15:32:17"
 }
