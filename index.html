@@ -1393,7 +1393,7 @@ const eventCard = `
         window.scrollTo(0, 0); 
         updateHeroBanner();
         clearInterval(heroTimer);
-        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 10000);
+        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000);
     }
     
     function showChapter(chapterId) {
@@ -1614,12 +1614,16 @@ const eventCard = `
         globalBannerIdx += dir;
         updateHeroBanner();
         clearInterval(heroTimer);
-        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 20000);
+        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 25000);
     }
 
-function updateHeroBanner() {
+function updateHeroBanner(silent = false) {
+    if (!silent) {
+        globalBannerIdx++;
+    }
+
     const activePage = document.querySelector('.page.active').id;
-    
+
 // HELPER: Builds the 1-5 / 6-10 columns with support for full telemetry
 const buildTwoColumnList = (items, type) => {
         if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
@@ -2294,7 +2298,7 @@ data.Servers.forEach(server => {
             renderServerList('raceServersContainer', window.raceServers, true);
             renderServerList('tdServersContainer', window.tdServers, false);
 			updateSeasonSections([...window.raceServers, ...window.tdServers]);
-			updateHeroBanner();
+			updateHeroBanner(true);
         } catch (error) { console.error("📡 FIREBASE FETCH ERROR:", error); }
     }
 
