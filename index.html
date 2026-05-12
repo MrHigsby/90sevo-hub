@@ -2191,26 +2191,41 @@ function renderServerList(containerId, servers, isRace) {
                 tb.parentElement.onclick = () => goToServerAndExpand('srv-t-0', 'trackday');
             }
 
-            // Start home banner rotation safely
+// --- LIVE RACES BANNER ROTATION ---
             setInterval(() => {
                 if(window.raceServers && window.raceServers.length > 0) {
                     rIdx = (rIdx + 1) % window.raceServers.length;
+                    let rb = document.getElementById('race-ss-title');
                     if(rb) {
-                        rb.innerText = window.raceServers[rIdx].name.toUpperCase();
-                        document.getElementById('race-ss-data').innerText = `DRIVERS: ${window.raceServers[rIdx].p} | ${window.raceServers[rIdx].status.toUpperCase()}`;
-                        rb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${window.raceServers[rIdx].img}')`;
+                        const srv = window.raceServers[rIdx];
+                        rb.innerText = srv.name.toUpperCase();
+                        document.getElementById('race-ss-data').innerText = `DRIVERS: ${srv.p} | ${srv.status.toUpperCase()}`;
+                        
+                        // THIS IS THE MISSING MAGIC LINE:
+                        rb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${srv.img}')`;
+                        rb.parentElement.style.backgroundSize = "cover";
+                        rb.parentElement.style.backgroundPosition = "center";
+                        
                         rb.parentElement.onclick = () => goToServerAndExpand('srv-r-' + rIdx, 'race');
                     }
                 }
             }, 4000);
 
+            // --- LIVE TRACK DAYS BANNER ROTATION ---
             setInterval(() => {
                 if(window.tdServers && window.tdServers.length > 0) {
                     tIdx = (tIdx + 1) % window.tdServers.length;
+                    let tb = document.getElementById('td-ss-title');
                     if(tb) {
-                        tb.innerText = window.tdServers[tIdx].name.toUpperCase();
-                        document.getElementById('td-ss-data').innerText = `DRIVERS: ${window.tdServers[tIdx].p} | PRACTICE`;
-                        tb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${window.tdServers[tIdx].img}')`;
+                        const srv = window.tdServers[tIdx];
+                        tb.innerText = srv.name.toUpperCase();
+                        document.getElementById('td-ss-data').innerText = `DRIVERS: ${srv.p} | PRACTICE`;
+                        
+                        // THIS IS THE MISSING MAGIC LINE:
+                        tb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${srv.img}')`;
+                        tb.parentElement.style.backgroundSize = "cover";
+                        tb.parentElement.style.backgroundPosition = "center";
+                        
                         tb.parentElement.onclick = () => goToServerAndExpand('srv-t-' + tIdx, 'trackday');
                     }
                 }
