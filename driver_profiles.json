@@ -1478,20 +1478,20 @@
     "TrackdayXP": 60.0,
     "RaceContacts": 0,
     "LicenseClass": 0,
-    "Laps": 8,
+    "Laps": 9,
     "TotalStartPos": 0,
     "Pylons": 0,
     "LapsPerTrack": {
-      "Mount Panorama\r\n[GP]": 8
+      "Mount Panorama\r\n[GP]": 9
     },
     "QualiIncidents": 0,
     "DNFs": 0,
     "Name": "Zhiming Li",
     "MostDrivenCar": "DALLARA STRADALE COUPE",
     "DriverRating": 1500,
-    "SafetyRating": 2.6174800000000005,
+    "SafetyRating": 2.6321650000000005,
     "LapsPerCar": {
-      "DALLARA STRADALE COUPE": 8
+      "DALLARA STRADALE COUPE": 9
     },
     "Poles": 0,
     "ServerStats": {},

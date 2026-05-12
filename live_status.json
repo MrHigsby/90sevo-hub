@@ -33,24 +33,11 @@
     {
       "Port": "9603",
       "Name": "Street Legal Bathurst - Road Cars - Trackday",
-      "LiveDrivers": [
-        {
-          "Class": 0,
-          "BestLap": "02:07.455",
-          "SR": "2.62",
-          "Incidents": 18,
-          "SteamID": "76561198868365617",
-          "Name": "Zhiming Li",
-          "SessionLaps": 8,
-          "Car": "DALLARA STRADALE COUPE",
-          "Level": 2.0,
-          "Rating": 1500
-        }
-      ],
+      "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "1 / 32",
+      "Players": "0 / 32",
       "Track": "Mount Panorama\r\n[GP]"
     },
     {
@@ -94,5 +81,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 08:21:28"
+  "LastUpdated": "2026-05-12 08:26:31"
 }
