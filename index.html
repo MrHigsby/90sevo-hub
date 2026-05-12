@@ -1154,33 +1154,36 @@
 <script>
     // --- GLOBAL VARIABLES ---
 	// --- THE MASTER IMAGE DICTIONARY ---
+// --- THE MASTER IMAGE DICTIONARY ---
     const IMAGE_DICT = {
-        // --- SEASON IMAGES ---
-        // Must match exactly what you type in the PowerShell "Manage Season" box
-        "GT3 SPRINT (SEASON 4)": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Vote.png",
-        "MX5 CUP": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/MX5_CUP_Vote.png",
-        "90s JDM TOUGE": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/AE86_Vote.png",
+        // --- YOUR CURRENT SEASONS ---
+        "Old Timer Endurance Challenge": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Alfa_Sprint_Grid.png",
+        "BMW M2 CS Racing Challenge": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/BMW_M2_Racing1.png",
+        "GT3 Endurance Challenge": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Race1.png",
         
-        // --- TRACK IMAGES ---
-        // Used for Practice/Track Day servers. Must match the Track Name.
-        "Nordschleife": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/tracklayout/TouristenfahrtenLayout.png",
-        "Spa-Francorchamps": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/tracklayout/SpaGPLayout.png",
-        "Suzuka Circuit": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/tracklayout/SuzukaGPLayout.png",
-        "Mount Panorama": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/tracklayout/MountPanoramaGPLayout.png",
+        // --- TRACK FALLBACKS (If no season is running) ---
+        "Nordschleife": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/911GT3RNurbs.png",
+        "Spa-Francorchamps": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Grid1.png",
         
         // --- THE FALLBACK ---
-        // A generic image if no match is found
-        "DEFAULT": "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" 
+        "DEFAULT": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Vote.png"
     };
 
     // Auto-Matcher Function
-    function getServerImage(server) {
-        if (server.season && server.season !== "None" && IMAGE_DICT[server.season]) {
-            return IMAGE_DICT[server.season];
-        }
-        if (server.track && IMAGE_DICT[server.track]) {
-            return IMAGE_DICT[server.track];
-        }
+function getServerImage(server) {
+        const sName = (server.season || "").toUpperCase();
+        const tName = (server.track || "").toUpperCase();
+
+        // 1. Match by Season Name (Keywords)
+        if (sName.includes("OLD TIMER")) return IMAGE_DICT["Old Timer Endurance Challenge"];
+        if (sName.includes("BMW") || sName.includes("M2")) return IMAGE_DICT["BMW M2 CS Racing Challenge"];
+        if (sName.includes("GT3")) return IMAGE_DICT["GT3 Endurance Challenge"];
+
+        // 2. Match by Track Name (Keywords)
+        if (tName.includes("NORD") || tName.includes("TOURIST")) return IMAGE_DICT["Nordschleife"];
+        if (tName.includes("SPA")) return IMAGE_DICT["Spa-Francorchamps"];
+
+        // 3. Absolute Fallback
         return IMAGE_DICT["DEFAULT"];
     }
     let dbProfiles = {};
