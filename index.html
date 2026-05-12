@@ -2477,25 +2477,37 @@ if(s.roster && s.roster.length > 0) {
         container.innerHTML = html;
     }
 
-    async function initStaticData() {
-        try {
-            const profRes = await fetch('driver_profiles.json?t=' + Date.now());
-            if (profRes.ok) {
-                dbProfiles = await profRes.json();
-                updateHomeEliteLists(); 
-            }
-            const lbRes = await fetch('leaderboard.json?t=' + Date.now());
-            if (lbRes.ok) {
-                dbLeaderboard = await lbRes.json();
-                populateLeaderboardFilters();
-                startHomeTrackCycle();
-                processLeaderboardData();
-            }
+// --- NEW: THE SMART TRACK SANITIZER ---
+                // Only used for old legacy laps that have no track data
+                const legacyPortMap = {
+                    "9600": "Nurburgring [Touristenfahrten]",
+                    "9601": "Laguna Seca [GP]",
+                    "9602": "Sebring International Raceway [GP]",
+                    "9603": "Mount Panorama [GP]",
+                    "9604": "Nurburgring [Touristenfahrten]",
+                    "9605": "Mount Panorama [GP]", 
+                    "9606": "Brands Hatch [GP]"
+                };
+
+                dbLeaderboard.forEach(entry => {
+                    // 1. If the server successfully logged a track, just clean up the weird line breaks
+                    if (entry.Track && entry.Track !== "Unknown" && entry.Track !== "Unknown Track") {
+                        entry.Track = entry.Track.replace(/\r\n/g, ' ').replace(/\n/g, ' ').trim();
+                    } 
+                    // 2. If the track is missing (legacy laps), use the port map to fill it in
+                    else if (legacyPortMap[entry.ServerPort]) {
+                        entry.Track = legacyPortMap[entry.ServerPort];
+                    } 
+                    // 3. Ultimate fallback
+                    else {
+                        entry.Track = "Unknown Track";
+                    }
+                });
+                // --------------------------------
             const bootloader = document.querySelector('.bootloader');
             if (bootloader) bootloader.style.display = 'none';
         } catch (err) { console.error("📡 STATIC SYNC ERROR:", err); }
     }
-
     // --- BOOT SEQUENCE ---
     window.addEventListener('load', () => {
         initStaticData();
