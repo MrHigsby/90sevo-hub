@@ -2477,7 +2477,18 @@ if(s.roster && s.roster.length > 0) {
         container.innerHTML = html;
     }
 
-// --- NEW: THE SMART TRACK SANITIZER ---
+async function initStaticData() {
+        try {
+            const profRes = await fetch('driver_profiles.json?t=' + Date.now());
+            if (profRes.ok) {
+                dbProfiles = await profRes.json();
+                updateHomeEliteLists(); 
+            }
+            const lbRes = await fetch('leaderboard.json?t=' + Date.now());
+            if (lbRes.ok) {
+                dbLeaderboard = await lbRes.json();
+
+                // --- NEW: THE SMART TRACK SANITIZER ---
                 // Only used for old legacy laps that have no track data
                 const legacyPortMap = {
                     "9600": "Nurburgring [Touristenfahrten]",
@@ -2504,6 +2515,13 @@ if(s.roster && s.roster.length > 0) {
                     }
                 });
                 // --------------------------------
+
+                // THESE THREE LINES WERE ACCIDENTALLY DELETED!
+                populateLeaderboardFilters();
+                startHomeTrackCycle();
+                processLeaderboardData();
+            } // <-- THIS CLOSING BRACKET WAS ALSO MISSING!
+
             const bootloader = document.querySelector('.bootloader');
             if (bootloader) bootloader.style.display = 'none';
         } catch (err) { console.error("📡 STATIC SYNC ERROR:", err); }
