@@ -1614,74 +1614,19 @@ const eventCard = `
         globalBannerIdx += dir;
         updateHeroBanner();
         clearInterval(heroTimer);
-        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 25000);
+        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 20000);
     }
+	let persistentPool = []; // This stores our shuffled order
+	
 
 function updateHeroBanner(silent = false) {
-    if (!silent) {
-        globalBannerIdx++;
-    }
-
     const activePage = document.querySelector('.page.active').id;
 
-// HELPER: Builds the 1-5 / 6-10 columns with support for full telemetry
-const buildTwoColumnList = (items, type) => {
-        if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
-        
-        const isFull = (type === 'full');
-        const col1 = items.slice(0, 5);
-        const col2 = items.slice(5, 10);
-        
-        // Header updated to include CAR
-        const headerHtml = isFull ? `
-            <div class="tele-row tele-header" style="display: grid; grid-template-columns: 20px 80px 35px 75px 30px 80px 1fr; gap: 5px; border-bottom: 1px solid #555; color: #555; font-size: 0.6rem; font-weight: bold; padding-bottom: 2px; margin-bottom: 3px;">
-                <span>#</span><span>DRIVER</span><span>ELO</span><span>SR</span><span>LVL</span><span>CAR</span><span style="text-align:right">LAP</span>
-            </div>` : '';
-
-        const renderRow = (p, i, offset) => {
-            const name = p.name || p.Name || "Unknown";
-            const elo = p.rating || p.DriverRating || 1500;
-            const sr = p.sr || (p.SafetyRating ? p.SafetyRating.toFixed(2) : "2.50");
-            const lvl = p.level || (p.TrackdayXP ? (Math.floor(Math.sqrt(p.TrackdayXP / 50)) + 1) : 1);
-            const lap = p.lapTime || p.LapTime || "--:--.---";
-            const car = p.car || p.Car || "---"; // Get the car name
-            const clsIndex = (p.class !== undefined) ? p.class : (p.LicenseClass !== undefined ? p.LicenseClass : 0);
-            const cls = classLetters[clsIndex];
-
-            if (isFull) {
-                return `
-                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="display: grid; grid-template-columns: 20px 80px 35px 75px 30px 80px 1fr; gap: 5px; align-items: center; border-bottom: 1px dashed #333; padding: 4px 0; font-size: 0.65rem; font-family: 'Share Tech Mono';">
-                    <span style="color:#555;">${i + offset}</span>
-                    <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
-                    <span style="color:var(--neon-cyan);">${elo}</span>
-                    <span style="background:#111; border:1px solid ${getStickerColor(cls)}; padding:0 2px; border-radius:2px; font-size:0.55rem; text-align:center;">${cls} [${sr}]</span>
-                    <span style="color:var(--neon-gold); text-align:center;">L${lvl}</span>
-                    <span style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:0.6rem;">${car}</span>
-                    <span style="color:var(--neon-mint); text-align:right;">${lap}</span>
-                </div>`;
-            } else {
-                const val = type === 'elo' ? elo : lap;
-                const color = type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)';
-                return `
-                <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:4px 0; cursor:pointer; font-size:0.8rem;" onclick="event.stopPropagation(); openDriverCard('${p.id || p.steamId}')">
-                    <span>${i + offset}. ${name}</span>
-                    <span style="color:${color}; font-weight:bold;">${val}</span>
-                </div>`;
-            }
-        };
-
-        let html = `<div class="hero-grid-container" style="max-width: 1000px;">`; // Slightly wider to accommodate car names
-        html += `<div>${headerHtml}${col1.map((p, i) => renderRow(p, i, 1)).join('')}</div>`;
-        html += `<div>${headerHtml}${col2.map((p, i) => renderRow(p, i, 6)).join('')}</div>`;
-        html += `</div>`;
-        
-        return html;
-    };
-// 1. DATA PREP
+    // 1. DATA PREP (Keep this part for live updates)
     const sortedElo = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]})).sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0, 10);
     const eloHtml = buildTwoColumnList(sortedElo, 'elo');
 
-    let trHtml = '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ LOAD LEADERBOARD.JSON ]</div>';
+    let trHtml = '[ LOAD LEADERBOARD.JSON ]';
     if (dbLeaderboard.length > 0) {
         const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown Track'))];
         const track = tracks[Math.floor(Date.now() / 15000) % tracks.length] || tracks[0]; 
@@ -1689,11 +1634,14 @@ const buildTwoColumnList = (items, type) => {
         trHtml = `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${track.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps');
     }
 
-    // 2. SLIDE POOL CONSTRUCTION
-    let pool = [];
-    let randomPool = []; // Temporary bucket for items we want to shuffle
+    // 2. POOL CONSTRUCTION (The Fix)
+    // We rebuild a "fresh" pool to get latest live numbers, 
+    // but we use the persistentPool to keep the order identical.
+    
+    let currentSlides = [];
+    let nurbSlide = null;
 
-    // --- STEP 1: MAKE NURBURGRING THE DEFAULT (TOP PRIORITY - NO SHUFFLE) ---
+    // Identify the Nurburgring Slide
     const nurbServer = [...(window.raceServers||[]), ...(window.tdServers||[])].find(s => s.port == "9604");
     if (nurbServer) {
         const sortedRoster = [...(nurbServer.roster || [])].sort((a, b) => {
@@ -1701,23 +1649,23 @@ const buildTwoColumnList = (items, type) => {
             if (b.lapTime === "--:--.---") return -1;
             return a.lapTime.localeCompare(b.lapTime);
         });
-
-        pool.push({ 
+        nurbSlide = { 
+            id: 'nurb', // Added ID to track the slide
             label: "[ FEATURED SERVER ]", 
             title: "90s NURBURGRING TOURISTENFAHRTEN", 
             data: `<div style="color:var(--neon-gold); text-align:center; font-family:'Share Tech Mono'; font-size:0.8rem; margin-bottom:5px;">LIVE ONLINE TELEMETRY (${nurbServer.p})</div>` + buildTwoColumnList(sortedRoster.slice(0, 10), 'full'), 
             color: "var(--neon-gold)", 
             action: () => goToServerAndExpand('srv-t-0', 'trackday'), 
             img: IMAGE_DICT["Nordschleife"] 
-        });
+        };
     }
 
-    // --- STEP 2: COLLECT REMAINING SLIDES INTO RANDOM BUCKET ---
-    
-    // Add Seasons
+    // Identify all other slides
+    let otherSlides = [];
     const activeSeasons = (window.raceServers || []).filter(s => s.season && s.season !== "None");
     activeSeasons.forEach((s, i) => {
-        randomPool.push({
+        otherSlides.push({
+            id: `season-${s.port}`,
             label: "[ SEASON EVENTS ]",
             title: s.season.toUpperCase(),
             data: `<div style="text-align:center; font-size:1.2rem; margin-top:20px; font-family:'Share Tech Mono';"> TRACK: ${s.track.toUpperCase()}<br>STATUS: ${s.status}</div>`,
@@ -1727,66 +1675,40 @@ const buildTwoColumnList = (items, type) => {
         });
     });
 
-    // Add Global Rankings
-    randomPool.push({ 
-        label: "[ GLOBAL RANKINGS ]", 
-        title: "TOP 10 DRIVERS (ELO)", 
-        data: eloHtml, 
-        color: "var(--neon-cyan)", 
-        action: () => openLeaderboard('stats'), 
-        img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" 
-    });
+    otherSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
+    otherSlides.push({ id: 'records', label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
 
-    // Add Track Records
-    randomPool.push({ 
-        label: "[ TRACK RECORDS ]", 
-        title: "FASTEST LAPS", 
-        data: trHtml, 
-        color: "var(--neon-mint)", 
-        action: () => openLeaderboard('laps'), 
-        img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" 
-    });
-
-    // --- STEP 3: SHUFFLE THE RANDOM BUCKET ONLY ---
-    for (let i = randomPool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [randomPool[i], randomPool[j]] = [randomPool[j], randomPool[i]];
+    // --- THE MAGIC ORDER LOGIC ---
+    // If this is the FIRST time we have data, shuffle the others and lock it
+    if (persistentPool.length === 0 && otherSlides.length > 0) {
+        for (let i = otherSlides.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [otherSlides[i], otherSlides[j]] = [otherSlides[j], otherSlides[i]];
+        }
+        // Save the IDs in order: Nurburgring first, then shuffled others
+        persistentPool = nurbSlide ? [nurbSlide.id, ...otherSlides.map(s => s.id)] : otherSlides.map(s => s.id);
     }
 
-    // --- STEP 4: MERGE (Nurburgring first, then everything else) ---
-    pool = pool.concat(randomPool);
+    // Now, map the actual slide content back into the locked order
+    const allAvailableSlides = nurbSlide ? [nurbSlide, ...otherSlides] : otherSlides;
+    const finalPool = persistentPool.map(id => allAvailableSlides.find(s => s.id === id)).filter(s => s !== undefined);
 
-    if(pool.length === 0) return;
-    let safeIdx = ((globalBannerIdx % pool.length) + pool.length) % pool.length;
-    const slide = pool[safeIdx];
+    if (finalPool.length === 0) return;
+
+    // 3. RENDER
+    if (!silent) { globalBannerIdx++; }
+    
+    let safeIdx = ((globalBannerIdx % finalPool.length) + finalPool.length) % finalPool.length;
+    const slide = finalPool[safeIdx];
     
     document.querySelectorAll('.hero-banner-container').forEach(banner => {
         banner.style.borderColor = slide.color;
-		banner.style.display = "flex";
-banner.style.flexDirection = "column";
-banner.style.justifyContent = "center"; // This forces vertical centering
         banner.querySelector('.hero-label').innerText = slide.label;
         banner.querySelector('.hero-label').style.color = slide.color;
         banner.querySelector('.hero-title').innerText = slide.title;
         banner.querySelector('.hero-data').innerHTML = slide.data;
         banner.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${slide.img}')`;
         banner.onclick = slide.action;
-
-        // --- ARROW LOGIC (RE-ADDED) ---
-        if (!banner.querySelector('.banner-arrow.left')) {
-            const leftArr = document.createElement('div'); 
-            leftArr.className = 'banner-arrow left'; 
-            leftArr.innerHTML = '&#10094;';
-            leftArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(-1); };
-            
-            const rightArr = document.createElement('div'); 
-            rightArr.className = 'banner-arrow right'; 
-            rightArr.innerHTML = '&#10095;';
-            rightArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(1); };
-            
-            banner.appendChild(leftArr); 
-            banner.appendChild(rightArr);
-        }
     });
 }
 
