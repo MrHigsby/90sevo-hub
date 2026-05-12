@@ -1630,10 +1630,10 @@ function updateHeroBanner() {
         const col1 = items.slice(0, 5);
         const col2 = items.slice(5, 10);
         
-        // Grid template order updated and widths tweaked slightly for the new order
+        // SWITCHED TO 'fr' UNITS: 1.5fr for Driver, 1fr for Car. Fixed pixels for numbers.
         const headerHtml = isFull ? `
-            <div class="tele-row tele-header" style="display: grid; grid-template-columns: 20px 85px 40px 65px 35px 75px 25px 30px 30px 55px; gap: 4px; border-bottom: 1px solid #555; color: #555; font-size: 0.55rem; font-weight: bold; padding-bottom: 2px; margin-bottom: 3px;">
-                <span>#</span><span>DRIVER</span><span style="text-align:center;">ELO</span><span style="text-align:center;">SR</span><span style="text-align:center;">LVL</span><span>CAR</span><span style="text-align:center;">INC</span><span style="text-align:center;">I/L</span><span style="text-align:center;">LAPS</span><span style="text-align:right;">LAP TIME</span>
+            <div class="tele-row tele-header" style="display: grid; grid-template-columns: 15px 1.5fr 30px 45px 25px 1fr 20px 25px 22px 48px; gap: 3px; border-bottom: 1px solid #555; color: #555; font-size: 0.5rem; font-weight: bold; padding-bottom: 2px; margin-bottom: 3px;">
+                <span>#</span><span>DRIVER</span><span style="text-align:center;">ELO</span><span style="text-align:center;">SR</span><span style="text-align:center;">LVL</span><span>CAR</span><span style="text-align:center;">INC</span><span style="text-align:center;">I/L</span><span style="text-align:center;">LAP</span><span style="text-align:right;">TIME</span>
             </div>` : '';
 
         const renderRow = (p, i, offset) => {
@@ -1663,15 +1663,15 @@ function updateHeroBanner() {
 
             if (isFull) {
                 return `
-                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="display: grid; grid-template-columns: 20px 85px 40px 65px 35px 75px 25px 30px 30px 55px; gap: 4px; align-items: center; border-bottom: 1px dashed #333; padding: 4px 0; font-size: 0.6rem; font-family: 'Share Tech Mono';">
+                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="display: grid; grid-template-columns: 15px 1.5fr 30px 45px 25px 1fr 20px 25px 22px 48px; gap: 3px; align-items: center; border-bottom: 1px dashed #333; padding: 3px 0; font-size: 0.55rem; font-family: 'Share Tech Mono';">
                     <span style="color:#555;">${i + offset}</span>
-                    <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:85px;">${name}</span>
+                    <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
                     
                     <span style="color:var(--neon-cyan); text-align:center;">${elo}</span>
-                    <span style="justify-self:center; display: inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFillPct}%, #111 ${srFillPct}%); padding: 0 4px; border-radius: 2px; font-size: 0.55rem; color: #fff; text-shadow: 1px 1px 1px #000; white-space: nowrap;">${cls} [${srValue}]</span>
-                    <span style="justify-self:center; color:var(--neon-gold); font-size: 0.6rem; background: rgba(255,215,0,0.05); padding: 1px 3px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${lvl}</span>
+                    <span style="justify-self:center; display: inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFillPct}%, #111 ${srFillPct}%); padding: 0 2px; border-radius: 2px; font-size: 0.5rem; color: #fff; text-shadow: 1px 1px 0 #000; white-space: nowrap;">${cls} [${srValue}]</span>
+                    <span style="justify-self:center; color:var(--neon-gold); font-size: 0.55rem; background: rgba(255,215,0,0.05); padding: 1px 2px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${lvl}</span>
                     
-                    <span style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:75px;">${car}</span>
+                    <span style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${car}</span>
                     
                     <span style="color:#888; text-align:center;">${incCount}</span>
                     <span style="color:${incColor}; text-align:center; font-weight:bold;">${incPerLap}</span>
@@ -1689,6 +1689,13 @@ function updateHeroBanner() {
                 </div>`;
             }
         };
+
+        let html = `<div class="hero-grid-container" style="max-width: 1000px;">`; 
+        html += `<div>${headerHtml}${col1.map((p, i) => renderRow(p, i, 1)).join('')}</div>`;
+        html += `<div>${headerHtml}${col2.map((p, i) => renderRow(p, i, 6)).join('')}</div>`;
+        html += `</div>`;
+        return html;
+    };
 
         let html = `<div class="hero-grid-container" style="max-width: 1000px;">`; 
         html += `<div>${headerHtml}${col1.map((p, i) => renderRow(p, i, 1)).join('')}</div>`;
