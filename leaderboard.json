@@ -3316,9 +3316,9 @@
     "SteamID": "76561198868365617",
     "Name": "Zhiming Li",
     "Car": "DALLARA STRADALE COUPE",
+    "LapTime": "02:06.597",
+    "TotalMs": 126597.0,
     "Track": "Mount Panorama\r\n[GP]",
-    "LapTime": "02:06.612",
-    "TotalMs": 126612.0,
-    "LapSetOn": 1
+    "LapSetOn": 4
   }
 ]
