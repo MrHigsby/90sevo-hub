@@ -37,20 +37,32 @@
       "LiveDrivers": [
         {
           "Class": 0,
-          "BestLap": "--:--.---",
-          "SR": "2.50",
+          "BestLap": "01:55.725",
+          "SR": "2.51",
           "Incidents": 0,
           "SteamID": "76561198743642509",
           "Name": "blue santamaria",
-          "SessionLaps": "0",
+          "SessionLaps": 1,
           "Car": "BMW M3 E30 EVO III",
-          "Level": 1,
+          "Level": 1.0,
+          "Rating": 1500
+        },
+        {
+          "Class": 0,
+          "BestLap": "01:37.491",
+          "SR": "2.53",
+          "Incidents": 0,
+          "SteamID": "76561198436617476",
+          "Name": "Rambo Lives",
+          "SessionLaps": 2,
+          "Car": "PORSCHE 992 GT3 RS",
+          "Level": 2.0,
           "Rating": 1500
         }
       ],
       "Status": "🟢 ONLINE",
       "Mode": "Practice",
-      "Players": "1 / 32",
+      "Players": "2 / 32",
       "Track": "Laguna Seca\r\n[GP]"
     },
     {
@@ -99,5 +111,5 @@
       "Port": "9707"
     }
   ],
-  "LastUpdated": "2026-05-11 21:37:24"
+  "LastUpdated": "2026-05-11 21:42:27"
 }
