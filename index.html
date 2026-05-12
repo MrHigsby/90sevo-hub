@@ -76,10 +76,11 @@
             padding: 30px !important; /* Pushes content away from the edges */
         }
         
-        .hero-banner-container { 
-            height: 320px; /* Increased height slightly for better spacing */
+.hero-banner-container { 
+            min-height: 380px; /* Gives enough room for 10 drivers */
+            height: auto; /* Allows it to stretch if needed */
             box-sizing: border-box; 
-            transition: border-color 0.3s; 
+            transition: border-color 0.3s, background-image 0.8s ease-in-out; 
             cursor: pointer; 
             overflow: hidden; 
             background-color: #111; 
@@ -88,7 +89,9 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start; /* PUSHES CONTENT TO THE TOP */
+            padding-top: 30px; /* Breathing room from the top border */
+            padding-bottom: 20px; /* Breathing room at the bottom */
         }
 
         /* ADD THIS: New rule for the data grid inside the banner */
@@ -1613,7 +1616,7 @@
         // --- OPTION 2: FULL WIDTH (TELEMETRY) ---
         if (isFull) {
             // We slice at 6 so it perfectly fills the height of the hero banner without stretching it
-            const topRows = items.slice(0, 6);
+            const topRows = items.slice(0, 10);
             
             // Re-engineered Grid: Massive 2fr sections for Driver and Car names. Large 0.85rem font sizes.
             const headerHtml = `
