@@ -76,10 +76,11 @@
             padding: 30px !important; /* Pushes content away from the edges */
         }
         
-        .hero-banner-container { 
-            height: 320px; /* Increased height slightly for better spacing */
+.hero-banner-container { 
+            min-height: 380px; /* Gives enough room for 10 drivers */
+            height: auto; /* Allows it to stretch if needed */
             box-sizing: border-box; 
-            transition: border-color 0.3s; 
+            transition: border-color 0.3s, background-image 0.8s ease-in-out; 
             cursor: pointer; 
             overflow: hidden; 
             background-color: #111; 
@@ -88,7 +89,9 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start; /* PUSHES CONTENT TO THE TOP */
+            padding-top: 30px; /* Breathing room from the top border */
+            padding-bottom: 20px; /* Breathing room at the bottom */
         }
 
         /* ADD THIS: New rule for the data grid inside the banner */
@@ -1289,74 +1292,51 @@
 </div>
 
 <script>
-    // --- GLOBAL VARIABLES ---
-// --- THE MASTER IMAGE DICTIONARY ---
+// --- GLOBAL VARIABLES ---
+    let lockedOrderPool = null;
     const IMAGE_DICT = {
-        // --- YOUR CURRENT SEASONS ---
         "Old Timer Endurance Challenge": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Alfa_Sprint_Grid.png",
         "BMW M2 CS Racing Challenge": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/BMW_M2_Racing1.png",
         "GT3 Endurance Challenge": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Race1.png",
-        
-        // --- TRACK FALLBACKS (If no season is running) ---
         "Nordschleife": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/911GT3RNurbs.png",
         "Spa-Francorchamps": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Grid1.png",
-        
-        // --- THE FALLBACK ---
         "DEFAULT": "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Vote.png"
     };
 
-    // Auto-Matcher Function
-function getServerImage(server) {
+    function getServerImage(server) {
         const sName = (server.season || "").toUpperCase();
         const tName = (server.track || "").toUpperCase();
-
-        // 1. Match by Season Name (Keywords)
         if (sName.includes("OLD TIMER")) return IMAGE_DICT["Old Timer Endurance Challenge"];
         if (sName.includes("BMW") || sName.includes("M2")) return IMAGE_DICT["BMW M2 CS Racing Challenge"];
         if (sName.includes("GT3")) return IMAGE_DICT["GT3 Endurance Challenge"];
-
-        // 2. Match by Track Name (Keywords)
         if (tName.includes("NORD") || tName.includes("TOURIST")) return IMAGE_DICT["Nordschleife"];
         if (tName.includes("SPA")) return IMAGE_DICT["Spa-Francorchamps"];
-
-        // 3. Absolute Fallback
         return IMAGE_DICT["DEFAULT"];
     }
-	function updateSeasonSections(allServers) {
-    // 1. Find the containers in your HTML
-    const currentEventsGrid = document.querySelector('.event-card-grid'); // On the Home/Events section
-    const standingsContainer = document.getElementById('standings-container'); // On the Schedule page
-    
-    // Clear the fake placeholders
-    if (currentEventsGrid) currentEventsGrid.innerHTML = '';
 
-    // 2. Filter servers that actually have a Season running
-    const activeSeasons = allServers.filter(s => s.season && s.season !== "None");
+    function updateSeasonSections(allServers) {
+        const currentEventsGrid = document.querySelector('.event-card-grid');
+        if (currentEventsGrid) currentEventsGrid.innerHTML = '';
+        const activeSeasons = allServers.filter(s => s.season && s.season !== "None");
 
-    activeSeasons.forEach(srv => {
-        // Create the Event Card HTML
-const eventCard = `
-            <div class="event-card" onclick="goToServerAndExpand('srv-${srv.port}', 'race')">
-                <img src="${srv.img}" alt="${srv.season}">
-                <div class="event-content">
-                    <h3>${srv.season.toUpperCase()}</h3>
-                    <div class="event-track">> ${srv.track.toUpperCase()}</div>
-                    <div class="event-status">STATUS: ${srv.status}</div>
-                </div>
-            </div>
-        `;
+        activeSeasons.forEach(srv => {
+            const eventCard = `
+                <div class="event-card" onclick="goToServerAndExpand('srv-${srv.port}', 'race')">
+                    <img src="${srv.img}" alt="${srv.season}">
+                    <div class="event-content">
+                        <h3>${srv.season.toUpperCase()}</h3>
+                        <div class="event-track">> ${srv.track.toUpperCase()}</div>
+                        <div class="event-status">STATUS: ${srv.status}</div>
+                    </div>
+                </div>`;
+            if (currentEventsGrid) currentEventsGrid.insertAdjacentHTML('beforeend', eventCard);
+        });
 
-        if (currentEventsGrid) {
-            currentEventsGrid.insertAdjacentHTML('beforeend', eventCard);
+        if (activeSeasons.length === 0 && currentEventsGrid) {
+            currentEventsGrid.innerHTML = '<p class="status" style="grid-column: 1/-1; text-align:center;">NO OFFICIAL SEASON EVENTS CURRENTLY LIVE. CHECK BACK SOON.</p>';
         }
-    });
-
-    // If no seasons are active, show a "Stay Tuned" message
-    if (activeSeasons.length === 0 && currentEventsGrid) {
-        currentEventsGrid.innerHTML = '<p class="status" style="grid-column: 1/-1; text-align:center;">NO OFFICIAL SEASON EVENTS CURRENTLY LIVE. CHECK BACK SOON.</p>';
     }
-}
-	
+    
     let dbProfiles = {};
     let dbLeaderboard = [];
     const classLetters = ["R", "D", "C", "B", "A", "S"];
@@ -1373,6 +1353,15 @@ const eventCard = `
     let heroTimer = null;
     let activeModalSteamID = "";
     let currentTelemetryDriver = null;
+
+    window.raceServers = [];
+    window.tdServers = [];
+
+    // SR MATH HELPERS
+    function getStickerColor(c) {
+        if(c==='S') return 'var(--neon-gold)'; if(c==='A') return '#fff'; if(c==='R' || c==='D') return 'var(--neon-pink)'; return 'var(--neon-mint)';
+    }
+    function getSrFill(sr) { return Math.min(((parseFloat(sr) || 2.50) / 4.0) * 100, 100).toFixed(1); }
 
     // --- YOUR UI & NAVIGATION FUNCTIONS ---
     function showPage(pageId) {
@@ -1393,7 +1382,7 @@ const eventCard = `
         window.scrollTo(0, 0); 
         updateHeroBanner();
         clearInterval(heroTimer);
-        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 10000);
+        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000);
     }
     
     function showChapter(chapterId) {
@@ -1429,7 +1418,6 @@ const eventCard = `
     function goToRaceAndExpand(srvId) { goToServerAndExpand(srvId, 'race'); }
     function openLeaderboard(mode) { document.getElementById('lbMode').value = mode; showPage('leaderboard'); processLeaderboardData(); }
 
-    // --- VOTING SYSTEM ---
     let mockVotes = { 'race-track': { spa: 42, suzuka: 28, monza: 14, nurb: 31 }, 'td-env': { shutoko: 35, golden: 55, la: 40, tsukuba: 22 } };
     let userVoted = { 'race-track': false, 'td-env': false };
 
@@ -1565,7 +1553,7 @@ const eventCard = `
         reader.readAsText(e.target.files[0]);
     });
 
-    // --- HOMEPAGE & HERO BANNER ---
+    // --- HOMEPAGE ELITE ---
     function updateHomeEliteLists() {
         if(!dbProfiles) return;
         const sorted = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]}));
@@ -1614,150 +1602,206 @@ const eventCard = `
         globalBannerIdx += dir;
         updateHeroBanner();
         clearInterval(heroTimer);
-        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 20000);
+        heroTimer = setInterval(() => { globalBannerIdx++; updateHeroBanner(); }, 15000);
     }
 
-function updateHeroBanner() {
-    const activePage = document.querySelector('.page.active').id;
-    
-// HELPER: Builds the 1-5 / 6-10 columns with support for full telemetry
-const buildTwoColumnList = (items, type) => {
+    // --- HERO BANNER ---
+    function updateHeroBanner() {
+// --- 1. HELPER FUNCTION ---
+    const buildTwoColumnList = (items, type) => {
         if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
         
         const isFull = (type === 'full');
-        const col1 = items.slice(0, 5);
-        const col2 = items.slice(5, 10);
         
-        // Header updated to include CAR
-        const headerHtml = isFull ? `
-            <div class="tele-row tele-header" style="display: grid; grid-template-columns: 20px 80px 35px 75px 30px 80px 1fr; gap: 5px; border-bottom: 1px solid #555; color: #555; font-size: 0.6rem; font-weight: bold; padding-bottom: 2px; margin-bottom: 3px;">
-                <span>#</span><span>DRIVER</span><span>ELO</span><span>SR</span><span>LVL</span><span>CAR</span><span style="text-align:right">LAP</span>
-            </div>` : '';
-
-        const renderRow = (p, i, offset) => {
-            const name = p.name || p.Name || "Unknown";
-            const elo = p.rating || p.DriverRating || 1500;
-            const sr = p.sr || (p.SafetyRating ? p.SafetyRating.toFixed(2) : "2.50");
-            const lvl = p.level || (p.TrackdayXP ? (Math.floor(Math.sqrt(p.TrackdayXP / 50)) + 1) : 1);
-            const lap = p.lapTime || p.LapTime || "--:--.---";
-            const car = p.car || p.Car || "---"; // Get the car name
-            const clsIndex = (p.class !== undefined) ? p.class : (p.LicenseClass !== undefined ? p.LicenseClass : 0);
-            const cls = classLetters[clsIndex];
-
-            if (isFull) {
-                return `
-                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="display: grid; grid-template-columns: 20px 80px 35px 75px 30px 80px 1fr; gap: 5px; align-items: center; border-bottom: 1px dashed #333; padding: 4px 0; font-size: 0.65rem; font-family: 'Share Tech Mono';">
-                    <span style="color:#555;">${i + offset}</span>
-                    <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
-                    <span style="color:var(--neon-cyan);">${elo}</span>
-                    <span style="background:#111; border:1px solid ${getStickerColor(cls)}; padding:0 2px; border-radius:2px; font-size:0.55rem; text-align:center;">${cls} [${sr}]</span>
-                    <span style="color:var(--neon-gold); text-align:center;">L${lvl}</span>
-                    <span style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:0.6rem;">${car}</span>
-                    <span style="color:var(--neon-mint); text-align:right;">${lap}</span>
+        // --- OPTION 2: FULL WIDTH (TELEMETRY) ---
+        if (isFull) {
+            // We slice at 6 so it perfectly fills the height of the hero banner without stretching it
+            const topRows = items.slice(0, 10);
+            
+            // Re-engineered Grid: Massive 2fr sections for Driver and Car names. Large 0.85rem font sizes.
+            const headerHtml = `
+                <div class="tele-row tele-header" style="display: grid; grid-template-columns: 30px 2fr 60px 85px 50px 2fr 40px 50px 50px 85px; gap: 10px; border-bottom: 1px solid #555; color: #555; font-size: 0.75rem; font-weight: bold; padding-bottom: 4px; margin-bottom: 4px;">
+                    <span>#</span><span>DRIVER</span><span style="text-align:center;">ELO</span><span style="text-align:center;">SR</span><span style="text-align:center;">LVL</span><span>CAR</span><span style="text-align:center;">INC</span><span style="text-align:center;">I/L</span><span style="text-align:center;">LAPS</span><span style="text-align:center;">TIME</span>
                 </div>`;
-            } else {
+
+            const renderRow = (p, i) => {
+                const name = p.name || p.Name || "Unknown";
+                const elo = p.rating || p.DriverRating || 1500;
+                
+                const srRaw = p.sr || (p.SafetyRating ? p.SafetyRating : 2.50);
+                const srValue = parseFloat(srRaw).toFixed(2);
+                const srFillPct = getSrFill(srRaw);
+                
+                const lvl = p.level || (p.TrackdayXP ? (Math.floor(Math.sqrt(p.TrackdayXP / 50)) + 1) : 1);
+                const lap = p.lapTime || p.LapTime || "--:--.---";
+                const car = p.car || p.Car || "---"; 
+                
+                const clsIndex = (p.class !== undefined) ? p.class : (p.LicenseClass !== undefined ? p.LicenseClass : 0);
+                const cls = classLetters[clsIndex] || "R";
+                const colorStr = getStickerColor(cls);
+
+                const lapsCount = p.laps || p.Laps || "0";
+                const incCount = p.incidents || p.Incidents || "0";
+                let parsedLaps = parseInt(lapsCount) || 0;
+                let incPerLap = "0.00";
+                if (parsedLaps > 0) {
+                    incPerLap = (parseInt(incCount) / parsedLaps).toFixed(2);
+                }
+                let incColor = incPerLap >= 1.5 ? 'var(--neon-pink)' : '#fff';
+
+                return `
+                <div class="tele-row" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="display: grid; grid-template-columns: 30px 2fr 60px 85px 50px 2fr 40px 50px 50px 85px; gap: 10px; align-items: center; border-bottom: 1px dashed #333; padding: 6px 0; font-size: 0.85rem; font-family: 'Share Tech Mono';">
+                    <span style="color:#555;">${i + 1}</span>
+                    <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
+                    
+                    <span style="color:var(--neon-cyan); text-align:center;">${elo}</span>
+                    <span style="justify-self:center; display: inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFillPct}%, #111 ${srFillPct}%); padding: 1px 4px; border-radius: 2px; font-size: 0.75rem; color: #fff; text-shadow: 1px 1px 0 #000; white-space: nowrap;">${cls} [${srValue}]</span>
+                    <span style="justify-self:center; color:var(--neon-gold); font-size: 0.75rem; background: rgba(255,215,0,0.05); padding: 1px 4px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${lvl}</span>
+                    
+                    <span style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${car}</span>
+                    
+                    <span style="color:#888; text-align:center;">${incCount}</span>
+                    <span style="color:${incColor}; text-align:center; font-weight:bold;">${incPerLap}</span>
+                    <span style="color:var(--neon-cyan); text-align:center;">${lapsCount}</span>
+                    
+                    <span style="color:var(--neon-mint); text-align:center; font-weight:bold; white-space:nowrap;">${lap}</span>
+                </div>`;
+            };
+
+// Using display:block overrides the CSS grid so it spans 100% horizontally!
+            let html = `<div class="hero-grid-container" style="max-width: 1000px; display: block; border: 1px solid #444;">`; 
+            
+            // THE FIX: We wrap the header and rows in ONE div so they don't all individually stretch to 120px!
+            html += `<div>`; 
+            
+            html += headerHtml;
+            html += topRows.map((p, i) => renderRow(p, i)).join('');
+            
+            html += `</div>`; // Close the wrapper
+            html += `</div>`; // Close the main container
+            
+            return html;
+            
+        } else {
+            // --- BASIC 2-COLUMN VIEW (For ELO and LAPS Slides) ---
+            const col1 = items.slice(0, 5);
+            const col2 = items.slice(5, 10);
+            
+            const renderBasicRow = (p, i, offset) => {
+                const name = p.name || p.Name || "Unknown";
+                const elo = p.rating || p.DriverRating || 1500;
+                const lap = p.lapTime || p.LapTime || "--:--.---";
                 const val = type === 'elo' ? elo : lap;
                 const color = type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)';
+                
                 return `
-                <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:4px 0; cursor:pointer; font-size:0.8rem;" onclick="event.stopPropagation(); openDriverCard('${p.id || p.steamId}')">
-                    <span>${i + offset}. ${name}</span>
-                    <span style="color:${color}; font-weight:bold;">${val}</span>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px dashed #444; padding:5px 0; cursor:pointer; font-size:0.85rem;" onclick="event.stopPropagation(); openDriverCard('${p.id || p.steamId}')">
+                    <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:10px;">${i + offset}. ${name}</span>
+                    <span style="color:${color}; font-weight:bold; flex-shrink:0;">${val}</span>
                 </div>`;
-            }
-        };
+            };
 
-        let html = `<div class="hero-grid-container" style="max-width: 1000px;">`; // Slightly wider to accommodate car names
-        html += `<div>${headerHtml}${col1.map((p, i) => renderRow(p, i, 1)).join('')}</div>`;
-        html += `<div>${headerHtml}${col2.map((p, i) => renderRow(p, i, 6)).join('')}</div>`;
-        html += `</div>`;
-        
-        return html;
-    };
-// 1. DATA PREP
-    const sortedElo = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]})).sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0, 10);
-    const eloHtml = buildTwoColumnList(sortedElo, 'elo');
-
-    let trHtml = '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ LOAD LEADERBOARD.JSON ]</div>';
-    if (dbLeaderboard.length > 0) {
-        const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown Track'))];
-        const track = tracks[Math.floor(Date.now() / 15000) % tracks.length] || tracks[0]; 
-        const top10 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0, 10);
-        trHtml = `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${track.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps');
-    }
-    // 2. SLIDE POOL CONSTRUCTION
-    let pool = [];
-
-    // --- STEP 1: MAKE NURBURGRING THE DEFAULT (TOP PRIORITY) ---
-    const nurbServer = [...(window.raceServers||[]), ...(window.tdServers||[])].find(s => s.port == "9604");
-    if (nurbServer) {
-        // We sort the roster so the fastest laps appear at the top of our new detail view
-        const sortedRoster = [...(nurbServer.roster || [])].sort((a, b) => {
-            if (a.lapTime === "--:--.---") return 1;
-            if (b.lapTime === "--:--.---") return -1;
-            return a.lapTime.localeCompare(b.lapTime);
-        });
-
-        pool.push({ 
-            label: "[ FEATURED SERVER ]", 
-            title: "90s NURBURGRING TOURISTENFAHRTEN", 
-            data: `<div style="color:var(--neon-gold); text-align:center; font-family:'Share Tech Mono'; font-size:0.8rem; margin-bottom:5px;">LIVE ONLINE TELEMETRY (${nurbServer.p})</div>` + buildTwoColumnList(sortedRoster.slice(0, 10), 'full'), 
-            color: "var(--neon-gold)", 
-            action: () => goToServerAndExpand('srv-t-0', 'trackday'), 
-            img: IMAGE_DICT["Nordschleife"] 
-        });
-    }
-
-    // --- STEP 2: ADD ACTIVE SEASONS ---
-    const activeSeasons = (window.raceServers || []).filter(s => s.season && s.season !== "None");
-    activeSeasons.forEach((s, i) => {
-        pool.push({
-            label: "[ SEASON EVENTS ]",
-            title: s.season.toUpperCase(),
-            data: `<div style="text-align:center; font-size:1.2rem; margin-top:20px; font-family:'Share Tech Mono';"> TRACK: ${s.track.toUpperCase()}<br>STATUS: ${s.status}</div>`,
-            color: "var(--neon-pink)",
-            action: () => goToServerAndExpand(`srv-r-${i}`, 'race'),
-            img: s.img
-        });
-    });
-
-    // --- STEP 3: ADD RANKINGS & RECORDS ---
-    pool.push({ label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?q=80&w=1000" });
-    pool.push({ label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://images.unsplash.com/photo-1493238792040-81584920a43d?q=80&w=1000" });
-    if(pool.length === 0) return;
-    let safeIdx = ((globalBannerIdx % pool.length) + pool.length) % pool.length;
-    const slide = pool[safeIdx];
-    
-    document.querySelectorAll('.hero-banner-container').forEach(banner => {
-        banner.style.borderColor = slide.color;
-		banner.style.display = "flex";
-banner.style.flexDirection = "column";
-banner.style.justifyContent = "center"; // This forces vertical centering
-        banner.querySelector('.hero-label').innerText = slide.label;
-        banner.querySelector('.hero-label').style.color = slide.color;
-        banner.querySelector('.hero-title').innerText = slide.title;
-        banner.querySelector('.hero-data').innerHTML = slide.data;
-        banner.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${slide.img}')`;
-        banner.onclick = slide.action;
-
-        // --- ARROW LOGIC (RE-ADDED) ---
-        if (!banner.querySelector('.banner-arrow.left')) {
-            const leftArr = document.createElement('div'); 
-            leftArr.className = 'banner-arrow left'; 
-            leftArr.innerHTML = '&#10094;';
-            leftArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(-1); };
-            
-            const rightArr = document.createElement('div'); 
-            rightArr.className = 'banner-arrow right'; 
-            rightArr.innerHTML = '&#10095;';
-            rightArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(1); };
-            
-            banner.appendChild(leftArr); 
-            banner.appendChild(rightArr);
+            let html = `<div class="hero-grid-container" style="max-width: 1000px;">`; 
+            html += `<div>${col1.map((p, i) => renderBasicRow(p, i, 1)).join('')}</div>`;
+            html += `<div>${col2.map((p, i) => renderBasicRow(p, i, 6)).join('')}</div>`;
+            html += `</div>`;
+            return html;
         }
-    });
-}
+    };
 
-    // --- LEADERBOARD & TABLES ---
+        const sortedElo = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]})).sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0, 10);
+        const eloHtml = buildTwoColumnList(sortedElo, 'elo');
+
+        let trHtml = '[ LOAD LEADERBOARD.JSON ]';
+        if (dbLeaderboard.length > 0) {
+            const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown Track'))];
+            const track = tracks[Math.floor(Date.now() / 15000) % tracks.length] || tracks[0]; 
+            const top10 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0, 10);
+            trHtml = `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${track.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps');
+        }
+
+        let currentAvailableSlides = [];
+        
+        const nurbServer = [...(window.raceServers||[]), ...(window.tdServers||[])].find(s => s.port == "9604");
+        if (nurbServer) {
+            const sortedRoster = [...(nurbServer.roster || [])].sort((a, b) => {
+                if (a.lapTime === "--:--.---") return 1;
+                if (b.lapTime === "--:--.---") return -1;
+                return a.lapTime.localeCompare(b.lapTime);
+            });
+            currentAvailableSlides.push({ 
+                id: 'nurb',
+                label: "[ FEATURED SERVER ]", 
+                title: "90s NURBURGRING TOURISTENFAHRTEN", 
+                data: `<div style="color:var(--neon-gold); text-align:center; font-family:'Share Tech Mono'; font-size:0.8rem; margin-bottom:5px;">LIVE ONLINE TELEMETRY (${nurbServer.p})</div>` + buildTwoColumnList(sortedRoster.slice(0, 10), 'full'), 
+                color: "var(--neon-gold)", 
+                action: () => goToServerAndExpand('srv-t-0', 'trackday'), 
+                img: IMAGE_DICT["Nordschleife"] 
+            });
+        }
+
+        const activeSeasons = (window.raceServers || []).filter(s => s.season && s.season !== "None");
+        activeSeasons.forEach((s, i) => {
+            currentAvailableSlides.push({
+                id: `season-${s.port}`,
+                label: "[ SEASON EVENTS ]",
+                title: s.season.toUpperCase(),
+                data: `<div style="text-align:center; font-size:1.2rem; margin-top:20px; font-family:'Share Tech Mono';"> TRACK: ${s.track.toUpperCase()}<br>STATUS: ${s.status}</div>`,
+                color: "var(--neon-pink)",
+                action: () => goToServerAndExpand(`srv-r-${i}`, 'race'),
+                img: s.img
+            });
+        });
+
+        currentAvailableSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
+        currentAvailableSlides.push({ id: 'records', label: "[ TRACK RECORDS ]", title: "FASTEST LAPS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
+
+        if (!lockedOrderPool || lockedOrderPool.length !== currentAvailableSlides.length) {
+            let first = currentAvailableSlides.find(s => s.id === 'nurb');
+            let others = currentAvailableSlides.filter(s => s.id !== 'nurb');
+            for (let i = others.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [others[i], others[j]] = [others[j], others[i]];
+            }
+            lockedOrderPool = first ? [first.id, ...others.map(o => o.id)] : others.map(o => o.id);
+        }
+
+        if (!lockedOrderPool || lockedOrderPool.length === 0) return;
+
+        let safeIdx = ((globalBannerIdx % lockedOrderPool.length) + lockedOrderPool.length) % lockedOrderPool.length;
+        let currentId = lockedOrderPool[safeIdx];
+        let slide = currentAvailableSlides.find(s => s.id === currentId);
+
+        if (!slide) return; 
+
+        document.querySelectorAll('.hero-banner-container').forEach(banner => {
+            banner.style.borderColor = slide.color;
+            banner.querySelector('.hero-label').innerText = slide.label;
+            banner.querySelector('.hero-label').style.color = slide.color;
+            banner.querySelector('.hero-title').innerText = slide.title;
+            banner.querySelector('.hero-data').innerHTML = slide.data;
+            banner.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${slide.img}')`;
+            banner.onclick = slide.action;
+
+            if (!banner.querySelector('.banner-arrow.left')) {
+                const leftArr = document.createElement('div'); 
+                leftArr.className = 'banner-arrow left'; 
+                leftArr.innerHTML = '&#10094;';
+                leftArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(-1); };
+                
+                const rightArr = document.createElement('div'); 
+                rightArr.className = 'banner-arrow right'; 
+                rightArr.innerHTML = '&#10095;';
+                rightArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(1); };
+                
+                banner.appendChild(leftArr); 
+                banner.appendChild(rightArr);
+            }
+        });
+    }
+    function goToHeroPage() { return; }
+
+    // --- LEADERBOARDS ---
     const lbMode = document.getElementById('lbMode');
     const lbTrack = document.getElementById('lbTrack');
     const lbCar = document.getElementById('lbCar');
@@ -1925,12 +1969,7 @@ banner.style.justifyContent = "center"; // This forces vertical centering
 
     function loadMoreRows() { lbCurrentPage++; renderTableRows(); }
 
-    // --- DRIVER CARDS & TELEMETRY ---
-    function getStickerColor(c) {
-        if(c==='S') return 'var(--neon-gold)'; if(c==='A') return '#fff'; if(c==='R' || c==='D') return 'var(--neon-pink)'; return 'var(--neon-mint)';
-    }
-    function getSrFill(sr) { return Math.min(((sr || 2.50) / 4.0) * 100, 100).toFixed(1); }
-
+    // --- PROFILES ---
     function openDriverCard(steamId) {
         if(Object.keys(dbProfiles).length === 0) { alert("Please load DRIVER_PROFILES.JSON on the Home tab first to view ID Cards."); return; }
         const prof = dbProfiles[steamId];
@@ -2006,7 +2045,6 @@ banner.style.justifyContent = "center"; // This forces vertical centering
                 return;
             }
         }
-        
         alert("Driver not found. Please verify the exact Alias or Steam ID.");
     }
     
@@ -2015,7 +2053,6 @@ banner.style.justifyContent = "center"; // This forces vertical centering
         if(searchInput) {
             searchInput.addEventListener('input', function(e) {
                 if (e.inputType === 'deleteContentBackward' || e.inputType === 'deleteContentForward') return;
-                
                 const val = this.value;
                 if (!val) return;
 
@@ -2034,9 +2071,7 @@ banner.style.justifyContent = "center"; // This forces vertical centering
             });
 
             searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    searchTelemetry();
-                }
+                if (e.key === 'Enter') { searchTelemetry(); }
             });
         }
     });
@@ -2044,7 +2079,6 @@ banner.style.justifyContent = "center"; // This forces vertical centering
     function renderProfileRecords() {
         if (!currentTelemetryDriver) return;
         const id = currentTelemetryDriver;
-        
         let pRecords = dbLeaderboard.filter(entry => entry.SteamID === id);
         
         const trackSelect = document.getElementById('profTrackFilter');
@@ -2100,7 +2134,6 @@ banner.style.justifyContent = "center"; // This forces vertical centering
         
         document.getElementById('profName').innerText = p.Name;
         document.getElementById('profSteamId').innerText = "STEAM_ID: " + id;
-        
         document.getElementById('profRating').innerText = p.DriverRating || 1500;
         
         let totalTitles = 0;
@@ -2208,14 +2241,9 @@ banner.style.justifyContent = "center"; // This forces vertical centering
         showPage('profile');
     }
 
-    // --- UPLINK AUTOMATION ---
-    // Safely declare global arrays for interval functions
-    window.raceServers = [];
-    window.tdServers = [];
-
-async function fetchLiveStatus() {
+    // --- LIVE FETCH ---
+    async function fetchLiveStatus() {
         try {
-            // We now fetch from your LIVE Firebase URL
             const response = await fetch('https://sevo-hub-default-rtdb.firebaseio.com/live_status.json');
             if (!response.ok) return;
             const data = await response.json();
@@ -2226,15 +2254,15 @@ async function fetchLiveStatus() {
             let liveTdServers = [];
             const reservedRacePorts = ["9605", "9606", "9607"]; 
 
-data.Servers.forEach(server => {
+            data.Servers.forEach(server => {
                 const serverObj = {
                     name: server.Name, 
                     track: server.Track, 
                     p: server.Players,
                     status: server.Mode ? server.Mode.toUpperCase() : "ONLINE",
                     port: server.Port,
-                    season: server.Season || "None", // <--- Pulls Season from Firebase
-                    img: "",                         // <--- Placeholder
+                    season: server.Season || "None",
+                    img: "", 
                     roster: (server.LiveDrivers || []).map((d, idx) => ({
                         pos: idx + 1, 
                         name: d.Name, 
@@ -2251,7 +2279,6 @@ data.Servers.forEach(server => {
                     }))
                 };
                 
-                // Assign the image automatically using our dictionary!
                 serverObj.img = getServerImage(serverObj);
 
                 if (reservedRacePorts.includes(server.Port.toString()) || server.Name.toLowerCase().includes("race")) {
@@ -2264,138 +2291,128 @@ data.Servers.forEach(server => {
 
             renderServerList('raceServersContainer', window.raceServers, true);
             renderServerList('tdServersContainer', window.tdServers, false);
-			updateSeasonSections([...window.raceServers, ...window.tdServers]);
-			updateHeroBanner();
+            updateSeasonSections([...window.raceServers, ...window.tdServers]);
+            updateHeroBanner();
         } catch (error) { console.error("📡 FIREBASE FETCH ERROR:", error); }
     }
 
-function renderServerList(containerId, servers, isRace) {
-    const container = document.getElementById(containerId);
-    if(!container) return;
-    
-    // 1. MEMORY CHECK: See which server IDs are currently expanded
-    const expandedIds = [];
-    container.querySelectorAll('.server-roster').forEach(roster => {
-        if (roster.style.display === 'block') { expandedIds.push(roster.id); }
-    });
-    
-    let html = '';
-    if (servers.length === 0) {
-        container.innerHTML = `<div style="text-align:center; padding:20px; color:#666; font-family:'Share Tech Mono'; border:1px dashed #333;">[ NO LIVE ${isRace ? 'RACE' : 'TRACK DAY'} SERVERS FOUND ]</div>`;
-        return;
-    }
-
-    // MATCHING YOUR OFFICIAL CLASS COLORS
-    const getSRStyles = (cls) => {
-        const styles = [
-            { name: 'R', color: '#ff00ff' }, // ROOKIE (Magenta)
-            { name: 'D', color: '#55efc4' }, // NOVICE (Mint)
-            { name: 'C', color: '#74b9ff' }, // AMATEUR (Blue)
-            { name: 'B', color: '#a29bfe' }, // SEMI-PRO (Purple)
-            { name: 'A', color: '#ffe135' }, // PRO (Gold)
-            { name: 'S', color: '#ff7675' }  // ELITE (Red)
-        ];
-        return styles[cls] || styles[0];
-    };
-
-    servers.forEach((s, idx) => {
-        const rowClass = isRace ? 'server-item race-mode' : 'server-item';
-        const srvId = `srv-${isRace ? 'r' : 't'}-${idx}`;
-        const rosterId = `roster-${srvId}`;
-        const isExpanded = expandedIds.includes(rosterId);
-
-        let rosterHtml = '';
-        if(s.roster && s.roster.length > 0) {
-            rosterHtml = `
-                <div class="server-roster" id="${rosterId}" style="display: ${isExpanded ? 'block' : 'none'}; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
-<table class="server-roster-table" style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="color: #666; font-size: 0.70rem; text-transform: uppercase; font-family: 'Share Tech Mono'; border-bottom: 1px solid #333;">
-                                <th style="text-align: left; padding: 8px 4px; width: 3%;">#</th>
-                                <th style="text-align: left; padding: 8px 4px; width: 22%;">DRIVER</th>
-                                <th style="text-align: center; padding: 8px 10px;">RATING (ELO)</th>
-                                <th style="text-align: center; padding: 8px 10px;">SAFETY (SR)</th>
-                                <th style="text-align: center; padding: 8px 10px;">TRACKXP (TXP)</th>
-                                <th style="text-align: center; padding: 8px 4px;">CAR</th>
-                                <th style="text-align: center; padding: 8px 4px;">LAP TIME</th>
-                                <th style="text-align: center; padding: 8px 4px;">SESSION LAPS</th>
-                                <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INCIDENTS</th>
-                                <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC/LAP</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${s.roster.map(r => {
-                                const classStyle = getSRStyles(r.class);
-                                
-                                // --- THE NEW MATH LOGIC ---
-                                let parsedLaps = parseInt(r.laps) || 0;
-                                let incPerLap = "0.00";
-                                if (parsedLaps > 0) {
-                                    incPerLap = (r.incidents / parsedLaps).toFixed(2);
-                                }
-                                
-                                // Color it red if they are driving terribly (averaging more than 1.5 incidents a lap)
-                                let incColor = incPerLap >= 1.5 ? 'var(--neon-pink)' : '#fff';
-                                // --------------------------
-
-                                return `
-                                <tr onclick="event.stopPropagation(); openDriverCard('${r.steamId}')" style="border-bottom: 1px solid #222; cursor: pointer;">
-                                    <td style="padding: 8px 4px; color: #555; font-family: 'Share Tech Mono';">${r.pos}</td>
-                                    <td style="padding: 8px 4px; font-weight: bold; color: #fff; white-space: nowrap;">${r.name}</td>
-                                    
-                                    <td style="padding: 8px 10px; text-align: center; white-space: nowrap;">
-                                        <span style="color: #fff; font-family: 'Share Tech Mono'; font-size: 0.70rem; background: #222; padding: 2px 6px; border-radius: 3px; border: 1px solid #444;">${r.rating}</span>
-                                    </td>
-                                    
-                                    <td style="padding: 8px 10px; text-align: center; white-space: nowrap;">
-                                        <div style="display: inline-flex; border: 2px solid ${classStyle.color}; border-radius: 3px; overflow: hidden; font-family: 'Share Tech Mono'; font-size: 0.70rem; font-weight: bold;">
-                                            <div style="background-color: ${classStyle.color}; color: #fff; padding: 1px 5px; text-transform: uppercase; text-shadow: 1px 1px 0 #000;">
-                                                CLASS ${classStyle.name}
-                                            </div>
-                                            <div style="background-color: #222; color: #fff; padding: 1px 5px;">
-                                                [${r.sr}]
-                                            </div>
-                                        </div>
-                                    </td>
-                                    
-                                    <td style="padding: 8px 10px; text-align: center; white-space: nowrap;">
-                                        <span style="color: var(--neon-gold); font-family: 'Share Tech Mono'; font-size: 0.70rem; background: rgba(255,215,0,0.05); padding: 2px 6px; border-radius: 3px; border: 1px solid var(--neon-gold);">LVL ${r.level}</span>
-                                    </td>
-                                    
-                                    <td style="padding: 8px 4px; text-align: center; color: #aaa; font-size: 0.80rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">${r.car}</td>
-                                    <td style="padding: 8px 4px; text-align: center; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold; font-family: 'Share Tech Mono';">${r.lapTime}</td>
-                                    <td style="padding: 8px 4px; text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
-                                    
-                                    <td style="padding: 8px 4px; text-align: center; color: #888; font-family: 'Share Tech Mono';">${r.incidents}x</td>
-                                    <td style="padding: 8px 4px; text-align: center; color: ${incColor}; font-weight: bold; font-family: 'Share Tech Mono';">${incPerLap}</td>
-                                </tr>`;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        } else {
-            rosterHtml = `<div class="server-roster" id="${rosterId}" style="display: ${isExpanded ? 'block' : 'none'}; padding: 15px; text-align: center; color: #444; font-family: 'Share Tech Mono';">[ SERVER EMPTY ]</div>`;
+    function renderServerList(containerId, servers, isRace) {
+        const container = document.getElementById(containerId);
+        if(!container) return;
+        
+        const expandedIds = [];
+        container.querySelectorAll('.server-roster').forEach(roster => {
+            if (roster.style.display === 'block') { expandedIds.push(roster.id); }
+        });
+        
+        let html = '';
+        if (servers.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:20px; color:#666; font-family:'Share Tech Mono'; border:1px dashed #333;">[ NO LIVE ${isRace ? 'RACE' : 'TRACK DAY'} SERVERS FOUND ]</div>`;
+            return;
         }
 
-        html += `
-            <div class="${rowClass}" id="${srvId}" onclick="toggleRoster('${srvId}')" style="margin-bottom: 10px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 4px; border-left: 4px solid ${isRace ? 'var(--neon-gold)' : 'var(--neon-mint)'};">
-                <div class="server-header-row" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-size: 1.1rem; font-weight: bold; color: #fff; text-transform: uppercase;">${s.name}</div>
-                        <div style="color: #666; font-family: 'Share Tech Mono'; font-size: 0.8rem; margin-top: 4px;">TRACK: ${s.track} | STATUS: ${s.status}</div>
+        const getSRStyles = (cls) => {
+            const styles = [
+                { name: 'R', color: '#ff00ff' }, // ROOKIE
+                { name: 'D', color: '#55efc4' }, // NOVICE
+                { name: 'C', color: '#74b9ff' }, // AMATEUR
+                { name: 'B', color: '#a29bfe' }, // SEMI-PRO
+                { name: 'A', color: '#ffe135' }, // PRO
+                { name: 'S', color: '#ff7675' }  // ELITE
+            ];
+            return styles[cls] || styles[0];
+        };
+
+        servers.forEach((s, idx) => {
+            const rowClass = isRace ? 'server-item race-mode' : 'server-item';
+            const srvId = `srv-${isRace ? 'r' : 't'}-${idx}`;
+            const rosterId = `roster-${srvId}`;
+            const isExpanded = expandedIds.includes(rosterId);
+
+            let rosterHtml = '';
+            if(s.roster && s.roster.length > 0) {
+                rosterHtml = `
+                    <div class="server-roster" id="${rosterId}" style="display: ${isExpanded ? 'block' : 'none'}; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
+                        <table class="server-roster-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="color: #666; font-size: 0.70rem; text-transform: uppercase; font-family: 'Share Tech Mono'; border-bottom: 1px solid #333;">
+                                    <th style="text-align: left; padding: 8px 4px; width: 3%;">#</th>
+                                    <th style="text-align: left; padding: 8px 4px; width: 20%;">DRIVER</th>
+                                    <th style="text-align: center; padding: 8px 4px;">RATING (ELO)</th>
+                                    <th style="text-align: center; padding: 8px 4px;">SAFETY (SR)</th>
+                                    <th style="text-align: center; padding: 8px 4px;">TrackXP (TXP)</th>
+                                    <th style="text-align: center; padding: 8px 4px;">CAR</th>
+                                    <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC</th>
+                                    <th style="text-align: center; padding: 8px 4px; color: var(--neon-pink);">INC/L</th>
+                                    <th style="text-align: center; padding: 8px 4px;">LAPS</th>
+                                    <th style="text-align: center; padding: 8px 4px; white-space: nowrap;">TIME</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${s.roster.map(r => {
+                                    const classStyle = getSRStyles(r.class);
+                                    
+                                    let parsedLaps = parseInt(r.laps) || 0;
+                                    let incPerLap = "0.00";
+                                    if (parsedLaps > 0) {
+                                        incPerLap = (r.incidents / parsedLaps).toFixed(2);
+                                    }
+                                    let incColor = incPerLap >= 1.5 ? 'var(--neon-pink)' : '#fff';
+
+                                    return `
+                                    <tr onclick="event.stopPropagation(); openDriverCard('${r.steamId}')" style="border-bottom: 1px solid #222; cursor: pointer;">
+                                        <td style="padding: 8px 4px; color: #555; font-family: 'Share Tech Mono';">${r.pos}</td>
+                                        <td style="padding: 8px 4px; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">${r.name}</td>
+                                        
+                                        <td style="padding: 8px 4px; text-align: center; white-space: nowrap;">
+                                            <span style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.8rem;">${r.rating}</span>
+                                        </td>
+                                        
+                                        <td style="padding: 8px 4px; text-align: center; white-space: nowrap;">
+                                            <span style="display: inline-block; border: 1px solid ${classStyle.color}; background: linear-gradient(to right, ${classStyle.color} ${getSrFill(r.sr)}%, #111 ${getSrFill(r.sr)}%); padding: 1px 6px; border-radius: 2px; font-family: 'Share Tech Mono'; font-size: 0.65rem; font-weight: bold; color: #fff; text-shadow: 1px 1px 1px #000;">
+                                                ${classStyle.name} [${r.sr}]
+                                            </span>
+                                        </td>
+                                        
+                                        <td style="padding: 8px 4px; text-align: center; white-space: nowrap;">
+                                            <span style="color: var(--neon-gold); font-family: 'Share Tech Mono'; font-size: 0.70rem; background: rgba(255,215,0,0.05); padding: 1px 4px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${r.level}</span>
+                                        </td>
+                                        
+                                        <td style="padding: 8px 4px; text-align: left; color: #aaa; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;">${r.car}</td>
+                                        
+                                        <td style="padding: 8px 4px; text-align: center; color: #888; font-family: 'Share Tech Mono';">${r.incidents}x</td>
+                                        <td style="padding: 8px 4px; text-align: center; color: ${incColor}; font-weight: bold; font-family: 'Share Tech Mono';">${incPerLap}</td>
+                                        <td style="padding: 8px 4px; text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
+                                        
+                                        <td style="padding: 8px 4px; text-align: center; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold; font-family: 'Share Tech Mono'; white-space: nowrap;">${r.lapTime}</td>
+                                    </tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
                     </div>
-                    <div style="text-align: right;">
-                        <div style="color: #fff; font-size: 1.4rem; font-family: 'Share Tech Mono'; font-weight: bold;">${s.p}</div>
-                        <div style="font-size: 0.65rem; color: #444; font-family: 'Share Tech Mono'; text-transform: uppercase;" id="toggle-icon-${srvId}">${isExpanded ? '▲ COLLAPSE' : '▼ EXPAND'}</div>
+                `;
+            } else {
+                rosterHtml = `<div class="server-roster" id="${rosterId}" style="display: ${isExpanded ? 'block' : 'none'}; padding: 15px; text-align: center; color: #444; font-family: 'Share Tech Mono';">[ SERVER EMPTY ]</div>`;
+            }
+
+            html += `
+                <div class="${rowClass}" id="${srvId}" onclick="toggleRoster('${srvId}')" style="margin-bottom: 10px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 4px; border-left: 4px solid ${isRace ? 'var(--neon-gold)' : 'var(--neon-mint)'};">
+                    <div class="server-header-row" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: bold; color: #fff; text-transform: uppercase;">${s.name}</div>
+                            <div style="color: #666; font-family: 'Share Tech Mono'; font-size: 0.8rem; margin-top: 4px;">TRACK: ${s.track} | STATUS: ${s.status}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #fff; font-size: 1.4rem; font-family: 'Share Tech Mono'; font-weight: bold;">${s.p}</div>
+                            <div style="font-size: 0.65rem; color: #444; font-family: 'Share Tech Mono'; text-transform: uppercase;" id="toggle-icon-${srvId}">${isExpanded ? '▲ COLLAPSE' : '▼ EXPAND'}</div>
+                        </div>
                     </div>
+                    ${rosterHtml}
                 </div>
-                ${rosterHtml}
-            </div>
-        `;
-    });
-    container.innerHTML = html;
-}
+            `;
+        });
+        container.innerHTML = html;
+    }
 
     async function initStaticData() {
         try {
@@ -2418,13 +2435,10 @@ function renderServerList(containerId, servers, isRace) {
 
     // --- BOOT SEQUENCE ---
     window.addEventListener('load', () => {
-        // Run initial data fetch
         initStaticData();
         fetchLiveStatus().then(() => {
-            // Once initial live data is fetched, setup intervals
             let rIdx = 0; let tIdx = 0;
             
-            // Immediately populate the home page banners
             const rb = document.getElementById('race-ss-title');
             if(rb && window.raceServers.length > 0) {
                 rb.innerText = window.raceServers[0].name.toUpperCase();
@@ -2441,7 +2455,6 @@ function renderServerList(containerId, servers, isRace) {
                 tb.parentElement.onclick = () => goToServerAndExpand('srv-t-0', 'trackday');
             }
 
-// --- LIVE RACES BANNER ROTATION ---
             setInterval(() => {
                 if(window.raceServers && window.raceServers.length > 0) {
                     rIdx = (rIdx + 1) % window.raceServers.length;
@@ -2450,18 +2463,14 @@ function renderServerList(containerId, servers, isRace) {
                         const srv = window.raceServers[rIdx];
                         rb.innerText = srv.name.toUpperCase();
                         document.getElementById('race-ss-data').innerText = `DRIVERS: ${srv.p} | ${srv.status.toUpperCase()}`;
-                        
-                        // THIS IS THE MISSING MAGIC LINE:
                         rb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${srv.img}')`;
                         rb.parentElement.style.backgroundSize = "cover";
                         rb.parentElement.style.backgroundPosition = "center";
-                        
                         rb.parentElement.onclick = () => goToServerAndExpand('srv-r-' + rIdx, 'race');
                     }
                 }
             }, 4000);
 
-            // --- LIVE TRACK DAYS BANNER ROTATION ---
             setInterval(() => {
                 if(window.tdServers && window.tdServers.length > 0) {
                     tIdx = (tIdx + 1) % window.tdServers.length;
@@ -2470,12 +2479,9 @@ function renderServerList(containerId, servers, isRace) {
                         const srv = window.tdServers[tIdx];
                         tb.innerText = srv.name.toUpperCase();
                         document.getElementById('td-ss-data').innerText = `DRIVERS: ${srv.p} | PRACTICE`;
-                        
-                        // THIS IS THE MISSING MAGIC LINE:
                         tb.parentElement.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${srv.img}')`;
                         tb.parentElement.style.backgroundSize = "cover";
                         tb.parentElement.style.backgroundPosition = "center";
-                        
                         tb.parentElement.onclick = () => goToServerAndExpand('srv-t-' + tIdx, 'trackday');
                     }
                 }
@@ -2484,11 +2490,8 @@ function renderServerList(containerId, servers, isRace) {
 
         renderCalendar();
         loadStandings('gt3', document.querySelector('.standings-tab.active'));
-
-        // Refresh heartbeat
         setInterval(fetchLiveStatus, 3000);
     });
-
 </script>
 </body>
 </html>
