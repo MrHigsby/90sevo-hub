@@ -1987,6 +1987,14 @@ function renderServerList(containerId, servers, isRace) {
     const container = document.getElementById(containerId);
     if(!container) return;
     
+    // 1. MEMORY CHECK: See which server IDs are currently expanded
+    const expandedIds = [];
+    container.querySelectorAll('.server-roster').forEach(roster => {
+        if (roster.style.display === 'block') {
+            expandedIds.push(roster.id);
+        }
+    });
+    
     let html = '';
     if (servers.length === 0) {
         container.innerHTML = `<div style="text-align:center; padding:20px; color:#666; font-family:'Share Tech Mono'; border:1px dashed #333;">[ NO LIVE ${isRace ? 'RACE' : 'TRACK DAY'} SERVERS FOUND ]</div>`;
@@ -1996,43 +2004,44 @@ function renderServerList(containerId, servers, isRace) {
     servers.forEach((s, idx) => {
         const rowClass = isRace ? 'server-item race-mode' : 'server-item';
         const srvId = `srv-${isRace ? 'r' : 't'}-${idx}`;
+        const rosterId = `roster-${srvId}`;
+        
+        // 2. APPLY MEMORY: Check if this server should stay open
+        const isExpanded = expandedIds.includes(rosterId);
+        const displayStyle = isExpanded ? 'block' : 'none';
+        const iconText = isExpanded ? '▲ COLLAPSE' : '▼ EXPAND';
 
         let rosterHtml = '';
         if(s.roster && s.roster.length > 0) {
             rosterHtml = `
-                <div class="server-roster" id="roster-${srvId}" style="display: none; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
-                    <table class="server-roster-table">
+                <div class="server-roster" id="${rosterId}" style="display: ${displayStyle}; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
+                    <table class="server-roster-table" style="width: 100%; border-collapse: collapse;">
                         <thead>
-                            <tr>
-                                <th style="width: 5%;">#</th>
-                                <th style="width: 20%;">DRIVER</th>
-                                <th style="width: 25%;">RATINGS</th>
-                                <th style="width: 20%;">CAR</th>
-                                <th style="width: 10%; text-align: center;">SESS LAPS</th>
-                                <th style="width: 20%; text-align: right;">BEST</th>
+                            <tr style="color: #666; font-size: 0.75rem; text-transform: uppercase; font-family: 'Share Tech Mono';">
+                                <th style="text-align: left; padding-bottom: 10px;">#</th>
+                                <th style="text-align: left; padding-bottom: 10px;">DRIVER</th>
+                                <th style="text-align: left; padding-bottom: 10px;">RATING & CLASS</th>
+                                <th style="text-align: left; padding-bottom: 10px;">CAR</th>
+                                <th style="text-align: center; padding-bottom: 10px;">SESS LAPS</th>
+                                <th style="text-align: right; padding-bottom: 10px;">BEST</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${s.roster.map(r => {
-                                // Extract the data from the new PowerShell export
-                                const rating = r.rating || 1500;
-                                const sr = r.sr || "2.50";
-                                const lvl = r.level || 1;
                                 const classLetters = ["R", "D", "C", "B", "A", "S"];
-                                const className = classLetters[r.class || 0];
-
+                                const className = classLetters[r.class] || "R";
                                 return `
-                                <tr onclick="event.stopPropagation(); openDriverCard('${r.steamId}')">
-                                    <td style="color: #888;">${r.pos}</td>
-                                    <td style="font-weight: bold; color: #fff;">${r.name}</td>
-                                    <td>
-                                        <span style="color: var(--neon-cyan); font-size: 0.8rem; font-family: 'Share Tech Mono';">${rating} ELO</span>
-                                        <span style="color: var(--neon-mint); font-size: 0.8rem; font-family: 'Share Tech Mono'; margin-left: 8px;">${className} ${sr}</span>
-                                        <span style="color: var(--neon-gold); font-size: 0.8rem; font-family: 'Share Tech Mono'; margin-left: 8px;">L${lvl}</span>
+                                <tr onclick="event.stopPropagation(); openDriverCard('${r.steamId}')" style="border-bottom: 1px solid #222; cursor: pointer;">
+                                    <td style="padding: 8px 0; color: #555;">${r.pos}</td>
+                                    <td style="padding: 8px 0; font-weight: bold; color: #fff;">${r.name}</td>
+                                    <td style="padding: 8px 0;">
+                                        <span style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.85rem;">${r.rating}</span>
+                                        <span style="color: var(--neon-mint); font-family: 'Share Tech Mono'; font-size: 0.85rem; margin-left: 10px;">[${className}] ${r.sr}</span>
+                                        <span style="color: var(--neon-gold); font-family: 'Share Tech Mono'; font-size: 0.85rem; margin-left: 10px;">LVL ${r.level}</span>
                                     </td>
-                                    <td style="color: #aaa; font-size: 0.85rem;">${r.car}</td>
-                                    <td style="text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
-                                    <td style="text-align: right; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold;">${r.lapTime}</td>
+                                    <td style="padding: 8px 0; color: #aaa; font-size: 0.85rem;">${r.car}</td>
+                                    <td style="padding: 8px 0; text-align: center; color: var(--neon-cyan); font-family: 'Share Tech Mono';">${r.laps}</td>
+                                    <td style="padding: 8px 0; text-align: right; color: ${r.isSessionBest ? '#bf00ff' : '#fff'}; font-weight: bold; font-family: 'Share Tech Mono';">${r.lapTime}</td>
                                 </tr>`;
                             }).join('')}
                         </tbody>
@@ -2040,19 +2049,19 @@ function renderServerList(containerId, servers, isRace) {
                 </div>
             `;
         } else {
-            rosterHtml = `<div class="server-roster" id="roster-${srvId}" style="display: none; margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px; text-align: center; color: #666; font-style: italic; font-family: 'Share Tech Mono';">[ SERVER EMPTY ]</div>`;
+            rosterHtml = `<div class="server-roster" id="${rosterId}" style="display: ${displayStyle}; padding: 15px; text-align: center; color: #444; font-family: 'Share Tech Mono';">[ SERVER EMPTY ]</div>`;
         }
 
         html += `
-            <div class="${rowClass}" id="${srvId}" onclick="toggleRoster('${srvId}')">
-                <div class="server-header-row">
+            <div class="${rowClass}" id="${srvId}" onclick="toggleRoster('${srvId}')" style="margin-bottom: 10px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 4px; border-left: 4px solid ${isRace ? 'var(--neon-gold)' : 'var(--neon-mint)'};">
+                <div class="server-header-row" style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <div style="font-size: 1.2rem; font-weight: bold; color: #fff;">${s.name}</div>
-                        <div style="color: #888; font-family: 'Share Tech Mono'; font-size: 0.9rem; margin-top: 3px;">TRACK: ${s.track} | STATUS: ${s.status}</div>
+                        <div style="font-size: 1.1rem; font-weight: bold; color: #fff; text-transform: uppercase;">${s.name}</div>
+                        <div style="color: #666; font-family: 'Share Tech Mono'; font-size: 0.8rem; margin-top: 4px;">TRACK: ${s.track} | STATUS: ${s.status}</div>
                     </div>
                     <div style="text-align: right;">
-                        <div style="color: ${isRace ? 'var(--neon-gold)' : 'var(--neon-mint)'}; font-size: 1.5rem; font-family: 'Share Tech Mono'; font-weight: bold;">${s.p}</div>
-                        <div style="font-size: 0.75rem; color: #666; font-family: 'Share Tech Mono'; margin-top: 5px;" id="toggle-icon-${srvId}">▼ EXPAND</div>
+                        <div style="color: #fff; font-size: 1.4rem; font-family: 'Share Tech Mono'; font-weight: bold;">${s.p}</div>
+                        <div style="font-size: 0.65rem; color: #444; font-family: 'Share Tech Mono'; text-transform: uppercase;" id="toggle-icon-${srvId}">${iconText}</div>
                     </div>
                 </div>
                 ${rosterHtml}
