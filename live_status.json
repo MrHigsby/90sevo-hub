@@ -13,24 +13,11 @@
     {
       "Port": "9600",
       "Name": "Street Legal Nurburgring - Road Cars - Tourist Regulations",
-      "LiveDrivers": [
-        {
-          "Class": 0,
-          "BestLap": "--:--.---",
-          "SR": "3.53",
-          "Incidents": 0,
-          "SteamID": "76561198158038393",
-          "Name": "Higsby Higs",
-          "SessionLaps": "0",
-          "Car": "CHEVROLET CAMARO ZL1",
-          "Level": 4.0,
-          "Rating": 1529
-        }
-      ],
+      "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "1 / 64",
+      "Players": "0 / 64",
       "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
@@ -94,5 +81,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 22:15:05"
+  "LastUpdated": "2026-05-12 22:20:08"
 }
