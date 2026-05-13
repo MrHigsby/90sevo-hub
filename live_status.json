@@ -3,20 +3,7 @@
     {
       "Port": "9604",
       "Name": "90s Night N├╝rburgring - Retro & Vintage - Tourist Regulations",
-      "LiveDrivers": [
-        {
-          "Class": 0,
-          "BestLap": "--:--.---",
-          "SR": "2.50",
-          "Incidents": 0,
-          "SteamID": "76561198444531229",
-          "Name": "Elver Galarga",
-          "SessionLaps": "0",
-          "Car": "ALFA ROMEO 75 TURBO EVO",
-          "Level": 1,
-          "Rating": 1500
-        }
-      ],
+      "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
@@ -94,5 +81,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 22:50:34"
+  "LastUpdated": "2026-05-12 22:55:40"
 }
