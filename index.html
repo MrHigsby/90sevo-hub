@@ -508,6 +508,14 @@
             white-space: normal; /* Allows super long track names to safely wrap to a new line */
             word-wrap: break-word;
         }
+		/* Specialized arrows for the Track Records panel */
+        .panel .banner-arrow {
+            opacity: 0.4;
+            padding: 10px;
+        }
+        .panel:hover .banner-arrow {
+            opacity: 1;
+        }
 
     </style>
 </head>
@@ -586,12 +594,17 @@
                 <div class="screenshot-frame"></div>
             </div>
 
-            <div class="panel">
-                <div class="panel-header" style="color: var(--neon-cyan); cursor: pointer; transition: 0.2s;" onclick="openLeaderboard('laps')" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--neon-cyan)'">[ TOP 5 ] TRACK RECORDS</div>
-                <div class="leaderboard-cycle">
-                    <div style="color: var(--neon-mint); margin-bottom: 10px; font-weight: bold;" id="home-track-name">> WAITING FOR DATA...</div>
+       <div class="panel" style="position: relative;">
+                <div class="panel-header" style="color: var(--neon-cyan); cursor: pointer; transition: 0.2s;" onclick="openLeaderboard('laps')" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--neon-cyan)'">[ TOP 6 ] TRACK RECORDS</div>
+                
+                <!-- Navigation Arrows -->
+                <div class="banner-arrow left" style="font-size: 1.2rem; left: 0;" onclick="changeHomeTrack(-1)">&#10094;</div>
+                <div class="banner-arrow right" style="font-size: 1.2rem; right: 0;" onclick="changeHomeTrack(1)">&#10095;</div>
+
+                <div class="leaderboard-cycle" style="padding: 0 20px;">
+                    <div style="color: var(--neon-mint); margin-bottom: 10px; font-weight: bold; text-align: center;" id="home-track-name">> WAITING FOR DATA...</div>
                     <div id="homeRecords">
-                        <div style="color: #444;">[ LOAD LEADERBOARD.JSON ]</div>
+                        <div style="color: #444; text-align: center;">[ LOAD LEADERBOARD.JSON ]</div>
                     </div>
                 </div>
             </div>
@@ -1632,31 +1645,113 @@ const homeRating = document.getElementById('homeRatingList');
         `).join('');
     }
 
-    function startHomeTrackCycle() {
-        if(!dbLeaderboard || dbLeaderboard.length === 0) return;
-        clearInterval(homeTrackInterval);
-        const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown Track'))];
-        if (tracks.length === 0) return;
+function changeHomeTrack(dir) {
+        clearInterval(homeTrackInterval); // Stop auto-cycle when user clicks
+        currentHomeTrackIdx += dir;
+        renderHomeTrackRecords();
+        // Restart auto-cycle after 10 seconds of inactivity
+        homeTrackInterval = setInterval(() => { currentHomeTrackIdx++; renderHomeTrackRecords(); }, 8000);
+    }
 
-        let currentIdx = 0;
-        const renderTrack = () => {
-            const track = tracks[currentIdx];
-            const tName = document.getElementById('home-track-name');
-            if(tName) tName.innerText = `> ${track.toUpperCase()}`;
-            const top5 = dbLeaderboard.filter(x => (x.Track || 'Unknown Track') === track).sort((a,b) => a.TotalMs - b.TotalMs).slice(0,5);
-            
-const hRecords = document.getElementById('homeRecords');
-            if(hRecords) hRecords.innerHTML = top5.map((entry, i) => `
-                <div class="lb-row" onclick="openDriverCard('${entry.SteamID}')">
-                    <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${i+1}. ${entry.Name} <span style="font-size: 0.75rem; color: #888; font-family: 'Share Tech Mono'; margin-left: 5px;">[${entry.Car}]</span></span>
-                    <span style="color: var(--neon-mint); flex-shrink: 0;">${entry.LapTime}</span>
-                </div>
-            `).join('');
-            currentIdx = (currentIdx + 1) % tracks.length;
+function renderHomeTrackRecords() {
+        if(!dbLeaderboard || dbLeaderboard.length === 0) return;
+
+        // 1. --- DEFINE SERVER NAMES ---
+        const serverNames = {
+            "9600": "STREET LEGAL",
+            "9601": "STREET LEGAL",
+			"9602": "STREET LEGAL"
+			"9603": "STREET LEGAL"
+            "9604": "90s NIGHT",
+            "9605": "CHAMPIONSHIP SERIES"
         };
+        const allowedPorts = Object.keys(serverNames);
+
+        // 2. --- GENERATE CYCLE VIEWS ---
+        let cycleViews = [];
         
-        renderTrack();
-        homeTrackInterval = setInterval(renderTrack, 5000); 
+        // Find all unique Port + Track combinations in your data
+        const portTrackCombos = [];
+        const seen = new Set();
+        dbLeaderboard.forEach(entry => {
+            if (!allowedPorts.includes(entry.ServerPort)) return;
+            const comboKey = entry.ServerPort + "||" + entry.Track;
+            if (!seen.has(comboKey)) {
+                portTrackCombos.push({ port: entry.ServerPort, track: entry.Track });
+                seen.add(comboKey);
+            }
+        });
+
+        // Create the actual slides for the cycle
+        portTrackCombos.forEach(combo => {
+            if (combo.port === "9604") {
+                // ADD TWO SEPARATE VIEWS FOR PORT 9604
+                cycleViews.push({
+                    port: combo.port,
+                    track: combo.track,
+                    label: serverNames[combo.port] + " (NO F40)",
+                    exclude: ["FERRARI F40 LM"] // Filter out the F40 here
+                });
+                cycleViews.push({
+                    port: combo.port,
+                    track: combo.track,
+                    label: serverNames[combo.port] + " (ALL)",
+                    exclude: [] // Show everything here
+                });
+            } else {
+                // Standard single view for all other ports
+                cycleViews.push({
+                    port: combo.port,
+                    track: combo.track,
+                    label: serverNames[combo.port],
+                    exclude: []
+                });
+            }
+        });
+
+        if (cycleViews.length === 0) return;
+
+        // 3. --- RENDER THE CURRENT VIEW ---
+        currentHomeTrackIdx = ((currentHomeTrackIdx % cycleViews.length) + cycleViews.length) % cycleViews.length;
+        const currentView = cycleViews[currentHomeTrackIdx];
+
+        const tName = document.getElementById('home-track-name');
+        if(tName) {
+            tName.innerHTML = `
+                <div style="font-size: 0.7rem; color: var(--neon-pink); letter-spacing: 1px;">[ ${currentView.label} ]</div>
+                <div style="color: var(--neon-mint);">> ${currentView.track.toUpperCase()}</div>
+            `;
+        }
+
+        // Filter data specifically for this view's Port, Track, and Car Exclusions
+        const top6 = dbLeaderboard
+            .filter(x => x.ServerPort === currentView.port && x.Track === currentView.track)
+            .filter(x => !currentView.exclude.includes(x.Car)) 
+            .sort((a,b) => a.TotalMs - b.TotalMs)
+            .slice(0,6);
+            
+        const hRecords = document.getElementById('homeRecords');
+        if(hRecords) {
+            if (top6.length > 0) {
+                hRecords.innerHTML = top6.map((entry, i) => `
+                    <div class="lb-row" onclick="openDriverCard('${entry.SteamID}')">
+                        <span style="flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 10px;">${i+1}. ${entry.Name} <span style="font-size: 0.75rem; color: #888; font-family: 'Share Tech Mono'; margin-left: 5px;">[${entry.Car}]</span></span>
+                        <span style="color: var(--neon-mint); flex-shrink: 0;">${entry.LapTime}</span>
+                    </div>
+                `).join('');
+            } else {
+                hRecords.innerHTML = '<div style="color: #444; text-align: center; padding: 10px;">[ NO DATA FOUND ]</div>';
+            }
+        }
+    }
+
+    function startHomeTrackCycle() {
+        clearInterval(homeTrackInterval);
+        renderHomeTrackRecords();
+        homeTrackInterval = setInterval(() => {
+            currentHomeTrackIdx++;
+            renderHomeTrackRecords();
+        }, 8000); // Cycles every 8 seconds
     }
 
     function manualBannerChange(dir) {
