@@ -1763,260 +1763,147 @@ function renderHomeTrackRecords() {
 
 // --- HERO BANNER ---
     function updateHeroBanner() {
-        // --- 1. HELPER FUNCTION ---
-        const buildTwoColumnList = (items, type) => {
+        // --- 1. THE STANDARDIZED ROW BUILDER ---
+        const buildTwoColumnList = (items, type, highlightStat = '') => {
             if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
             
-            const isFull = (type === 'full');
-            
-            if (isFull) {
-                // --- FULL 10-COLUMN VIEW (For Live Server Telemetry) ---
+            if (type === 'full') {
+                // Keep the 10-column Live Telemetry View for the "Most Populated" slide
                 const topRows = items.slice(0, 10); 
-                
-                const headerHtml = `
-                    <div class="tele-row tele-header telemetry-grid" style="border-bottom: 1px solid #555; color: #555; font-size: 0.75rem; font-weight: bold; padding-bottom: 4px; margin-bottom: 4px;">
-                        <span>#</span>
-                        <span>DRIVER</span>
-                        <span class="hide-on-mobile" style="text-align:center;">ELO</span>
-                        <span style="text-align:center;">SR</span>
-                        <span class="hide-on-mobile" style="text-align:center;">LVL</span>
-                        <span class="hide-on-mobile">CAR</span>
-                        <span class="hide-on-mobile" style="text-align:center;">INC</span>
-                        <span class="hide-on-mobile" style="text-align:center;">I/L</span>
-                        <span class="hide-on-mobile" style="text-align:center;">LAPS</span>
-                        <span style="text-align:center;">TIME</span>
-                    </div>`;
-
+                const headerHtml = `<div class="tele-row tele-header telemetry-grid" style="border-bottom: 1px solid #555; color: #555; font-size: 0.75rem; font-weight: bold; padding-bottom: 4px; margin-bottom: 4px;"><span>#</span><span>DRIVER</span><span class="hide-on-mobile" style="text-align:center;">ELO</span><span style="text-align:center;">SR</span><span class="hide-on-mobile" style="text-align:center;">LVL</span><span class="hide-on-mobile">CAR</span><span class="hide-on-mobile" style="text-align:center;">INC</span><span class="hide-on-mobile" style="text-align:center;">I/L</span><span class="hide-on-mobile" style="text-align:center;">LAPS</span><span style="text-align:center;">TIME</span></div>`;
                 const renderRow = (p, i) => {
                     const name = p.name || p.Name || "Unknown";
                     const elo = p.rating || p.DriverRating || 1500;
-                    
                     const srRaw = p.sr || (p.SafetyRating ? p.SafetyRating : 2.50);
-                    const srValue = parseFloat(srRaw).toFixed(2);
-                    const srFillPct = getSrFill(srRaw);
-                    
                     const lvl = p.level || (p.TrackdayXP ? (Math.floor(Math.sqrt(p.TrackdayXP / 50)) + 1) : 1);
                     const lap = p.lapTime || p.LapTime || "--:--.---";
                     const car = p.car || p.Car || "---"; 
-                    
-                    const clsIndex = (p.class !== undefined) ? p.class : (p.LicenseClass !== undefined ? p.LicenseClass : 0);
-                    const cls = classLetters[clsIndex] || "R";
+                    const cls = classLetters[p.class !== undefined ? p.class : (p.LicenseClass || 0)] || "R";
                     const colorStr = getStickerColor(cls);
-
+                    const srFill = getSrFill(srRaw);
                     const lapsCount = p.laps || p.Laps || "0";
                     const incCount = p.incidents || p.Incidents || "0";
-                    let parsedLaps = parseInt(lapsCount) || 0;
-                    let incPerLap = "0.00";
-                    if (parsedLaps > 0) incPerLap = (parseInt(incCount) / parsedLaps).toFixed(2);
-                    let incColor = incPerLap >= 1.5 ? 'var(--neon-pink)' : '#fff';
+                    let incPerLap = (parseInt(lapsCount) > 0) ? (parseInt(incCount) / parseInt(lapsCount)).toFixed(2) : "0.00";
 
-                    return `
-                    <div class="tele-row telemetry-grid" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="border-bottom: 1px dashed #333; padding: 6px 0; font-size: 0.85rem; font-family: 'Share Tech Mono';">
-                        <span style="color:#555;">${i + 1}</span>
-                        <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
-                        <span class="hide-on-mobile" style="color:var(--neon-cyan); text-align:center;">${elo}</span>
-                        <span style="justify-self:center; display: inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFillPct}%, #111 ${srFillPct}%); padding: 1px 4px; border-radius: 2px; font-size: 0.70rem; color: #fff; text-shadow: 1px 1px 0 #000; white-space: nowrap;">${cls} [${srValue}]</span>
-                        <span class="hide-on-mobile" style="justify-self:center; color:var(--neon-gold); font-size: 0.75rem; background: rgba(255,215,0,0.05); padding: 1px 4px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${lvl}</span>
-                        <span class="hide-on-mobile" style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${car}</span>
-                        <span class="hide-on-mobile" style="color:#888; text-align:center;">${incCount}</span>
-                        <span class="hide-on-mobile" style="color:${incColor}; text-align:center; font-weight:bold;">${incPerLap}</span>
-                        <span class="hide-on-mobile" style="color:var(--neon-cyan); text-align:center;">${lapsCount}</span>
-                        <span style="color:var(--neon-mint); text-align:center; font-weight:bold; white-space:nowrap;">${lap}</span>
-                    </div>`;
+                    return `<div class="tele-row telemetry-grid" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="border-bottom: 1px dashed #333; padding: 6px 0; font-size: 0.85rem; font-family: 'Share Tech Mono';"><span style="color:#555;">${i + 1}</span><span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span><span class="hide-on-mobile" style="color:var(--neon-cyan); text-align:center;">${elo}</span><span style="justify-self:center; display: inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFill}%, #111 ${srFill}%); padding: 1px 4px; border-radius: 2px; font-size: 0.70rem; color: #fff; text-shadow: 1px 1px 0 #000; white-space: nowrap;">${cls} [${parseFloat(srRaw).toFixed(2)}]</span><span class="hide-on-mobile" style="justify-self:center; color:var(--neon-gold); font-size: 0.75rem; background: rgba(255,215,0,0.05); padding: 1px 4px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${lvl}</span><span class="hide-on-mobile" style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${car}</span><span class="hide-on-mobile" style="color:#888; text-align:center;">${incCount}</span><span class="hide-on-mobile" style="color:${incPerLap >= 1.5 ? 'var(--neon-pink)' : '#fff'}; text-align:center; font-weight:bold;">${incPerLap}</span><span class="hide-on-mobile" style="color:var(--neon-cyan); text-align:center;">${lapsCount}</span><span style="color:var(--neon-mint); text-align:center; font-weight:bold; white-space:nowrap;">${lap}</span></div>`;
                 };
-
-                let html = `<div class="hero-grid-container" style="max-width: 1000px; display: block; border: 1px solid #444;">`; 
-                html += `<div>${headerHtml}${topRows.map((p, i) => renderRow(p, i)).join('')}</div>`;
-                html += `</div>`;
-                return html;
-                
-            } else {
-                // --- BASIC 2-COLUMN VIEW WITH BADGES (For ELO and LAPS Slides) ---
-                const col1 = items.slice(0, 5);
-                const col2 = items.slice(5, 10);
-                
-                const renderBasicRow = (p, i, offset) => {
-                    // Extract core data
-                    const name = p.name || p.Name || "Unknown";
-                    const elo = p.rating || p.DriverRating || 1500;
-                    const lap = p.lapTime || p.LapTime || "--:--.---";
-                    const val = type === 'elo' ? elo : lap;
-                    const color = type === 'elo' ? 'var(--neon-cyan)' : 'var(--neon-mint)';
-                    
-                    // Look up the driver's profile to grab their badges
-                    const steamId = p.id || p.SteamID || p.steamId;
-                    const prof = (type === 'elo') ? p : (dbProfiles[steamId] || {});
-
-                    const srRaw = prof.SafetyRating || 2.50;
-                    const srValue = parseFloat(srRaw).toFixed(2);
-                    const clsIndex = prof.LicenseClass || 0;
-                    const cls = classLetters[clsIndex] || "R";
-                    const colorStr = getStickerColor(cls);
-                    const srFillPct = getSrFill(srRaw);
-
-                    const lvl = prof.TrackdayXP ? (Math.floor(Math.sqrt(prof.TrackdayXP / 50)) + 1) : 1;
-                    
-                    // Only show ELO badge if we are on the Track Records slide (since ELO slide already shows it on the right)
-                    const eloBadge = type === 'laps' ? `<span style="color:var(--neon-cyan); font-size: 0.70rem; font-family:'Share Tech Mono'; margin-left:5px;">${elo} ELO</span>` : '';
-                    
-                    return `
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #444; padding:5px 0; cursor:pointer; font-size:0.85rem;" onclick="event.stopPropagation(); openDriverCard('${steamId}')">
-                        <div style="display:flex; align-items:center; overflow:hidden;">
-                            <span style="color:#888; margin-right: 8px;">${i + offset}.</span>
-                            <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 100px; margin-right: 8px;">${name}</span>
-                            
-                            <span style="display:inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFillPct}%, #111 ${srFillPct}%); padding: 1px 4px; border-radius: 2px; font-size: 0.6rem; color: #fff; text-shadow: 1px 1px 0 #000; font-family:'Share Tech Mono'; margin-right: 5px; flex-shrink: 0; line-height: 1;">${cls} [${srValue}]</span>
-                            <span style="color:var(--neon-gold); font-size: 0.65rem; background: rgba(255,215,0,0.05); padding: 1px 4px; border-radius: 2px; border: 1px solid var(--neon-gold); font-family:'Share Tech Mono'; flex-shrink: 0; line-height: 1;">L${lvl}</span>
-                            ${eloBadge}
-                        </div>
-                        <span style="color:${color}; font-weight:bold; flex-shrink:0; font-family:'Share Tech Mono'; padding-left: 10px;">${val}</span>
-                    </div>`;
-                };
-
-                let html = `<div class="hero-grid-container" style="max-width: 1000px;">`; 
-                html += `<div>${col1.map((p, i) => renderBasicRow(p, i, 1)).join('')}</div>`;
-                html += `<div>${col2.map((p, i) => renderBasicRow(p, i, 6)).join('')}</div>`;
-                html += `</div>`;
-                return html;
+                return `<div class="hero-grid-container" style="max-width: 1000px; display: block; border: 1px solid #444;"><div>${headerHtml}${topRows.map((p, i) => renderRow(p, i)).join('')}</div></div>`;
             }
+
+            // --- STANDARDIZED 2-COLUMN LEADERBOARD ---
+            const col1 = items.slice(0, 5);
+            const col2 = items.slice(5, 10);
+            
+            const renderRow = (p, i, offset) => {
+                const steamId = p.id || p.SteamID || p.steamId;
+                const prof = dbProfiles[steamId] || {};
+                const name = p.name || p.Name || prof.Name || "Unknown";
+                const elo = prof.DriverRating || 1500;
+                const srRaw = prof.SafetyRating || 2.50;
+                const cls = classLetters[prof.LicenseClass || 0] || "R";
+                const lvl = prof.TrackdayXP ? (Math.floor(Math.sqrt(prof.TrackdayXP / 50)) + 1) : 1;
+                
+                // Color formatting
+                const colorStr = getStickerColor(cls);
+                const srFill = getSrFill(srRaw);
+
+                // Right-side value (Time for laps, else Highlight Stat)
+                let rightVal = p.LapTime || highlightStat;
+                let rightColor = (type === 'laps') ? 'var(--neon-mint)' : 'var(--neon-cyan)';
+                if (type === 'pylon') rightColor = 'var(--neon-pink)';
+                if (type === 'xp') rightColor = 'var(--neon-gold)';
+
+                // Car info for Track Records
+                const carInfo = (type === 'laps') ? `<span style="color:#666; font-size:0.65rem; margin-left:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:70px;">[${p.Car}]</span>` : '';
+
+                return `
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #444; padding:5px 0; cursor:pointer; font-family:'Share Tech Mono'; font-size:0.8rem;" onclick="event.stopPropagation(); openDriverCard('${steamId}')">
+                    <div style="display:flex; align-items:center; overflow:hidden; flex:1;">
+                        <span style="color:#555; width:18px; flex-shrink:0;">${i + offset}.</span>
+                        <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 90px; color:#fff;">${name}</span>
+                        <span style="color:var(--neon-cyan); font-size:0.7rem; margin-left:8px; flex-shrink:0;">${elo}</span>
+                        <span style="display:inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFill}%, #111 ${srFill}%); padding: 0 4px; border-radius: 2px; font-size: 0.6rem; color: #fff; text-shadow: 1px 1px 0 #000; margin-left:8px; flex-shrink:0;">${cls}</span>
+                        <span style="color:var(--neon-gold); font-size: 0.6rem; background: rgba(255,215,0,0.05); padding: 0 3px; border-radius: 2px; border: 1px solid var(--neon-gold); margin-left:5px; flex-shrink:0;">L${lvl}</span>
+                        ${carInfo}
+                    </div>
+                    <span style="color:${rightColor}; font-weight:bold; flex-shrink:0; padding-left: 10px; font-size:0.85rem;">${rightVal}</span>
+                </div>`;
+            };
+
+            let html = `<div class="hero-grid-container" style="max-width: 1000px;">`; 
+            html += `<div>${col1.map((p, i) => renderRow(p, i, 1)).join('')}</div>`;
+            html += `<div>${col2.map((p, i) => renderRow(p, i, 6)).join('')}</div>`;
+            html += `</div>`;
+            return html;
         };
 
-        // --- 2. BUILD AVAILABLE SLIDES ---
+        // --- 2. BUILD SLIDES ---
         let currentAvailableSlides = [];
+        const allProfiles = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]}));
         
-        // A. MOST POPULATED SERVER (Replaces hardcoded Port 9604)
-        const allServers = [...(window.raceServers||[]), ...(window.tdServers||[])];
-        const populatedServers = allServers.filter(s => parseInt(s.p) > 0); // Only keep servers with players
-        
-        if (populatedServers.length > 0) {
-            // Sort to find the single most populated server
-            populatedServers.sort((a, b) => parseInt(b.p) - parseInt(a.p));
-            const topServer = populatedServers[0];
-
-            const sortedRoster = [...(topServer.roster || [])].sort((a, b) => {
-                if (a.lapTime === "--:--.---") return 1;
-                if (b.lapTime === "--:--.---") return -1;
-                return a.lapTime.localeCompare(b.lapTime);
-            });
-            
-            // Figure out if it's a Race or TD server to route the click correctly
-            const isRace = window.raceServers.includes(topServer);
-            const routeType = isRace ? 'race' : 'trackday';
-            const routeIndex = isRace ? window.raceServers.indexOf(topServer) : window.tdServers.indexOf(topServer);
-
-            currentAvailableSlides.push({ 
-                id: 'most-pop',
-                label: "[ MOST POPULATED SERVER ]", 
-                title: topServer.name.toUpperCase(), 
-                data: `<div style="color:var(--neon-gold); text-align:center; font-family:'Share Tech Mono'; font-size:0.8rem; margin-bottom:5px;">LIVE ONLINE TELEMETRY (${topServer.p} DRIVERS)</div>` + buildTwoColumnList(sortedRoster.slice(0, 10), 'full'), 
-                color: "var(--neon-gold)", 
-                action: () => goToServerAndExpand(`srv-${isRace ? 'r' : 't'}-${routeIndex}`, routeType), 
-                img: topServer.img || IMAGE_DICT["DEFAULT"] 
-            });
+        // A. MOST POPULATED
+        const popServers = [...(window.raceServers||[]), ...(window.tdServers||[])].filter(s => parseInt(s.p) > 0).sort((a,b) => parseInt(b.p) - parseInt(a.p));
+        if (popServers.length > 0) {
+            const topS = popServers[0];
+            const sortedRoster = [...(topS.roster || [])].sort((a,b) => a.lapTime === "--:--.---" ? 1 : b.lapTime === "--:--.---" ? -1 : a.lapTime.localeCompare(b.lapTime));
+            currentAvailableSlides.push({ id: 'most-pop', label: "[ LIVE TELEMETRY ]", title: topS.name.toUpperCase(), data: `<div style="color:var(--neon-gold); text-align:center; font-family:'Share Tech Mono'; font-size:0.8rem; margin-bottom:5px;">MOST POPULATED: ${topS.p} DRIVERS ONLINE</div>` + buildTwoColumnList(sortedRoster.slice(0, 10), 'full'), color: "var(--neon-gold)", action: () => goToServerAndExpand(`srv-${window.raceServers.includes(topS)?'r':'t'}-${(window.raceServers.includes(topS)?window.raceServers:window.tdServers).indexOf(topS)}`, window.raceServers.includes(topS)?'race':'trackday'), img: topS.img || IMAGE_DICT["DEFAULT"] });
         }
 
-        // B. SEASON EVENTS
-        const activeSeasons = (window.raceServers || []).filter(s => s.season && s.season !== "None");
-        activeSeasons.forEach((s, i) => {
-            currentAvailableSlides.push({
-                id: `season-${s.port}`,
-                label: "[ SEASON EVENTS ]",
-                title: s.season.toUpperCase(),
-                data: `<div style="text-align:center; font-size:1.2rem; margin-top:20px; font-family:'Share Tech Mono';"> TRACK: ${s.track.toUpperCase()}<br>STATUS: ${s.status}</div>`,
-                color: "var(--neon-pink)",
-                action: () => goToServerAndExpand(`srv-r-${i}`, 'race'),
-                img: s.img
-            });
-        });
+        // B. ELO RANKINGS
+        const topElo = [...allProfiles].sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0,10);
+        currentAvailableSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: buildTwoColumnList(topElo, 'stats', ''), color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
 
-        // C. GLOBAL ELO RANKINGS
-        const sortedElo = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]})).sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0, 10);
-        const eloHtml = buildTwoColumnList(sortedElo, 'elo');
-        currentAvailableSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: eloHtml, color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
+        // C. SAFETY ELITE (NEW)
+        const topSR = [...allProfiles].sort((a,b) => {
+            if((b.LicenseClass||0) !== (a.LicenseClass||0)) return (b.LicenseClass||0) - (a.LicenseClass||0);
+            return (b.SafetyRating||0) - (a.SafetyRating||0);
+        }).slice(0,10);
+        currentAvailableSlides.push({ id: 'sr-elite', label: "[ SAFETY ELITE ]", title: "TOP 10 CLEANEST DRIVERS", data: buildTwoColumnList(topSR, 'stats', ''), color: "var(--neon-mint)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/911GT3RNurbs.png" });
 
-        // D. TRACK RECORDS (Multi-View Logic)
-        let trHtml = '[ LOAD LEADERBOARD.JSON ]';
-        let trLabel = "[ TRACK RECORDS ]";
-        
+        // D. LEGEND GRINDERS (NEW)
+        const topXP = [...allProfiles].sort((a,b) => (b.TrackdayXP||0) - (a.TrackdayXP||0)).slice(0,10);
+        currentAvailableSlides.push({ id: 'xp-legends', label: "[ LEGEND GRINDERS ]", title: "TOP 10 TRACKXP LEVELS", data: buildTwoColumnList(topXP, 'xp', ''), color: "var(--neon-gold)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Alfa_Sprint_Grid.png" });
+
+        // E. PYLON KILLERS (NEW)
+        const topPylons = [...allProfiles].sort((a,b) => (b.Pylons||0) - (a.Pylons||0)).slice(0,10);
+        currentAvailableSlides.push({ id: 'pylon-killers', label: "[ PYLON KILLERS ]", title: "TOP 10 CONE CRUSHERS", data: buildTwoColumnList(topPylons, 'pylon', ' PYLONS'), color: "var(--neon-red)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
+
+        // F. TRACK RECORDS (Standardized order: # | Driver | Elo | Safety | TrackXP | Car | Time)
         if (dbLeaderboard.length > 0) {
-            const serverNames = {
-                "9600": "STREET LEGAL", "9601": "STREET LEGAL", "9602": "STREET LEGAL", "9603": "STREET LEGAL",
-                "9604": "90s NIGHT",
-            };
-            const allowedPorts = Object.keys(serverNames);
-            const heroRecordSlides = [];
-            const seen = new Set();
-
-            // Find all unique Port/Track combos
-            dbLeaderboard.forEach(entry => {
-                if (!allowedPorts.includes(entry.ServerPort)) return;
-                const comboKey = entry.ServerPort + "||" + entry.Track;
-                if (!seen.has(comboKey)) {
-                    seen.add(comboKey);
-                    if (entry.ServerPort === "9604") {
-                        heroRecordSlides.push({ port: entry.ServerPort, track: entry.Track, label: serverNames[entry.ServerPort] + " (NO F40)", exclude: ["FERRARI F40 LM"] });
-                        heroRecordSlides.push({ port: entry.ServerPort, track: entry.Track, label: serverNames[entry.ServerPort] + " (ALL)", exclude: [] });
-                    } else {
-                        heroRecordSlides.push({ port: entry.ServerPort, track: entry.Track, label: serverNames[entry.ServerPort], exclude: [] });
-                    }
+            const sNames = {"9600":"STREET LEGAL","9601":"STREET LEGAL","9602":"STREET LEGAL","9603":"STREET LEGAL","9604":"90s NIGHT",};
+            const slides = []; const seen = new Set();
+            dbLeaderboard.forEach(e => {
+                if(!sNames[e.ServerPort]) return;
+                const key = e.ServerPort + "||" + e.Track;
+                if(!seen.has(key)) {
+                    seen.add(key);
+                    if(e.ServerPort === "9604") {
+                        slides.push({p:e.ServerPort, t:e.Track, l:sNames[e.ServerPort]+" (NO F40)", ex:["FERRARI F40 LM"]});
+                        slides.push({p:e.ServerPort, t:e.Track, l:sNames[e.ServerPort]+" (ALL)", ex:[]});
+                    } else slides.push({p:e.ServerPort, t:e.Track, l:sNames[e.ServerPort], ex:[]});
                 }
             });
-
-            if (heroRecordSlides.length > 0) {
-                // We use globalBannerIdx to rotate the specific track shown on the records slide!
-                const activeView = heroRecordSlides[globalBannerIdx % heroRecordSlides.length];
-                const top10 = dbLeaderboard
-                    .filter(x => x.ServerPort === activeView.port && x.Track === activeView.track && !activeView.exclude.includes(x.Car))
-                    .sort((a,b) => a.TotalMs - b.TotalMs)
-                    .slice(0, 10);
-
-                trLabel = `[ FASTEST LAPS : ${activeView.label} ]`;
-                trHtml = `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${activeView.track.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps');
-            }
-        }
-        currentAvailableSlides.push({ id: 'records', label: trLabel, title: "TRACK RECORDS", data: trHtml, color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
-
-        // --- 3. RENDER THE CURRENT SLIDE ---
-        if (!lockedOrderPool || lockedOrderPool.length !== currentAvailableSlides.length) {
-            let first = currentAvailableSlides.find(s => s.id === 'most-pop');
-            let others = currentAvailableSlides.filter(s => s.id !== 'most-pop');
-            for (let i = others.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [others[i], others[j]] = [others[j], others[i]];
-            }
-            lockedOrderPool = first ? [first.id, ...others.map(o => o.id)] : others.map(o => o.id);
+            const active = slides[globalBannerIdx % slides.length];
+            const top10 = dbLeaderboard.filter(x => x.ServerPort === active.p && x.Track === active.t && !active.ex.includes(x.Car)).sort((a,b) => a.TotalMs - b.TotalMs).slice(0,10);
+            currentAvailableSlides.push({ id: 'records', label: `[ RECORDS : ${active.l} ]`, title: "TRACK RECORDS", data: `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${active.t.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps'), color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Grid1.png" });
         }
 
-        if (!lockedOrderPool || lockedOrderPool.length === 0) return;
-
-        let safeIdx = ((globalBannerIdx % lockedOrderPool.length) + lockedOrderPool.length) % lockedOrderPool.length;
-        let currentId = lockedOrderPool[safeIdx];
-        let slide = currentAvailableSlides.find(s => s.id === currentId);
-
-        if (!slide) return; 
-
+        // --- 3. RENDER ---
+        let safeIdx = ((globalBannerIdx % currentAvailableSlides.length) + currentAvailableSlides.length) % currentAvailableSlides.length;
+        let slide = currentAvailableSlides[safeIdx];
+        if(!slide) return;
         document.querySelectorAll('.hero-banner-container').forEach(banner => {
             banner.style.borderColor = slide.color;
             banner.querySelector('.hero-label').innerText = slide.label;
             banner.querySelector('.hero-label').style.color = slide.color;
             banner.querySelector('.hero-title').innerText = slide.title;
             banner.querySelector('.hero-data').innerHTML = slide.data;
-            banner.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.75), rgba(5, 5, 8, 0.85)), url('${slide.img}')`;
+            banner.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.8), rgba(5, 5, 8, 0.9)), url('${slide.img}')`;
             banner.onclick = slide.action;
-
-            if (!banner.querySelector('.banner-arrow.left')) {
-                const leftArr = document.createElement('div'); 
-                leftArr.className = 'banner-arrow left'; 
-                leftArr.innerHTML = '&#10094;';
-                leftArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(-1); };
-                
-                const rightArr = document.createElement('div'); 
-                rightArr.className = 'banner-arrow right'; 
-                rightArr.innerHTML = '&#10095;';
-                rightArr.onclick = (e) => { e.stopPropagation(); manualBannerChange(1); };
-                
-                banner.appendChild(leftArr); 
-                banner.appendChild(rightArr);
+            if(!banner.querySelector('.banner-arrow.left')) {
+                const l = document.createElement('div'); l.className='banner-arrow left'; l.innerHTML='&#10094;'; l.onclick=(e)=>{e.stopPropagation(); manualBannerChange(-1);};
+                const r = document.createElement('div'); r.className='banner-arrow right'; r.innerHTML='&#10095;'; r.onclick=(e)=>{e.stopPropagation(); manualBannerChange(1);};
+                banner.appendChild(l); banner.appendChild(r);
             }
         });
     }
