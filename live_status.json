@@ -17,7 +17,7 @@
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "0 / 32",
+      "Players": "0 / 64",
       "Track": "Nurburgring\r\n[Touristenfahrten]"
     },
     {
@@ -27,7 +27,7 @@
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "0 / 32",
+      "Players": "0 / 64",
       "Track": "Laguna Seca\r\n[GP]"
     },
     {
@@ -37,30 +37,17 @@
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "0 / 32",
+      "Players": "0 / 64",
       "Track": "Mount Panorama\r\n[GP]"
     },
     {
       "Port": "9602",
       "Name": "Street Legal Sebring - Road Cars - Trackday",
-      "LiveDrivers": [
-        {
-          "Class": 0,
-          "BestLap": "--:--.---",
-          "SR": "3.53",
-          "Incidents": 0,
-          "SteamID": "76561198158038393",
-          "Name": "Higsby Higs",
-          "SessionLaps": "0",
-          "Car": "ALFA ROMEO GIULIA GTA SPRINT",
-          "Level": 4.0,
-          "Rating": 1529
-        }
-      ],
+      "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "0 / 32",
+      "Players": "0 / 64",
       "Track": "Sebring International Raceway\r\n[GP]"
     },
     {
@@ -79,7 +66,7 @@
       "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "BMW M2 CS Racing Challenge",
-      "Mode": "Practice",
+      "Mode": "Qualifying",
       "Players": "0 / 32",
       "Track": "Brands Hatch\r\n[GP]"
     },
@@ -89,10 +76,10 @@
       "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "GT3 Endurance Challenge",
-      "Mode": "Practice",
+      "Mode": "Qualifying",
       "Players": "0 / 32",
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-13 01:57:04"
+  "LastUpdated": "2026-05-13 02:02:08"
 }
