@@ -1763,6 +1763,7 @@ function renderHomeTrackRecords() {
 
 // --- HERO BANNER ---
     function updateHeroBanner() {
+        // --- 1. THE STANDARDIZED ROW BUILDER ---
         const buildTwoColumnList = (items, type) => {
             if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
             
@@ -1818,10 +1819,10 @@ function renderHomeTrackRecords() {
                     rightVal = elo + ' ELO';
                 }
 
-                // FIXED: Check to remove double ELO display on non-lap slides
-                const eloColumn = (type === 'laps') ? `<span style="width:35px; color:var(--neon-cyan); font-size:0.7rem; flex-shrink:0;">${elo}</span>` : `<span style="width:35px;"></span>`;
+                // FIXED: Show ELO on every slide EXCEPT the standard "stats" (ELO/SR) slides
+                const eloColumn = (type !== 'stats') ? `<span style="width:35px; color:var(--neon-cyan); font-size:0.7rem; flex-shrink:0;">${elo}</span>` : `<span style="width:35px;"></span>`;
 
-                // FIXED: Car info for Track Records
+                // Car info for Track Records
                 const carInfo = (type === 'laps') ? `<span style="color:#666; font-size:0.65rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; padding-left:10px;">[${p.Car || '---'}]</span>` : '';
 
                 return `
@@ -1850,6 +1851,7 @@ function renderHomeTrackRecords() {
         let currentAvailableSlides = [];
         const allProfiles = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]}));
         
+        // A. MOST POPULATED
         const popServers = [...(window.raceServers||[]), ...(window.tdServers||[])].filter(s => parseInt(s.p) > 0).sort((a,b) => parseInt(b.p) - parseInt(a.p));
         if (popServers.length > 0) {
             const topS = popServers[0];
@@ -1857,21 +1859,26 @@ function renderHomeTrackRecords() {
             currentAvailableSlides.push({ id: 'most-pop', label: "[ LIVE TELEMETRY ]", title: topS.name.toUpperCase(), data: `<div style="color:var(--neon-gold); text-align:center; font-family:'Share Tech Mono'; font-size:0.8rem; margin-bottom:5px;">MOST POPULATED: ${topS.p} DRIVERS ONLINE</div>` + buildTwoColumnList(sortedRoster.slice(0, 10), 'full'), color: "var(--neon-gold)", action: () => goToServerAndExpand(`srv-${window.raceServers.includes(topS)?'r':'t'}-${(window.raceServers.includes(topS)?window.raceServers:window.tdServers).indexOf(topS)}`, window.raceServers.includes(topS)?'race':'trackday'), img: topS.img || IMAGE_DICT["DEFAULT"] });
         }
 
+        // B. ELO RANKINGS
         const topElo = [...allProfiles].sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0,10);
         currentAvailableSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: buildTwoColumnList(topElo, 'stats'), color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
 
+        // C. SAFETY ELITE
         const topSR = [...allProfiles].sort((a,b) => {
             if((b.LicenseClass||0) !== (a.LicenseClass||0)) return (b.LicenseClass||0) - (a.LicenseClass||0);
             return (b.SafetyRating||0) - (a.SafetyRating||0);
         }).slice(0,10);
         currentAvailableSlides.push({ id: 'sr-elite', label: "[ SAFETY ELITE ]", title: "TOP 10 CLEANEST DRIVERS", data: buildTwoColumnList(topSR, 'stats'), color: "var(--neon-mint)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/911GT3RNurbs.png" });
 
+        // D. LEGEND GRINDERS
         const topXP = [...allProfiles].sort((a,b) => (b.TrackdayXP||0) - (a.TrackdayXP||0)).slice(0,10);
         currentAvailableSlides.push({ id: 'xp-legends', label: "[ LEGEND GRINDERS ]", title: "TOP 10 TRACKXP LEVELS", data: buildTwoColumnList(topXP, 'xp'), color: "var(--neon-gold)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Alfa_Sprint_Grid.png" });
 
+        // E. PYLON KILLERS
         const topPylons = [...allProfiles].sort((a,b) => (b.Pylons||0) - (a.Pylons||0)).slice(0,10);
         currentAvailableSlides.push({ id: 'pylon-killers', label: "[ PYLON KILLERS ]", title: "TOP 10 CONE CRUSHERS", data: buildTwoColumnList(topPylons, 'pylon'), color: "var(--neon-red)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
 
+        // F. TRACK RECORDS (Multi-View Logic)
         if (dbLeaderboard.length > 0) {
             const sNames = {"9600":"STREET LEGAL","9601":"STREET LEGAL","9602":"STREET LEGAL","9603":"STREET LEGAL","9604":"90s NIGHT"};
             const slides = []; const seen = new Set();
@@ -1893,6 +1900,7 @@ function renderHomeTrackRecords() {
             }
         }
 
+        // --- 3. RENDER ---
         let safeIdx = ((globalBannerIdx % currentAvailableSlides.length) + currentAvailableSlides.length) % currentAvailableSlides.length;
         let slide = currentAvailableSlides[safeIdx];
         if(!slide) return;
