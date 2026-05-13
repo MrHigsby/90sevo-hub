@@ -1769,7 +1769,7 @@ function renderHomeTrackRecords() {
             const showCenterElo = (type === 'laps' || type === 'xp' || type === 'pylon');
             const srContainerWidth = (type === 'laps') ? '22px' : '68px';
             
-            let rightLabel = 'ELO';
+            let rightLabel = 'RATING';
             if (type === 'laps') rightLabel = 'TIME';
             else if (type === 'xp') rightLabel = 'XP';
             else if (type === 'pylon') rightLabel = 'CONES';
@@ -1815,7 +1815,7 @@ function renderHomeTrackRecords() {
                     rightVal = (p.Pylons || prof.Pylons || 0) + ' CONES';
                     rightColor = 'var(--neon-pink)';
                 } else {
-                    rightVal = elo + ' ELO';
+                    rightVal = elo + ' RATING';
                 }
 
                 // DATA: Forced text-align: center to match the new headers
