@@ -1776,7 +1776,7 @@ function renderHomeTrackRecords() {
 
             // HEADERS: Added overflow:visible and white-space:nowrap to let longer words center properly over tiny columns
             const eloHeader = showCenterElo ? `<span style="width:38px; flex-shrink:0; text-align:center; overflow:visible; white-space:nowrap;">RATING</span>` : `<span style="width:38px; flex-shrink:0;"></span>`;
-            const carHeader = (type === 'laps') ? `<span style="flex:1; min-width:0; padding: 0 5px; text-align:left;">CAR</span>` : `<span style="flex:1; min-width:0;"></span>`;
+            const carHeader = (type === 'laps') ? `<span style="flex:1; min-width:0; padding: 0 5px; text-align:center;">CAR</span>` : `<span style="flex:1; min-width:0;"></span>`;
 
             const columnHeaderHtml = `
                 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #555; padding-bottom:4px; margin-bottom:4px; font-family:'Share Tech Mono'; font-size:0.65rem; font-weight:bold; color:#555; text-transform:uppercase;">
@@ -1784,7 +1784,7 @@ function renderHomeTrackRecords() {
                         <span style="width:18px; flex-shrink:0; text-align:center;">#</span>
                         <span style="width:85px; flex-shrink:0; margin-right:5px; text-align:left;">DRIVER</span>
                         ${eloHeader}
-                        <span style="width:${srContainerWidth}; flex-shrink:0; text-align:center; margin: 0 3px; overflow:visible; white-space:nowrap;">SAFETY</span>
+                        <span style="width:${srContainerWidth}; flex-shrink:0; text-align:center; margin: 0 3px; overflow:visible; white-space:nowrap;">SR</span>
                         <span style="width:28px; flex-shrink:0; text-align:center; margin-left: 5px; overflow:visible; white-space:nowrap;">TRACKXP</span>
                         ${carHeader}
                     </div>
