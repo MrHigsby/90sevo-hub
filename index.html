@@ -1865,19 +1865,19 @@ function renderHomeTrackRecords() {
         }
 
         const topElo = [...allProfiles].sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0,10);
-        currentAvailableSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: buildTwoColumnList(topElo, 'stats'), color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
+        currentAvailableSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVER RATING", data: buildTwoColumnList(topElo, 'stats'), color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
 
         const topSR = [...allProfiles].sort((a,b) => {
             if((b.LicenseClass||0) !== (a.LicenseClass||0)) return (b.LicenseClass||0) - (a.LicenseClass||0);
             return (b.SafetyRating||0) - (a.SafetyRating||0);
         }).slice(0,10);
-        currentAvailableSlides.push({ id: 'sr-elite', label: "[ SAFETY ELITE ]", title: "TOP 10 CLEANEST DRIVERS", data: buildTwoColumnList(topSR, 'stats'), color: "var(--neon-mint)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/911GT3RNurbs.png" });
+        currentAvailableSlides.push({ id: 'sr-elite', label: "[ SAFETY ELITE ]", title: "TOP 10 SAFETY RATING", data: buildTwoColumnList(topSR, 'stats'), color: "var(--neon-mint)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/911GT3RNurbs.png" });
 
         const topXP = [...allProfiles].sort((a,b) => (b.TrackdayXP||0) - (a.TrackdayXP||0)).slice(0,10);
-        currentAvailableSlides.push({ id: 'xp-legends', label: "[ LEGEND GRINDERS ]", title: "TOP 10 TRACKXP LEVELS", data: buildTwoColumnList(topXP, 'xp'), color: "var(--neon-gold)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Alfa_Sprint_Grid.png" });
+        currentAvailableSlides.push({ id: 'xp-legends', label: "[ TRACK DAY LEGENDS ]", title: "TOP 10 TRACKXP LEVEL", data: buildTwoColumnList(topXP, 'xp'), color: "var(--neon-gold)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Alfa_Sprint_Grid.png" });
 
         const topPylons = [...allProfiles].sort((a,b) => (b.Pylons||0) - (a.Pylons||0)).slice(0,10);
-        currentAvailableSlides.push({ id: 'pylon-killers', label: "[ PYLON KILLERS ]", title: "TOP 10 CONE CRUSHERS", data: buildTwoColumnList(topPylons, 'pylon'), color: "var(--neon-red)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
+        currentAvailableSlides.push({ id: 'pylon-killers', label: "[ PYLON CRUSHERS ]", title: "TOP 10 CONE KILLERS", data: buildTwoColumnList(topPylons, 'pylon'), color: "var(--neon-red)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
 
         if (dbLeaderboard.length > 0) {
             const sNames = {"9600":"STREET LEGAL","9601":"STREET LEGAL","9602":"STREET LEGAL","9603":"STREET LEGAL","9604":"90s NIGHT"};
