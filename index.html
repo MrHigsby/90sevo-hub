@@ -2488,8 +2488,7 @@ async function initStaticData() {
             if (lbRes.ok) {
                 dbLeaderboard = await lbRes.json();
 
-                // --- NEW: THE SMART TRACK SANITIZER ---
-                // Only used for old legacy laps that have no track data
+                // --- 1. TRACK SANITIZER & ALIAS MAP ---
                 const legacyPortMap = {
                     "9600": "Nurburgring [Touristenfahrten]",
                     "9601": "Laguna Seca [GP]",
@@ -2500,30 +2499,40 @@ async function initStaticData() {
                     "9606": "Brands Hatch [GP]"
                 };
 
+                const trackAliasMap = {
+                    "Nurburgring": "Nurburgring [Touristenfahrten]",
+                    "Laguna Seca": "Laguna Seca [GP]"
+                };
+
                 dbLeaderboard.forEach(entry => {
-                    // 1. If the server successfully logged a track, just clean up the weird line breaks
+                    // A. If the server successfully logged a track, clean it up
                     if (entry.Track && entry.Track !== "Unknown" && entry.Track !== "Unknown Track") {
-                        entry.Track = entry.Track.replace(/\r\n/g, ' ').replace(/\n/g, ' ').trim();
+                        // The \s+ regex violently flattens all weird line breaks and double spaces into a single normal space
+                        entry.Track = entry.Track.replace(/\s+/g, ' ').trim();
+                        
+                        // Check the Alias Map: If it matches an old name, overwrite it!
+                        if (trackAliasMap[entry.Track]) {
+                            entry.Track = trackAliasMap[entry.Track];
+                        }
                     } 
-                    // 2. If the track is missing (legacy laps), use the port map to fill it in
+                    // B. If the track is missing (legacy laps), use the port map
                     else if (legacyPortMap[entry.ServerPort]) {
                         entry.Track = legacyPortMap[entry.ServerPort];
                     } 
-                    // 3. Ultimate fallback
+                    // C. Ultimate fallback
                     else {
                         entry.Track = "Unknown Track";
                     }
                 });
-				
-                // --- NEW: THE DEDUPLICATOR ---
+
+                // --- 2. THE DEDUPLICATOR ---
                 // Prevents a driver from showing up twice for the same Car/Track combo
                 const uniqueLaps = {};
-                
                 dbLeaderboard.forEach(entry => {
                     // Create a unique fingerprint for this specific Driver + Car + Track
                     const key = entry.SteamID + "_" + entry.Car + "_" + entry.Track;
                     
-                    // If we haven't seen this combo before, OR if this lap is faster (lower TotalMs), keep it!
+                    // Keep the lap if it's the first time we've seen it, OR if it's faster than the previous one
                     if (!uniqueLaps[key] || entry.TotalMs < uniqueLaps[key].TotalMs) {
                         uniqueLaps[key] = entry;
                     }
@@ -2531,17 +2540,12 @@ async function initStaticData() {
                 
                 // Replace the raw leaderboard with our clean, deduplicated version
                 dbLeaderboard = Object.values(uniqueLaps);
-                // --------------------------------
 
+                // --- 3. UI RENDER TRIGGERS ---
                 populateLeaderboardFilters();
                 startHomeTrackCycle();
                 processLeaderboardData();
-
-                // THESE THREE LINES WERE ACCIDENTALLY DELETED!
-                populateLeaderboardFilters();
-                startHomeTrackCycle();
-                processLeaderboardData();
-            } // <-- THIS CLOSING BRACKET WAS ALSO MISSING!
+            }
 
             const bootloader = document.querySelector('.bootloader');
             if (bootloader) bootloader.style.display = 'none';
