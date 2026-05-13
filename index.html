@@ -2514,7 +2514,28 @@ async function initStaticData() {
                         entry.Track = "Unknown Track";
                     }
                 });
+				
+                // --- NEW: THE DEDUPLICATOR ---
+                // Prevents a driver from showing up twice for the same Car/Track combo
+                const uniqueLaps = {};
+                
+                dbLeaderboard.forEach(entry => {
+                    // Create a unique fingerprint for this specific Driver + Car + Track
+                    const key = entry.SteamID + "_" + entry.Car + "_" + entry.Track;
+                    
+                    // If we haven't seen this combo before, OR if this lap is faster (lower TotalMs), keep it!
+                    if (!uniqueLaps[key] || entry.TotalMs < uniqueLaps[key].TotalMs) {
+                        uniqueLaps[key] = entry;
+                    }
+                });
+                
+                // Replace the raw leaderboard with our clean, deduplicated version
+                dbLeaderboard = Object.values(uniqueLaps);
                 // --------------------------------
+
+                populateLeaderboardFilters();
+                startHomeTrackCycle();
+                processLeaderboardData();
 
                 // THESE THREE LINES WERE ACCIDENTALLY DELETED!
                 populateLeaderboardFilters();
