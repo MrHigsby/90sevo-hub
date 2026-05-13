@@ -1659,18 +1659,12 @@ function renderHomeTrackRecords() {
 
         // 1. --- DEFINE SERVER NAMES ---
         const serverNames = {
-            "9600": "STREET LEGAL",
-            "9601": "STREET LEGAL",
-			"9602": "STREET LEGAL",
-			"9603": "STREET LEGAL",
-            "9604": "90s NIGHT",
+            "9600": "STREET LEGAL", "9601": "STREET LEGAL", "9602": "STREET LEGAL", "9603": "STREET LEGAL", "9604": "90s NIGHT"
         };
         const allowedPorts = Object.keys(serverNames);
 
         // 2. --- GENERATE CYCLE VIEWS ---
         let cycleViews = [];
-        
-        // Find all unique Port + Track combinations in your data
         const portTrackCombos = [];
         const seen = new Set();
         dbLeaderboard.forEach(entry => {
@@ -1682,30 +1676,12 @@ function renderHomeTrackRecords() {
             }
         });
 
-        // Create the actual slides for the cycle
         portTrackCombos.forEach(combo => {
             if (combo.port === "9604") {
-                // ADD TWO SEPARATE VIEWS FOR PORT 9604
-                cycleViews.push({
-                    port: combo.port,
-                    track: combo.track,
-                    label: serverNames[combo.port] + " (NO F40)",
-                    exclude: ["FERRARI F40 LM"] // Filter out the F40 here
-                });
-                cycleViews.push({
-                    port: combo.port,
-                    track: combo.track,
-                    label: serverNames[combo.port] + " (ALL)",
-                    exclude: [] // Show everything here
-                });
+                cycleViews.push({ port: combo.port, track: combo.track, label: serverNames[combo.port] + " (NO F40)", exclude: ["FERRARI F40 LM"] });
+                cycleViews.push({ port: combo.port, track: combo.track, label: serverNames[combo.port] + " (ALL)", exclude: [] });
             } else {
-                // Standard single view for all other ports
-                cycleViews.push({
-                    port: combo.port,
-                    track: combo.track,
-                    label: serverNames[combo.port],
-                    exclude: []
-                });
+                cycleViews.push({ port: combo.port, track: combo.track, label: serverNames[combo.port], exclude: [] });
             }
         });
 
@@ -1717,16 +1693,12 @@ function renderHomeTrackRecords() {
 
         const tName = document.getElementById('home-track-name');
         if(tName) {
-            tName.innerHTML = `
-                <div style="font-size: 0.7rem; color: var(--neon-pink); letter-spacing: 1px;">[ ${currentView.label} ]</div>
-                <div style="color: var(--neon-mint);">> ${currentView.track.toUpperCase()}</div>
-            `;
+            tName.innerHTML = `<div style="font-size: 0.7rem; color: var(--neon-pink); letter-spacing: 1px;">[ ${currentView.label} ]</div><div style="color: var(--neon-mint);">> ${currentView.track.toUpperCase()}</div>`;
         }
 
-        // Filter data specifically for this view's Port, Track, and Car Exclusions
+        // Just grab the Top 6 fastest laps directly (No driver filtering)
         const top6 = dbLeaderboard
-            .filter(x => x.ServerPort === currentView.port && x.Track === currentView.track)
-            .filter(x => !currentView.exclude.includes(x.Car)) 
+            .filter(x => x.ServerPort === currentView.port && x.Track === currentView.track && !currentView.exclude.includes(x.Car)) 
             .sort((a,b) => a.TotalMs - b.TotalMs)
             .slice(0,6);
             
@@ -1763,7 +1735,6 @@ function renderHomeTrackRecords() {
 
 // --- HERO BANNER ---
     function updateHeroBanner() {
-        // --- 1. THE STANDARDIZED ROW BUILDER ---
         const buildTwoColumnList = (items, type) => {
             if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
             
@@ -1784,12 +1755,12 @@ function renderHomeTrackRecords() {
                     const incCount = p.incidents || p.Incidents || "0";
                     let incPerLap = (parseInt(lapsCount) > 0) ? (parseInt(incCount) / parseInt(lapsCount)).toFixed(2) : "0.00";
 
-                    return `<div class="tele-row telemetry-grid" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="border-bottom: 1px dashed #333; padding: 6px 0; font-size: 0.85rem; font-family: 'Share Tech Mono';"><span style="color:#555;">${i + 1}</span><span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span><span class="hide-on-mobile" style="color:var(--neon-cyan); text-align:center;">${elo}</span><span style="justify-self:center;"><span class="safety-sticker" style="border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFill}%, #111 ${srFill}%); padding: 2px 4px; font-size: 0.70rem; transform: none; box-shadow: none; display: inline-block; border-radius: 2px; line-height: 1;">${cls} [${parseFloat(srRaw).toFixed(2)}]</span></span><span class="hide-on-mobile" style="justify-self:center; color:var(--neon-gold); font-size: 0.75rem; background: rgba(255,215,0,0.05); padding: 1px 4px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${lvl}</span><span class="hide-on-mobile" style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${car}</span><span class="hide-on-mobile" style="color:#888; text-align:center;">${incCount}</span><span class="hide-on-mobile" style="color:${incPerLap >= 1.5 ? 'var(--neon-pink)' : '#fff'}; text-align:center; font-weight:bold;">${incPerLap}</span><span class="hide-on-mobile" style="color:var(--neon-cyan); text-align:center;">${lapsCount}</span><span style="color:var(--neon-mint); text-align:center; font-weight:bold; white-space:nowrap;">${lap}</span></div>`;
+                    return `<div class="tele-row telemetry-grid" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="border-bottom: 1px dashed #333; padding: 6px 0; font-size: 0.85rem; font-family: 'Share Tech Mono';"><span style="color:#555;">${i + 1}</span><span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span><span class="hide-on-mobile" style="color:var(--neon-cyan); text-align:center;">${elo}</span><span style="justify-self:center; display: inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFill}%, #111 ${srFill}%); padding: 1px 4px; border-radius: 2px; font-size: 0.70rem; color: #fff; text-shadow: 1px 1px 0 #000; white-space: nowrap;">${cls} [${parseFloat(srRaw).toFixed(2)}]</span><span class="hide-on-mobile" style="justify-self:center; color:var(--neon-gold); font-size: 0.75rem; background: rgba(255,215,0,0.05); padding: 1px 4px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${lvl}</span><span class="hide-on-mobile" style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${car}</span><span class="hide-on-mobile" style="color:#888; text-align:center;">${incCount}</span><span class="hide-on-mobile" style="color:${incPerLap >= 1.5 ? 'var(--neon-pink)' : '#fff'}; text-align:center; font-weight:bold;">${incPerLap}</span><span class="hide-on-mobile" style="color:var(--neon-cyan); text-align:center;">${lapsCount}</span><span style="color:var(--neon-mint); text-align:center; font-weight:bold; white-space:nowrap;">${lap}</span></div>`;
                 };
-                return `<div class="hero-grid-container" style="max-width: 1000px; display: block; border: 1px solid #444;"><div>${headerHtml}${topRows.map((p, i) => renderRow(p, i)).join('')}</div></div>`;
+                // ADDED: padding-left: 45px; padding-right: 45px;
+                return `<div class="hero-grid-container" style="max-width: 1000px; display: block; border: 1px solid #444; padding-left: 45px; padding-right: 45px;"><div>${headerHtml}${topRows.map((p, i) => renderRow(p, i)).join('')}</div></div>`;
             }
 
-            // --- STANDARDIZED 2-COLUMN VIEW ---
             const col1 = items.slice(0, 5);
             const col2 = items.slice(5, 10);
             
@@ -1820,13 +1791,12 @@ function renderHomeTrackRecords() {
                     rightVal = elo + ' ELO';
                 }
 
-                // Show ELO in the center column for everything EXCEPT the main ELO and Safety slides
                 const showCenterElo = (type === 'laps' || type === 'xp' || type === 'pylon');
                 const eloColumn = showCenterElo 
                     ? `<span style="width:38px; color:var(--neon-cyan); font-size:0.7rem; flex-shrink:0; text-align:left;">${elo}</span>` 
                     : `<span style="width:38px; flex-shrink:0;"></span>`;
 
-                // CAR INFO: Uses flex: 1 and min-width: 0 to shrink and add (...) if the name is too long!
+                // ADDED: flex: 1 and min-width: 0 forces it to truncate cleanly without pushing the lap time!
                 const carInfo = (type === 'laps') 
                     ? `<span style="color:#666; font-size:0.65rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0; padding: 0 5px;">[${p.Car || '---'}]</span>` 
                     : `<span style="flex:1;"></span>`;
@@ -1847,7 +1817,8 @@ function renderHomeTrackRecords() {
                 </div>`;
             };
 
-            let html = `<div class="hero-grid-container" style="max-width: 1000px; column-gap: 20px;">`; 
+            // ADDED: padding-left: 45px; padding-right: 45px;
+            let html = `<div class="hero-grid-container" style="max-width: 1000px; column-gap: 20px; padding-left: 45px; padding-right: 45px;">`; 
             html += `<div>${col1.map((p, i) => renderRow(p, i, 1)).join('')}</div>`;
             html += `<div>${col2.map((p, i) => renderRow(p, i, 6)).join('')}</div>`;
             html += `</div>`;
@@ -1893,9 +1864,17 @@ function renderHomeTrackRecords() {
                     } else slides.push({p:e.ServerPort, t:e.Track, l:sNames[e.ServerPort], ex:[]});
                 }
             });
+            
             if (slides.length > 0) {
-                const active = slides[globalBannerIdx % slides.length];
-                const top10 = dbLeaderboard.filter(x => x.ServerPort === active.p && x.Track === active.t && !active.ex.includes(x.Car)).sort((a,b) => a.TotalMs - b.TotalMs).slice(0,10);
+                // Decouple track rotation from slide rotation using Math.floor
+                const active = slides[Math.floor(globalBannerIdx / 6) % slides.length];
+                
+                // NO DRIVER FILTERING - Grab the raw top 10 laps
+                const top10 = dbLeaderboard
+                    .filter(x => x.ServerPort === active.p && x.Track === active.t && !active.ex.includes(x.Car))
+                    .sort((a,b) => a.TotalMs - b.TotalMs)
+                    .slice(0, 10);
+                
                 currentAvailableSlides.push({ id: 'records', label: `[ FASTEST LAPS : ${active.l} ]`, title: "TRACK RECORDS", data: `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${active.t.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps'), color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Grid1.png" });
             }
         }
