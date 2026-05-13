@@ -1659,18 +1659,12 @@ function renderHomeTrackRecords() {
 
         // 1. --- DEFINE SERVER NAMES ---
         const serverNames = {
-            "9600": "STREET LEGAL",
-            "9601": "STREET LEGAL",
-			"9602": "STREET LEGAL",
-			"9603": "STREET LEGAL",
-            "9604": "90s NIGHT",
+            "9600": "STREET LEGAL", "9601": "STREET LEGAL", "9602": "STREET LEGAL", "9603": "STREET LEGAL", "9604": "90s NIGHT"
         };
         const allowedPorts = Object.keys(serverNames);
 
         // 2. --- GENERATE CYCLE VIEWS ---
         let cycleViews = [];
-        
-        // Find all unique Port + Track combinations in your data
         const portTrackCombos = [];
         const seen = new Set();
         dbLeaderboard.forEach(entry => {
@@ -1682,30 +1676,12 @@ function renderHomeTrackRecords() {
             }
         });
 
-        // Create the actual slides for the cycle
         portTrackCombos.forEach(combo => {
             if (combo.port === "9604") {
-                // ADD TWO SEPARATE VIEWS FOR PORT 9604
-                cycleViews.push({
-                    port: combo.port,
-                    track: combo.track,
-                    label: serverNames[combo.port] + " (NO F40)",
-                    exclude: ["FERRARI F40 LM"] // Filter out the F40 here
-                });
-                cycleViews.push({
-                    port: combo.port,
-                    track: combo.track,
-                    label: serverNames[combo.port] + " (ALL)",
-                    exclude: [] // Show everything here
-                });
+                cycleViews.push({ port: combo.port, track: combo.track, label: serverNames[combo.port] + " (NO F40)", exclude: ["FERRARI F40 LM"] });
+                cycleViews.push({ port: combo.port, track: combo.track, label: serverNames[combo.port] + " (ALL)", exclude: [] });
             } else {
-                // Standard single view for all other ports
-                cycleViews.push({
-                    port: combo.port,
-                    track: combo.track,
-                    label: serverNames[combo.port],
-                    exclude: []
-                });
+                cycleViews.push({ port: combo.port, track: combo.track, label: serverNames[combo.port], exclude: [] });
             }
         });
 
@@ -1717,16 +1693,12 @@ function renderHomeTrackRecords() {
 
         const tName = document.getElementById('home-track-name');
         if(tName) {
-            tName.innerHTML = `
-                <div style="font-size: 0.7rem; color: var(--neon-pink); letter-spacing: 1px;">[ ${currentView.label} ]</div>
-                <div style="color: var(--neon-mint);">> ${currentView.track.toUpperCase()}</div>
-            `;
+            tName.innerHTML = `<div style="font-size: 0.7rem; color: var(--neon-pink); letter-spacing: 1px;">[ ${currentView.label} ]</div><div style="color: var(--neon-mint);">> ${currentView.track.toUpperCase()}</div>`;
         }
 
-        // Filter data specifically for this view's Port, Track, and Car Exclusions
+        // Just grab the Top 6 fastest laps directly (No driver filtering)
         const top6 = dbLeaderboard
-            .filter(x => x.ServerPort === currentView.port && x.Track === currentView.track)
-            .filter(x => !currentView.exclude.includes(x.Car)) 
+            .filter(x => x.ServerPort === currentView.port && x.Track === currentView.track && !currentView.exclude.includes(x.Car)) 
             .sort((a,b) => a.TotalMs - b.TotalMs)
             .slice(0,6);
             
@@ -1786,9 +1758,10 @@ function renderHomeTrackRecords() {
 
                     return `<div class="tele-row telemetry-grid" onclick="event.stopPropagation(); openDriverCard('${p.steamId || p.id}')" style="border-bottom: 1px dashed #333; padding: 6px 0; font-size: 0.85rem; font-family: 'Share Tech Mono';"><span style="color:#555;">${i + 1}</span><span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span><span class="hide-on-mobile" style="color:var(--neon-cyan); text-align:center;">${elo}</span><span style="justify-self:center; display: inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFill}%, #111 ${srFill}%); padding: 1px 4px; border-radius: 2px; font-size: 0.70rem; color: #fff; text-shadow: 1px 1px 0 #000; white-space: nowrap;">${cls} [${parseFloat(srRaw).toFixed(2)}]</span><span class="hide-on-mobile" style="justify-self:center; color:var(--neon-gold); font-size: 0.75rem; background: rgba(255,215,0,0.05); padding: 1px 4px; border-radius: 2px; border: 1px solid var(--neon-gold);">L${lvl}</span><span class="hide-on-mobile" style="color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${car}</span><span class="hide-on-mobile" style="color:#888; text-align:center;">${incCount}</span><span class="hide-on-mobile" style="color:${incPerLap >= 1.5 ? 'var(--neon-pink)' : '#fff'}; text-align:center; font-weight:bold;">${incPerLap}</span><span class="hide-on-mobile" style="color:var(--neon-cyan); text-align:center;">${lapsCount}</span><span style="color:var(--neon-mint); text-align:center; font-weight:bold; white-space:nowrap;">${lap}</span></div>`;
                 };
-                return `<div class="hero-grid-container" style="max-width: 1000px; display: block; border: 1px solid #444;"><div>${headerHtml}${topRows.map((p, i) => renderRow(p, i)).join('')}</div></div>`;
+                return `<div class="hero-grid-container" style="max-width: 1000px; display: block; border: 1px solid #444; padding-left: 45px; padding-right: 45px; box-sizing: border-box;"><div>${headerHtml}${topRows.map((p, i) => renderRow(p, i)).join('')}</div></div>`;
             }
 
+            // --- STANDARDIZED 2-COLUMN VIEW ---
             const col1 = items.slice(0, 5);
             const col2 = items.slice(5, 10);
             
@@ -1819,31 +1792,37 @@ function renderHomeTrackRecords() {
                     rightVal = elo + ' ELO';
                 }
 
-                // FIXED: Show ELO on every slide EXCEPT the standard "stats" (ELO/SR) slides
-                const eloColumn = (type !== 'stats') ? `<span style="width:35px; color:var(--neon-cyan); font-size:0.7rem; flex-shrink:0;">${elo}</span>` : `<span style="width:35px;"></span>`;
+                // Show ELO in the center column for everything EXCEPT the main ELO and Safety slides
+                const showCenterElo = (type === 'laps' || type === 'xp' || type === 'pylon');
+                const eloColumn = showCenterElo 
+                    ? `<span style="width:38px; color:var(--neon-cyan); font-size:0.7rem; flex-shrink:0; text-align:left;">${elo}</span>` 
+                    : `<span style="width:38px; flex-shrink:0;"></span>`;
 
-                // Car info for Track Records
-                const carInfo = (type === 'laps') ? `<span style="color:#666; font-size:0.65rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; padding-left:10px;">[${p.Car || '---'}]</span>` : '';
+                // CAR INFO: Kept flex: 1 and min-width: 0 so it can shrink
+                const carInfo = (type === 'laps') 
+                    ? `<span style="color:#666; font-size:0.65rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0; padding: 0 5px;">[${p.Car || '---'}]</span>` 
+                    : `<span style="flex:1; min-width:0;"></span>`;
 
                 return `
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #444; padding:5px 0; cursor:pointer; font-family:'Share Tech Mono'; font-size:0.85rem;" onclick="event.stopPropagation(); openDriverCard('${steamId}')">
-                    <div style="display:flex; align-items:center; overflow:hidden; flex:1;">
-                        <span style="color:#555; width:22px; flex-shrink:0;">${i + offset}.</span>
-                        <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width: 95px; color:#fff; flex-shrink:0;">${name}</span>
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #444; padding:5px 0; cursor:pointer; font-family:'Share Tech Mono'; font-size:0.82rem; width:100%; box-sizing:border-box;" onclick="event.stopPropagation(); openDriverCard('${steamId}')">
+                    <div style="display:flex; align-items:center; overflow:hidden; flex:1; min-width:0;">
+                        <span style="color:#555; width:18px; flex-shrink:0;">${i + offset}.</span>
+                        <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width: 85px; color:#fff; flex-shrink:0; margin-right:5px;">${name}</span>
                         ${eloColumn}
-                        <span style="width:52px; flex-shrink:0; text-align:center;">
-                            <span style="display:inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFill}%, #111 ${srFill}%); padding: 0 4px; border-radius: 2px; font-size: 0.6rem; color: #fff; text-shadow: 1px 1px 0 #000; line-height:1.2;">${cls}</span>
+                        <span style="width:68px; flex-shrink:0; text-align:center; margin: 0 3px;">
+                            <span class="safety-sticker" style="border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFill}%, #111 ${srFill}%); padding: 2px 4px; font-size: 0.65rem; transform: none; box-shadow: none; display: inline-block; border-radius: 2px; line-height: 1;">${cls} [${parseFloat(srRaw).toFixed(2)}]</span>
                         </span>
-                        <span style="width:30px; flex-shrink:0; color:var(--neon-gold); font-size: 0.65rem; background: rgba(255,215,0,0.05); border-radius: 2px; border: 1px solid var(--neon-gold); text-align:center; line-height:1.2;">L${lvl}</span>
+                        <span style="width:28px; flex-shrink:0; color:var(--neon-gold); font-size: 0.65rem; background: rgba(255,215,0,0.05); border-radius: 2px; border: 1px solid var(--neon-gold); text-align:center; line-height:1.2; margin-left: 5px;">L${lvl}</span>
                         ${carInfo}
                     </div>
-                    <span style="color:${rightColor}; font-weight:bold; flex-shrink:0; padding-left: 10px; font-size:0.85rem; text-align:right; width:80px;">${rightVal}</span>
+                    <span style="color:${rightColor}; font-weight:bold; flex-shrink:0; padding-left: 5px; font-size:0.85rem; text-align:right; width:72px;">${rightVal}</span>
                 </div>`;
             };
 
-            let html = `<div class="hero-grid-container" style="max-width: 1000px;">`; 
-            html += `<div style="padding-right:15px;">${col1.map((p, i) => renderRow(p, i, 1)).join('')}</div>`;
-            html += `<div style="padding-left:15px;">${col2.map((p, i) => renderRow(p, i, 6)).join('')}</div>`;
+            // ADDED: min-width: 0 to the inner column DIVs! This forces CSS Grid to respect the truncation boundary.
+            let html = `<div class="hero-grid-container" style="max-width: 1000px; column-gap: 20px; padding-left: 45px; padding-right: 45px; box-sizing: border-box;">`; 
+            html += `<div style="min-width: 0;">${col1.map((p, i) => renderRow(p, i, 1)).join('')}</div>`;
+            html += `<div style="min-width: 0;">${col2.map((p, i) => renderRow(p, i, 6)).join('')}</div>`;
             html += `</div>`;
             return html;
         };
@@ -1851,7 +1830,6 @@ function renderHomeTrackRecords() {
         let currentAvailableSlides = [];
         const allProfiles = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]}));
         
-        // A. MOST POPULATED
         const popServers = [...(window.raceServers||[]), ...(window.tdServers||[])].filter(s => parseInt(s.p) > 0).sort((a,b) => parseInt(b.p) - parseInt(a.p));
         if (popServers.length > 0) {
             const topS = popServers[0];
@@ -1859,26 +1837,21 @@ function renderHomeTrackRecords() {
             currentAvailableSlides.push({ id: 'most-pop', label: "[ LIVE TELEMETRY ]", title: topS.name.toUpperCase(), data: `<div style="color:var(--neon-gold); text-align:center; font-family:'Share Tech Mono'; font-size:0.8rem; margin-bottom:5px;">MOST POPULATED: ${topS.p} DRIVERS ONLINE</div>` + buildTwoColumnList(sortedRoster.slice(0, 10), 'full'), color: "var(--neon-gold)", action: () => goToServerAndExpand(`srv-${window.raceServers.includes(topS)?'r':'t'}-${(window.raceServers.includes(topS)?window.raceServers:window.tdServers).indexOf(topS)}`, window.raceServers.includes(topS)?'race':'trackday'), img: topS.img || IMAGE_DICT["DEFAULT"] });
         }
 
-        // B. ELO RANKINGS
         const topElo = [...allProfiles].sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0,10);
-        currentAvailableSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: buildTwoColumnList(topElo, 'stats'), color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
+        currentAvailableSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVER RATING", data: buildTwoColumnList(topElo, 'stats'), color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
 
-        // C. SAFETY ELITE
         const topSR = [...allProfiles].sort((a,b) => {
             if((b.LicenseClass||0) !== (a.LicenseClass||0)) return (b.LicenseClass||0) - (a.LicenseClass||0);
             return (b.SafetyRating||0) - (a.SafetyRating||0);
         }).slice(0,10);
-        currentAvailableSlides.push({ id: 'sr-elite', label: "[ SAFETY ELITE ]", title: "TOP 10 CLEANEST DRIVERS", data: buildTwoColumnList(topSR, 'stats'), color: "var(--neon-mint)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/911GT3RNurbs.png" });
+        currentAvailableSlides.push({ id: 'sr-elite', label: "[ SAFETY ELITE ]", title: "TOP 10 SAFETY RATING", data: buildTwoColumnList(topSR, 'stats'), color: "var(--neon-mint)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/911GT3RNurbs.png" });
 
-        // D. LEGEND GRINDERS
         const topXP = [...allProfiles].sort((a,b) => (b.TrackdayXP||0) - (a.TrackdayXP||0)).slice(0,10);
-        currentAvailableSlides.push({ id: 'xp-legends', label: "[ LEGEND GRINDERS ]", title: "TOP 10 TRACKXP LEVELS", data: buildTwoColumnList(topXP, 'xp'), color: "var(--neon-gold)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Alfa_Sprint_Grid.png" });
+        currentAvailableSlides.push({ id: 'xp-legends', label: "[ TRACK DAY LEGENDS ]", title: "TOP 10 TRACKXP LEVEL", data: buildTwoColumnList(topXP, 'xp'), color: "var(--neon-gold)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Alfa_Sprint_Grid.png" });
 
-        // E. PYLON KILLERS
         const topPylons = [...allProfiles].sort((a,b) => (b.Pylons||0) - (a.Pylons||0)).slice(0,10);
-        currentAvailableSlides.push({ id: 'pylon-killers', label: "[ PYLON KILLERS ]", title: "TOP 10 CONE CRUSHERS", data: buildTwoColumnList(topPylons, 'pylon'), color: "var(--neon-red)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
+        currentAvailableSlides.push({ id: 'pylon-killers', label: "[ PYLON CRUSHERS ]", title: "TOP 10 CONE KILLERS", data: buildTwoColumnList(topPylons, 'pylon'), color: "var(--neon-red)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
 
-        // F. TRACK RECORDS (Multi-View Logic)
         if (dbLeaderboard.length > 0) {
             const sNames = {"9600":"STREET LEGAL","9601":"STREET LEGAL","9602":"STREET LEGAL","9603":"STREET LEGAL","9604":"90s NIGHT"};
             const slides = []; const seen = new Set();
@@ -1893,14 +1866,21 @@ function renderHomeTrackRecords() {
                     } else slides.push({p:e.ServerPort, t:e.Track, l:sNames[e.ServerPort], ex:[]});
                 }
             });
+            
             if (slides.length > 0) {
-                const active = slides[globalBannerIdx % slides.length];
-                const top10 = dbLeaderboard.filter(x => x.ServerPort === active.p && x.Track === active.t && !active.ex.includes(x.Car)).sort((a,b) => a.TotalMs - b.TotalMs).slice(0,10);
+                // Decouple track rotation from slide rotation using Math.floor
+                const active = slides[Math.floor(globalBannerIdx / 6) % slides.length];
+                
+                // NO DRIVER FILTERING - Grab the raw top 10 laps
+                const top10 = dbLeaderboard
+                    .filter(x => x.ServerPort === active.p && x.Track === active.t && !active.ex.includes(x.Car))
+                    .sort((a,b) => a.TotalMs - b.TotalMs)
+                    .slice(0, 10);
+                
                 currentAvailableSlides.push({ id: 'records', label: `[ FASTEST LAPS : ${active.l} ]`, title: "TRACK RECORDS", data: `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${active.t.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps'), color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Grid1.png" });
             }
         }
 
-        // --- 3. RENDER ---
         let safeIdx = ((globalBannerIdx % currentAvailableSlides.length) + currentAvailableSlides.length) % currentAvailableSlides.length;
         let slide = currentAvailableSlides[safeIdx];
         if(!slide) return;
