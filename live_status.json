@@ -36,24 +36,11 @@
     {
       "Port": "9601",
       "Name": "Street Legal Seca - Road Cars - Trackday",
-      "LiveDrivers": [
-        {
-          "Class": 0,
-          "BestLap": "--:--.---",
-          "SR": "2.50",
-          "Incidents": 0,
-          "SteamID": "76561198998336258",
-          "Name": "Toad Commander",
-          "SessionLaps": "0",
-          "Car": "MAZDA MX5 NA",
-          "Level": 1,
-          "Rating": 1500
-        }
-      ],
+      "LiveDrivers": [],
       "Status": "🟢 ONLINE",
       "Season": "None",
       "Mode": "Practice",
-      "Players": "1 / 64",
+      "Players": "0 / 64",
       "Track": "Laguna Seca\r\n[GP]"
     },
     {
@@ -107,5 +94,5 @@
       "Track": "Brands Hatch\r\n[GP]"
     }
   ],
-  "LastUpdated": "2026-05-12 18:16:59"
+  "LastUpdated": "2026-05-12 18:22:06"
 }
