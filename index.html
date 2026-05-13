@@ -1764,17 +1764,17 @@ function renderHomeTrackRecords() {
 // --- HERO BANNER ---
     function updateHeroBanner() {
         // --- 1. THE STANDARDIZED ROW BUILDER ---
-        const buildTwoColumnList = (items, type, highlightStat = '') => {
+        const buildTwoColumnList = (items, type) => {
             if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
             
             if (type === 'full') {
-                // Keep the 10-column Live Telemetry View for the "Most Populated" slide
+                // LIVE TELEMETRY 10-COLUMN VIEW
                 const topRows = items.slice(0, 10); 
                 const headerHtml = `<div class="tele-row tele-header telemetry-grid" style="border-bottom: 1px solid #555; color: #555; font-size: 0.75rem; font-weight: bold; padding-bottom: 4px; margin-bottom: 4px;"><span>#</span><span>DRIVER</span><span class="hide-on-mobile" style="text-align:center;">ELO</span><span style="text-align:center;">SR</span><span class="hide-on-mobile" style="text-align:center;">LVL</span><span class="hide-on-mobile">CAR</span><span class="hide-on-mobile" style="text-align:center;">INC</span><span class="hide-on-mobile" style="text-align:center;">I/L</span><span class="hide-on-mobile" style="text-align:center;">LAPS</span><span style="text-align:center;">TIME</span></div>`;
                 const renderRow = (p, i) => {
                     const name = p.name || p.Name || "Unknown";
                     const elo = p.rating || p.DriverRating || 1500;
-                    const srRaw = p.sr || (p.SafetyRating ? p.SafetyRating : 2.50);
+                    const srRaw = p.sr || p.SafetyRating || 2.50;
                     const lvl = p.level || (p.TrackdayXP ? (Math.floor(Math.sqrt(p.TrackdayXP / 50)) + 1) : 1);
                     const lap = p.lapTime || p.LapTime || "--:--.---";
                     const car = p.car || p.Car || "---"; 
@@ -1790,7 +1790,7 @@ function renderHomeTrackRecords() {
                 return `<div class="hero-grid-container" style="max-width: 1000px; display: block; border: 1px solid #444;"><div>${headerHtml}${topRows.map((p, i) => renderRow(p, i)).join('')}</div></div>`;
             }
 
-            // --- STANDARDIZED 2-COLUMN LEADERBOARD ---
+            // --- STANDARDIZED 2-COLUMN VIEW ---
             const col1 = items.slice(0, 5);
             const col2 = items.slice(5, 10);
             
@@ -1803,27 +1803,36 @@ function renderHomeTrackRecords() {
                 const cls = classLetters[prof.LicenseClass || 0] || "R";
                 const lvl = prof.TrackdayXP ? (Math.floor(Math.sqrt(prof.TrackdayXP / 50)) + 1) : 1;
                 
-                // Color formatting
                 const colorStr = getStickerColor(cls);
                 const srFill = getSrFill(srRaw);
 
-                // Right-side value (Time for laps, else Highlight Stat)
-                let rightVal = p.LapTime || highlightStat;
-                let rightColor = (type === 'laps') ? 'var(--neon-mint)' : 'var(--neon-cyan)';
-                if (type === 'pylon') rightColor = 'var(--neon-pink)';
-                if (type === 'xp') rightColor = 'var(--neon-gold)';
+                // Dynamically build the value that sits on the far right edge based on the type of leaderboard
+                let rightVal = '';
+                let rightColor = 'var(--neon-cyan)';
+                if (type === 'laps') {
+                    rightVal = p.LapTime || '--:--.---';
+                    rightColor = 'var(--neon-mint)';
+                } else if (type === 'xp') {
+                    rightVal = (p.TrackdayXP || prof.TrackdayXP || 0) + ' XP';
+                    rightColor = 'var(--neon-gold)';
+                } else if (type === 'pylon') {
+                    rightVal = (p.Pylons || prof.Pylons || 0) + ' CONES';
+                    rightColor = 'var(--neon-pink)';
+                } else {
+                    rightVal = elo + ' ELO';
+                }
 
-                // Car info for Track Records
-                const carInfo = (type === 'laps') ? `<span style="color:#666; font-size:0.65rem; margin-left:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:70px;">[${p.Car}]</span>` : '';
+                // Inject Car info only if it's the Track Records view
+                const carInfo = (type === 'laps') ? `<span style="color:#888; font-size:0.65rem; margin-left:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px;">[${p.Car || 'UNKNOWN'}]</span>` : '';
 
                 return `
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #444; padding:5px 0; cursor:pointer; font-family:'Share Tech Mono'; font-size:0.8rem;" onclick="event.stopPropagation(); openDriverCard('${steamId}')">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #444; padding:5px 0; cursor:pointer; font-family:'Share Tech Mono'; font-size:0.85rem;" onclick="event.stopPropagation(); openDriverCard('${steamId}')">
                     <div style="display:flex; align-items:center; overflow:hidden; flex:1;">
-                        <span style="color:#555; width:18px; flex-shrink:0;">${i + offset}.</span>
-                        <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 90px; color:#fff;">${name}</span>
+                        <span style="color:#555; width:20px; flex-shrink:0;">${i + offset}.</span>
+                        <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 100px; color:#fff;">${name}</span>
                         <span style="color:var(--neon-cyan); font-size:0.7rem; margin-left:8px; flex-shrink:0;">${elo}</span>
-                        <span style="display:inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFill}%, #111 ${srFill}%); padding: 0 4px; border-radius: 2px; font-size: 0.6rem; color: #fff; text-shadow: 1px 1px 0 #000; margin-left:8px; flex-shrink:0;">${cls}</span>
-                        <span style="color:var(--neon-gold); font-size: 0.6rem; background: rgba(255,215,0,0.05); padding: 0 3px; border-radius: 2px; border: 1px solid var(--neon-gold); margin-left:5px; flex-shrink:0;">L${lvl}</span>
+                        <span style="display:inline-block; border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFill}%, #111 ${srFill}%); padding: 0 4px; border-radius: 2px; font-size: 0.6rem; color: #fff; text-shadow: 1px 1px 0 #000; margin-left:8px; flex-shrink:0;">${cls} [${parseFloat(srRaw).toFixed(2)}]</span>
+                        <span style="color:var(--neon-gold); font-size: 0.65rem; background: rgba(255,215,0,0.05); padding: 0 3px; border-radius: 2px; border: 1px solid var(--neon-gold); margin-left:5px; flex-shrink:0;">L${lvl}</span>
                         ${carInfo}
                     </div>
                     <span style="color:${rightColor}; font-weight:bold; flex-shrink:0; padding-left: 10px; font-size:0.85rem;">${rightVal}</span>
@@ -1837,11 +1846,10 @@ function renderHomeTrackRecords() {
             return html;
         };
 
-        // --- 2. BUILD SLIDES ---
         let currentAvailableSlides = [];
         const allProfiles = Object.keys(dbProfiles).map(id => ({id, ...dbProfiles[id]}));
         
-        // A. MOST POPULATED
+        // A. MOST POPULATED SERVER
         const popServers = [...(window.raceServers||[]), ...(window.tdServers||[])].filter(s => parseInt(s.p) > 0).sort((a,b) => parseInt(b.p) - parseInt(a.p));
         if (popServers.length > 0) {
             const topS = popServers[0];
@@ -1851,27 +1859,28 @@ function renderHomeTrackRecords() {
 
         // B. ELO RANKINGS
         const topElo = [...allProfiles].sort((a,b) => (b.DriverRating||1500) - (a.DriverRating||1500)).slice(0,10);
-        currentAvailableSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: buildTwoColumnList(topElo, 'stats', ''), color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
+        currentAvailableSlides.push({ id: 'elo', label: "[ GLOBAL RANKINGS ]", title: "TOP 10 DRIVERS (ELO)", data: buildTwoColumnList(topElo, 'stats'), color: "var(--neon-cyan)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Countach_Rear.png" });
 
-        // C. SAFETY ELITE (NEW)
+        // C. SAFETY ELITE
         const topSR = [...allProfiles].sort((a,b) => {
             if((b.LicenseClass||0) !== (a.LicenseClass||0)) return (b.LicenseClass||0) - (a.LicenseClass||0);
             return (b.SafetyRating||0) - (a.SafetyRating||0);
         }).slice(0,10);
-        currentAvailableSlides.push({ id: 'sr-elite', label: "[ SAFETY ELITE ]", title: "TOP 10 CLEANEST DRIVERS", data: buildTwoColumnList(topSR, 'stats', ''), color: "var(--neon-mint)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/911GT3RNurbs.png" });
+        currentAvailableSlides.push({ id: 'sr-elite', label: "[ SAFETY ELITE ]", title: "TOP 10 CLEANEST DRIVERS", data: buildTwoColumnList(topSR, 'stats'), color: "var(--neon-mint)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/911GT3RNurbs.png" });
 
-        // D. LEGEND GRINDERS (NEW)
+        // D. LEGEND GRINDERS
         const topXP = [...allProfiles].sort((a,b) => (b.TrackdayXP||0) - (a.TrackdayXP||0)).slice(0,10);
-        currentAvailableSlides.push({ id: 'xp-legends', label: "[ LEGEND GRINDERS ]", title: "TOP 10 TRACKXP LEVELS", data: buildTwoColumnList(topXP, 'xp', ''), color: "var(--neon-gold)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Alfa_Sprint_Grid.png" });
+        currentAvailableSlides.push({ id: 'xp-legends', label: "[ LEGEND GRINDERS ]", title: "TOP 10 TRACKXP LEVELS", data: buildTwoColumnList(topXP, 'xp'), color: "var(--neon-gold)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Alfa_Sprint_Grid.png" });
 
-        // E. PYLON KILLERS (NEW)
+        // E. PYLON KILLERS
         const topPylons = [...allProfiles].sort((a,b) => (b.Pylons||0) - (a.Pylons||0)).slice(0,10);
-        currentAvailableSlides.push({ id: 'pylon-killers', label: "[ PYLON KILLERS ]", title: "TOP 10 CONE CRUSHERS", data: buildTwoColumnList(topPylons, 'pylon', ' PYLONS'), color: "var(--neon-red)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
+        currentAvailableSlides.push({ id: 'pylon-killers', label: "[ PYLON KILLERS ]", title: "TOP 10 CONE CRUSHERS", data: buildTwoColumnList(topPylons, 'pylon'), color: "var(--neon-red)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
 
-        // F. TRACK RECORDS (Standardized order: # | Driver | Elo | Safety | TrackXP | Car | Time)
+        // F. TRACK RECORDS (Multi-View Logic)
         if (dbLeaderboard.length > 0) {
-            const sNames = {"9600":"STREET LEGAL","9601":"STREET LEGAL","9602":"STREET LEGAL","9603":"STREET LEGAL","9604":"90s NIGHT",};
+            const sNames = {"9600":"STREET LEGAL","9601":"STREET LEGAL","9602":"STREET LEGAL","9603":"STREET LEGAL","9604":"90s NIGHT"};
             const slides = []; const seen = new Set();
+            
             dbLeaderboard.forEach(e => {
                 if(!sNames[e.ServerPort]) return;
                 const key = e.ServerPort + "||" + e.Track;
@@ -1883,15 +1892,20 @@ function renderHomeTrackRecords() {
                     } else slides.push({p:e.ServerPort, t:e.Track, l:sNames[e.ServerPort], ex:[]});
                 }
             });
-            const active = slides[globalBannerIdx % slides.length];
-            const top10 = dbLeaderboard.filter(x => x.ServerPort === active.p && x.Track === active.t && !active.ex.includes(x.Car)).sort((a,b) => a.TotalMs - b.TotalMs).slice(0,10);
-            currentAvailableSlides.push({ id: 'records', label: `[ RECORDS : ${active.l} ]`, title: "TRACK RECORDS", data: `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${active.t.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps'), color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Grid1.png" });
+            
+            // This safety check prevents the slider from crashing if dbLeaderboard loaded but contained NO matching ports!
+            if (slides.length > 0) {
+                const active = slides[globalBannerIdx % slides.length];
+                const top10 = dbLeaderboard.filter(x => x.ServerPort === active.p && x.Track === active.t && !active.ex.includes(x.Car)).sort((a,b) => a.TotalMs - b.TotalMs).slice(0,10);
+                currentAvailableSlides.push({ id: 'records', label: `[ FASTEST LAPS : ${active.l} ]`, title: "TRACK RECORDS", data: `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${active.t.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps'), color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Grid1.png" });
+            }
         }
 
         // --- 3. RENDER ---
         let safeIdx = ((globalBannerIdx % currentAvailableSlides.length) + currentAvailableSlides.length) % currentAvailableSlides.length;
         let slide = currentAvailableSlides[safeIdx];
         if(!slide) return;
+        
         document.querySelectorAll('.hero-banner-container').forEach(banner => {
             banner.style.borderColor = slide.color;
             banner.querySelector('.hero-label').innerText = slide.label;
@@ -1900,6 +1914,7 @@ function renderHomeTrackRecords() {
             banner.querySelector('.hero-data').innerHTML = slide.data;
             banner.style.backgroundImage = `linear-gradient(rgba(5, 5, 8, 0.8), rgba(5, 5, 8, 0.9)), url('${slide.img}')`;
             banner.onclick = slide.action;
+            
             if(!banner.querySelector('.banner-arrow.left')) {
                 const l = document.createElement('div'); l.className='banner-arrow left'; l.innerHTML='&#10094;'; l.onclick=(e)=>{e.stopPropagation(); manualBannerChange(-1);};
                 const r = document.createElement('div'); r.className='banner-arrow right'; r.innerHTML='&#10095;'; r.onclick=(e)=>{e.stopPropagation(); manualBannerChange(1);};
