@@ -1735,7 +1735,6 @@ function renderHomeTrackRecords() {
 
 // --- HERO BANNER ---
     function updateHeroBanner() {
-        // --- 1. THE STANDARDIZED ROW BUILDER ---
         const buildTwoColumnList = (items, type) => {
             if (!items || items.length === 0) return '<div style="color:#666; font-family:\'Share Tech Mono\'; margin-top:10px; text-align:center;">[ NO DATA FOUND ]</div>';
             
@@ -1761,7 +1760,6 @@ function renderHomeTrackRecords() {
                 return `<div class="hero-grid-container" style="max-width: 1000px; display: block; border: 1px solid #444; padding-left: 45px; padding-right: 45px; box-sizing: border-box;"><div>${headerHtml}${topRows.map((p, i) => renderRow(p, i)).join('')}</div></div>`;
             }
 
-            // --- STANDARDIZED 2-COLUMN VIEW ---
             const col1 = items.slice(0, 5);
             const col2 = items.slice(5, 10);
             
@@ -1792,13 +1790,15 @@ function renderHomeTrackRecords() {
                     rightVal = elo + ' ELO';
                 }
 
-                // Show ELO in the center column for everything EXCEPT the main ELO and Safety slides
                 const showCenterElo = (type === 'laps' || type === 'xp' || type === 'pylon');
                 const eloColumn = showCenterElo 
                     ? `<span style="width:38px; color:var(--neon-cyan); font-size:0.7rem; flex-shrink:0; text-align:left;">${elo}</span>` 
                     : `<span style="width:38px; flex-shrink:0;"></span>`;
 
-                // CAR INFO: Kept flex: 1 and min-width: 0 so it can shrink
+                // SR BADGE LOGIC: Shrink the badge text and container width for the 'laps' view
+                const srText = (type === 'laps') ? cls : `${cls} [${parseFloat(srRaw).toFixed(2)}]`;
+                const srContainerWidth = (type === 'laps') ? '22px' : '68px';
+
                 const carInfo = (type === 'laps') 
                     ? `<span style="color:#666; font-size:0.65rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; min-width:0; padding: 0 5px;">[${p.Car || '---'}]</span>` 
                     : `<span style="flex:1; min-width:0;"></span>`;
@@ -1809,8 +1809,8 @@ function renderHomeTrackRecords() {
                         <span style="color:#555; width:18px; flex-shrink:0;">${i + offset}.</span>
                         <span style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width: 85px; color:#fff; flex-shrink:0; margin-right:5px;">${name}</span>
                         ${eloColumn}
-                        <span style="width:68px; flex-shrink:0; text-align:center; margin: 0 3px;">
-                            <span class="safety-sticker" style="border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFill}%, #111 ${srFill}%); padding: 2px 4px; font-size: 0.65rem; transform: none; box-shadow: none; display: inline-block; border-radius: 2px; line-height: 1;">${cls} [${parseFloat(srRaw).toFixed(2)}]</span>
+                        <span style="width:${srContainerWidth}; flex-shrink:0; text-align:center; margin: 0 3px;">
+                            <span class="safety-sticker" style="border: 1px solid ${colorStr}; background: linear-gradient(to right, ${colorStr} ${srFill}%, #111 ${srFill}%); padding: 2px 4px; font-size: 0.65rem; transform: none; box-shadow: none; display: inline-block; border-radius: 2px; line-height: 1;">${srText}</span>
                         </span>
                         <span style="width:28px; flex-shrink:0; color:var(--neon-gold); font-size: 0.65rem; background: rgba(255,215,0,0.05); border-radius: 2px; border: 1px solid var(--neon-gold); text-align:center; line-height:1.2; margin-left: 5px;">L${lvl}</span>
                         ${carInfo}
@@ -1819,7 +1819,6 @@ function renderHomeTrackRecords() {
                 </div>`;
             };
 
-            // ADDED: min-width: 0 to the inner column DIVs! This forces CSS Grid to respect the truncation boundary.
             let html = `<div class="hero-grid-container" style="max-width: 1000px; column-gap: 20px; padding-left: 45px; padding-right: 45px; box-sizing: border-box;">`; 
             html += `<div style="min-width: 0;">${col1.map((p, i) => renderRow(p, i, 1)).join('')}</div>`;
             html += `<div style="min-width: 0;">${col2.map((p, i) => renderRow(p, i, 6)).join('')}</div>`;
@@ -1866,17 +1865,9 @@ function renderHomeTrackRecords() {
                     } else slides.push({p:e.ServerPort, t:e.Track, l:sNames[e.ServerPort], ex:[]});
                 }
             });
-            
             if (slides.length > 0) {
-                // Decouple track rotation from slide rotation using Math.floor
                 const active = slides[Math.floor(globalBannerIdx / 6) % slides.length];
-                
-                // NO DRIVER FILTERING - Grab the raw top 10 laps
-                const top10 = dbLeaderboard
-                    .filter(x => x.ServerPort === active.p && x.Track === active.t && !active.ex.includes(x.Car))
-                    .sort((a,b) => a.TotalMs - b.TotalMs)
-                    .slice(0, 10);
-                
+                const top10 = dbLeaderboard.filter(x => x.ServerPort === active.p && x.Track === active.t && !active.ex.includes(x.Car)).sort((a,b) => a.TotalMs - b.TotalMs).slice(0,10);
                 currentAvailableSlides.push({ id: 'records', label: `[ FASTEST LAPS : ${active.l} ]`, title: "TRACK RECORDS", data: `<div style="color:var(--neon-mint); font-family:'Share Tech Mono'; font-size:0.75rem; text-align:center; margin-bottom:2px; font-weight:bold;">> ${active.t.toUpperCase()}</div>` + buildTwoColumnList(top10, 'laps'), color: "var(--neon-mint)", action: () => openLeaderboard('laps'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/GT3_Grid1.png" });
             }
         }
