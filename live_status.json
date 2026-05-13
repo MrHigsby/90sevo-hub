@@ -1,9 +1,9 @@
 {
-  "LastUpdated": "2026-05-13 13:33:04",
+  "LastUpdated": "2026-05-13 13:35:54",
   "Servers": [
     {
       "Port": "9604",
-      "Players": "0 / 32",
+      "Players": "1 / 32",
       "Status": "🟢 ONLINE",
       "LiveDrivers": [],
       "Track": "Unknown",
@@ -23,7 +23,7 @@
     },
     {
       "Port": "9601",
-      "Players": "0 / 32",
+      "Players": "3 / 32",
       "Status": "🟢 ONLINE",
       "LiveDrivers": [],
       "Track": "Unknown",
