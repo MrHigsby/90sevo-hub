@@ -1771,8 +1771,8 @@ function renderHomeTrackRecords() {
             
             let rightLabel = 'RATING';
             if (type === 'laps') rightLabel = 'TIME';
-            else if (type === 'xp') rightLabel = 'XP';
-            else if (type === 'pylon') rightLabel = 'CONES';
+            else if (type === 'xp') rightLabel = 'TRACKXP';
+            else if (type === 'pylon') rightLabel = 'PYLONS';
 
             // HEADERS: Added overflow:visible and white-space:nowrap to let longer words center properly over tiny columns
             const eloHeader = showCenterElo ? `<span style="width:38px; flex-shrink:0; text-align:center; overflow:visible; white-space:nowrap;">RATING</span>` : `<span style="width:38px; flex-shrink:0;"></span>`;
@@ -1875,7 +1875,7 @@ function renderHomeTrackRecords() {
         currentAvailableSlides.push({ id: 'xp-legends', label: "[ TRACK DAY LEGENDS ]", title: "TOP 10 TRACKXP LEVEL", data: buildTwoColumnList(topXP, 'xp'), color: "var(--neon-gold)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/Alfa_Sprint_Grid.png" });
 
         const topPylons = [...allProfiles].sort((a,b) => (b.Pylons||0) - (a.Pylons||0)).slice(0,10);
-        currentAvailableSlides.push({ id: 'pylon-killers', label: "[ PYLON CRUSHERS ]", title: "TOP 10 CONE KILLERS", data: buildTwoColumnList(topPylons, 'pylon'), color: "var(--neon-red)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
+        currentAvailableSlides.push({ id: 'pylon-killers', label: "[ CONE CRUSHERS ]", title: "TOP 10 PYLON KILLERS", data: buildTwoColumnList(topPylons, 'pylon'), color: "var(--neon-red)", action: () => openLeaderboard('stats'), img: "https://raw.githubusercontent.com/MrHigsby/90sevo-hub/main/images/Background/CamaroZL1_Front.png" });
 
         if (dbLeaderboard.length > 0) {
             const sNames = {"9600":"STREET LEGAL","9601":"STREET LEGAL","9602":"STREET LEGAL","9603":"STREET LEGAL","9604":"90s NIGHT"};
