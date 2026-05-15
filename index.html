@@ -396,10 +396,29 @@
         .cal-day:hover { border-color: var(--neon-cyan); background: rgba(0,243,255,0.05); }
         .cal-date { color: #888; font-size: 0.8rem; text-align: right; margin-bottom: 5px;}
         
-        .cal-event { border-left: 3px solid var(--neon-pink); background: rgba(255, 0, 255, 0.1); padding: 5px; font-size: 0.75rem; color: #fff; margin-top: auto; cursor: pointer; line-height: 1.3;}
-        .cal-event.completed { border-left-color: var(--neon-mint); background: rgba(57, 255, 20, 0.1); color: var(--neon-mint);}
-        .cal-event.upcoming { border-left-color: var(--neon-gold); background: rgba(255, 183, 0, 0.1); color: var(--neon-gold);}
+/* CALENDAR EVENT STYLES */
+.cal-event {
+    padding: 5px; font-size: 0.75rem; margin-top: auto; cursor: pointer; line-height: 1.3;
+    border-left: 3px solid; /* Color applied dynamically by JS */
+}
 
+/* The Automatic Color Cycle */
+.cal-event.color-pink { border-left-color: var(--neon-pink); background: rgba(255, 0, 255, 0.15); color: #fff; }
+.cal-event.color-cyan { border-left-color: var(--neon-cyan); background: rgba(0, 243, 255, 0.15); color: #fff; }
+.cal-event.color-mint { border-left-color: var(--neon-mint); background: rgba(57, 255, 20, 0.15); color: #fff; }
+.cal-event.color-gold { border-left-color: var(--neon-gold); background: rgba(255, 183, 0, 0.15); color: #fff; }
+
+/* The Time Fade for Past Events */
+.cal-event.past-event {
+    opacity: 0.35;
+    filter: grayscale(80%);
+    border-left-color: #555 !important;
+    color: #888 !important;
+}
+.cal-event.past-event:hover {
+    opacity: 0.8;
+    filter: none;
+}
         /* FOOTER */
         footer { border-top: 1px dashed #333; padding: 20px; text-align: center; font-family: 'Share Tech Mono'; font-size: 0.8rem; color: #555; background: var(--bg-dark); margin-top: auto;}
 
@@ -1560,54 +1579,70 @@ function renderCalendar() {
     const year = currentCalDate.getFullYear();
     const month = currentCalDate.getMonth();
     document.getElementById('calendarMonthDisplay').innerText = `${monthNames[month]} ${year}`;
-    
+
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
+
+    // 1. Get today's exact midnight for the "Time Fade" math
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     let gridHtml = `
         <div class="cal-header">SUN</div><div class="cal-header">MON</div>
         <div class="cal-header">TUE</div><div class="cal-header">WED</div>
         <div class="cal-header">THU</div><div class="cal-header">FRI</div>
         <div class="cal-header">SAT</div>`;
-    
-    // Fill empty slots for previous month
+
     for (let i = 0; i < firstDay; i++) {
         gridHtml += `<div class="cal-day" style="opacity: 0.1; border-color: #111;"></div>`;
     }
 
-    // Loop through every day of the current month
-for (let day = 1; day <= daysInMonth; day++) {
-            let dateKey = `${year}-${month}-${day}`;
-            let yesterdayKey = `${year}-${month}-${day - 1}`;
-            
-            let dayEvents = window.calEvents[dateKey] || []; 
-            let yesterdayEvents = window.calEvents[yesterdayKey] || [];
-            let eventsHtml = '';
-            
-            // Loop through all events for THIS specific day
-            dayEvents.forEach(evt => {
-                // Check if this specific event existed yesterday
-                let existsYesterday = yesterdayEvents.some(y => y.title === evt.title);
-                let isStartOfEvent = (day === 1 || !existsYesterday);
-                
-                let displayText = isStartOfEvent ? evt.title : '&nbsp;'; 
-                
-                eventsHtml += `
-                    <div class="cal-event ${evt.status}" 
-                         style="min-height: 18px; margin-bottom: 2px; font-size: 0.7rem;" 
-                         onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}')">
-                         ${displayText}
-                    </div>`;
-            });
+    // 2. Setup the Automatic Color Palette
+    const palette = ['color-pink', 'color-cyan', 'color-mint', 'color-gold'];
+    let eventColorMap = {};
+    let nextColorIdx = 0;
 
-            gridHtml += `
-                <div class="cal-day" style="display: flex; flex-direction: column;">
-                    <div class="cal-date">${day}</div>
-                    <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-end;">
-                        ${eventsHtml}
-                    </div>
+    for (let day = 1; day <= daysInMonth; day++) {
+        let dateKey = `${year}-${month}-${day}`;
+        let yesterdayKey = `${year}-${month}-${day - 1}`;
+
+        // 3. Check if this specific square is in the past
+        let squareDate = new Date(year, month, day);
+        let isPastDate = squareDate < today;
+        let timeFadeClass = isPastDate ? 'past-event' : '';
+
+        let dayEvents = window.calEvents[dateKey] || [];
+        let yesterdayEvents = window.calEvents[yesterdayKey] || [];
+        let eventsHtml = '';
+
+        dayEvents.forEach(evt => {
+            let existsYesterday = yesterdayEvents.some(y => y.title === evt.title);
+            let isStartOfEvent = (day === 1 || !existsYesterday);
+            let displayText = isStartOfEvent ? evt.title : '&nbsp;';
+
+            // 4. Assign or retrieve the color for this specific event
+            if (!eventColorMap[evt.title]) {
+                eventColorMap[evt.title] = palette[nextColorIdx % palette.length];
+                nextColorIdx++;
+            }
+            let assignedColorClass = eventColorMap[evt.title];
+
+            eventsHtml += `
+                <div class="cal-event ${timeFadeClass} ${assignedColorClass}" 
+                     style="min-height: 18px; margin-bottom: 2px; font-size: 0.7rem;" 
+                     onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}')">
+                     ${displayText}
                 </div>`;
-        }
+        });
+
+        gridHtml += `
+            <div class="cal-day" style="display: flex; flex-direction: column;">
+                <div class="cal-date" style="${isPastDate ? 'color: #444;' : 'color: #888;'}">${day}</div>
+                <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+                    ${eventsHtml}
+                </div>
+            </div>`;
+    }
 
     document.getElementById('calendarGrid').innerHTML = gridHtml;
 }
