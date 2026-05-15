@@ -1351,6 +1351,30 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="eventModal" onclick="this.style.display='none'">
+    <div class="driver-card-popout" style="border-color: var(--neon-gold); box-shadow: 0 0 40px rgba(255, 183, 0, 0.2);" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="document.getElementById('eventModal').style.display='none'">&times;</span>
+        <div class="jdm-text">レースイベント</div> <div class="ticket-header">
+            <div>
+                <div style="color: #888; font-size: 0.7rem; font-family: 'Share Tech Mono';">SCHEDULED MISSION</div>
+                <h2 id="event-modal-title" style="margin: 5px 0 2px 0; text-transform: uppercase; font-size: 1.8rem; line-height: 1; color: var(--neon-gold);">EVENT NAME</h2>
+                <div id="event-modal-config" style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.75rem;">> LOADING CONFIG...</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; border-top: 1px dashed #333; padding-top: 15px;">
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff;">
+                <span style="color: #888;">STATUS:</span> <span id="event-modal-status" style="text-transform: uppercase;">UPCOMING</span>
+            </div>
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-top: 5px;">
+                <span style="color: #888;">TARGET PORT:</span> <span id="event-modal-port">9600</span>
+            </div>
+        </div>
+        
+        <button class="nav-btn" style="width: 100%; border-color: var(--neon-gold); color: var(--neon-gold); background: #000; margin-top: 25px;" onclick="document.getElementById('eventModal').style.display='none'">CLOSE BRIEFING</button>
+    </div>
+</div>
+
 <script>
 // --- GLOBAL VARIABLES ---
     let lockedOrderPool = null;
@@ -1553,14 +1577,21 @@ for (let day = 1; day <= daysInMonth; day++) {
             let evtHtml = '';
             
             if (evt) {
-                // Check if this is the first day of the event
+                // 1. Check if this is the very first day of the event or the first day of the month
+                // We compare current event title to yesterday's to see if it's a continuation
                 let isStartOfEvent = (day === 1 || !window.calEvents[yesterdayKey] || window.calEvents[yesterdayKey].title !== evt.title);
                 
-                // If it's the start, show the title. Otherwise, show nothing (empty string).
+                // 2. If it's the start, show the title. Otherwise, show a space (&nbsp;) 
+                // so the bar stays visible but the text doesn't repeat.
                 let displayText = isStartOfEvent ? evt.title : '&nbsp;'; 
                 
-                // We keep the div and the status class so the background color still fills the box
-                evtHtml = `<div class="cal-event ${evt.status}" style="min-height: 20px;" onclick="alert('Event Details: ${evt.title}\\nConfig: ${evt.class}')">${displayText}</div>`;
+                // 3. Build the neon bar. 
+                // Notice we are passing evt.port to the popout function now!
+                evtHtml = `<div class="cal-event ${evt.status}" 
+                                style="min-height: 20px;" 
+                                onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}', '${evt.port}')">
+                                ${displayText}
+                           </div>`;
             }
             gridHtml += `<div class="cal-day"><div class="cal-date">${day}</div>${evtHtml}</div>`;
         }
@@ -1568,6 +1599,22 @@ for (let day = 1; day <= daysInMonth; day++) {
 
         document.getElementById('calendarGrid').innerHTML = gridHtml;
     }
+	
+function openEventModal(title, config, status, port) {
+    document.getElementById('event-modal-title').innerText = title;
+    document.getElementById('event-modal-config').innerText = "> " + config;
+    document.getElementById('event-modal-status').innerText = status.toUpperCase();
+    document.getElementById('event-modal-port').innerText = port || "AUTO";
+
+    // Match the modal text color to your Neon theme
+    const statusElem = document.getElementById('event-modal-status');
+    if (status === 'active') statusElem.style.color = 'var(--neon-pink)';
+    else if (status === 'upcoming') statusElem.style.color = 'var(--neon-gold)';
+    else statusElem.style.color = 'var(--neon-mint)';
+    
+    document.getElementById('eventModal').style.display = 'flex';
+}
+
     function changeMonth(dir) { currentCalDate.setMonth(currentCalDate.getMonth() + dir); renderCalendar(); }
 
     function changeMonth(dir) { currentCalDate.setMonth(currentCalDate.getMonth() + dir); renderCalendar(); }
@@ -2683,7 +2730,8 @@ async function initStaticData() {
                         window.calEvents[key] = {
                             title: evt.EventName,
                             class: evt.PresetID,
-                            status: evt.Status
+                            status: evt.Status,
+							port: evt.Port
                         };
                         // Move to the next day
                         current.setDate(current.getDate() + 1);
