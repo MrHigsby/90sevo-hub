@@ -1545,7 +1545,7 @@ function renderCalendar() {
         for (let i = 0; i < firstDay; i++) gridHtml += `<div class="cal-day" style="opacity: 0.1; border-color: #111;"></div>`;
 
         // --- THE UPDATED LOOP START ---
-        for (let day = 1; day <= daysInMonth; day++) {
+for (let day = 1; day <= daysInMonth; day++) {
             let dateKey = `${year}-${month}-${day}`;
             let yesterdayKey = `${year}-${month}-${day - 1}`;
             
@@ -1553,12 +1553,14 @@ function renderCalendar() {
             let evtHtml = '';
             
             if (evt) {
-                // If it's the 1st of the month, or the event didn't exist yesterday, show the title.
-                // Otherwise, show "..." so the calendar doesn't look cluttered.
+                // Check if this is the first day of the event
                 let isStartOfEvent = (day === 1 || !window.calEvents[yesterdayKey] || window.calEvents[yesterdayKey].title !== evt.title);
-                let displayText = isStartOfEvent ? evt.title : '...'; 
                 
-                evtHtml = `<div class="cal-event ${evt.status}" onclick="alert('Event Details: ${evt.title}\\nConfig: ${evt.class}')">${displayText}</div>`;
+                // If it's the start, show the title. Otherwise, show nothing (empty string).
+                let displayText = isStartOfEvent ? evt.title : '&nbsp;'; 
+                
+                // We keep the div and the status class so the background color still fills the box
+                evtHtml = `<div class="cal-event ${evt.status}" style="min-height: 20px;" onclick="alert('Event Details: ${evt.title}\\nConfig: ${evt.class}')">${displayText}</div>`;
             }
             gridHtml += `<div class="cal-day"><div class="cal-date">${day}</div>${evtHtml}</div>`;
         }
