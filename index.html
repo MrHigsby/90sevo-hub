@@ -1351,10 +1351,12 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="eventModal" onclick="this.style.display='none'">
+<<div class="modal-overlay" id="eventModal" onclick="this.style.display='none'">
     <div class="driver-card-popout" style="border-color: var(--neon-gold); box-shadow: 0 0 40px rgba(255, 183, 0, 0.2);" onclick="event.stopPropagation()">
         <span class="close-btn" onclick="document.getElementById('eventModal').style.display='none'">&times;</span>
-        <div class="jdm-text">レースイベント</div> <div class="ticket-header">
+        <div class="jdm-text">レースイベント</div> 
+        
+        <div class="ticket-header">
             <div>
                 <div style="color: #888; font-size: 0.7rem; font-family: 'Share Tech Mono';">SCHEDULED MISSION</div>
                 <h2 id="event-modal-title" style="margin: 5px 0 2px 0; text-transform: uppercase; font-size: 1.8rem; line-height: 1; color: var(--neon-gold);">EVENT NAME</h2>
@@ -1366,10 +1368,7 @@
             <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff;">
                 <span style="color: #888;">STATUS:</span> <span id="event-modal-status" style="text-transform: uppercase;">UPCOMING</span>
             </div>
-            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-top: 5px;">
-                <span style="color: #888;">TARGET PORT:</span> <span id="event-modal-port">9600</span>
             </div>
-        </div>
         
         <button class="nav-btn" style="width: 100%; border-color: var(--neon-gold); color: var(--neon-gold); background: #000; margin-top: 25px;" onclick="document.getElementById('eventModal').style.display='none'">CLOSE BRIEFING</button>
     </div>
@@ -1558,55 +1557,63 @@
     window.calEvents = {}; 
 
 function renderCalendar() {
-        const year = currentCalDate.getFullYear();
-        const month = currentCalDate.getMonth();
-        document.getElementById('calendarMonthDisplay').innerText = `${monthNames[month]} ${year}`;
-        const firstDay = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        
-        let gridHtml = `<div class="cal-header">SUN</div><div class="cal-header">MON</div><div class="cal-header">TUE</div><div class="cal-header">WED</div><div class="cal-header">THU</div><div class="cal-header">FRI</div><div class="cal-header">SAT</div>`;
-        
-        for (let i = 0; i < firstDay; i++) gridHtml += `<div class="cal-day" style="opacity: 0.1; border-color: #111;"></div>`;
-
-        // --- THE UPDATED LOOP START ---
-for (let day = 1; day <= daysInMonth; day++) {
-            let dateKey = `${year}-${month}-${day}`;
-            let yesterdayKey = `${year}-${month}-${day - 1}`;
-            
-            let evt = window.calEvents[dateKey]; 
-            let evtHtml = '';
-            
-            if (evt) {
-                // 1. Check if this is the very first day of the event or the first day of the month
-                // We compare current event title to yesterday's to see if it's a continuation
-                let isStartOfEvent = (day === 1 || !window.calEvents[yesterdayKey] || window.calEvents[yesterdayKey].title !== evt.title);
-                
-                // 2. If it's the start, show the title. Otherwise, show a space (&nbsp;) 
-                // so the bar stays visible but the text doesn't repeat.
-                let displayText = isStartOfEvent ? evt.title : '&nbsp;'; 
-                
-                // 3. Build the neon bar. 
-                // Notice we are passing evt.port to the popout function now!
-                evtHtml = `<div class="cal-event ${evt.status}" 
-                                style="min-height: 20px;" 
-                                onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}', '${evt.port}')">
-                                ${displayText}
-                           </div>`;
-            }
-            gridHtml += `<div class="cal-day"><div class="cal-date">${day}</div>${evtHtml}</div>`;
-        }
-        // --- THE UPDATED LOOP END ---
-
-        document.getElementById('calendarGrid').innerHTML = gridHtml;
+    const year = currentCalDate.getFullYear();
+    const month = currentCalDate.getMonth();
+    document.getElementById('calendarMonthDisplay').innerText = `${monthNames[month]} ${year}`;
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    let gridHtml = `
+        <div class="cal-header">SUN</div><div class="cal-header">MON</div>
+        <div class="cal-header">TUE</div><div class="cal-header">WED</div>
+        <div class="cal-header">THU</div><div class="cal-header">FRI</div>
+        <div class="cal-header">SAT</div>`;
+    
+    // Fill empty slots for previous month
+    for (let i = 0; i < firstDay; i++) {
+        gridHtml += `<div class="cal-day" style="opacity: 0.1; border-color: #111;"></div>`;
     }
+
+    // Loop through every day of the current month
+    for (let day = 1; day <= daysInMonth; day++) {
+        let dateKey = `${year}-${month}-${day}`;
+        let yesterdayKey = `${year}-${month}-${day - 1}`;
+        
+        let evt = window.calEvents[dateKey]; 
+        let evtHtml = '';
+        
+        if (evt) {
+            // Check if this is the start of the event so we don't repeat text
+            let isStartOfEvent = (day === 1 || !window.calEvents[yesterdayKey] || window.calEvents[yesterdayKey].title !== evt.title);
+            
+            // Show title on day 1, empty bar on following days
+            let displayText = isStartOfEvent ? evt.title : '&nbsp;'; 
+            
+            // onclick now only passes Title, Config (class), and Status
+            evtHtml = `<div class="cal-event ${evt.status}" 
+                            style="min-height: 20px;" 
+                            onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}')">
+                            ${displayText}
+                       </div>`;
+        }
+        
+        gridHtml += `
+            <div class="cal-day">
+                <div class="cal-date">${day}</div>
+                ${evtHtml}
+            </div>`;
+    }
+
+    document.getElementById('calendarGrid').innerHTML = gridHtml;
+}
 	
-function openEventModal(title, config, status, port) {
+function openEventModal(title, config, status) {
     document.getElementById('event-modal-title').innerText = title;
     document.getElementById('event-modal-config').innerText = "> " + config;
     document.getElementById('event-modal-status').innerText = status.toUpperCase();
-    document.getElementById('event-modal-port').innerText = port || "AUTO";
 
-    // Match the modal text color to your Neon theme
+    // Match colors to the Hub theme
     const statusElem = document.getElementById('event-modal-status');
     if (status === 'active') statusElem.style.color = 'var(--neon-pink)';
     else if (status === 'upcoming') statusElem.style.color = 'var(--neon-gold)';
