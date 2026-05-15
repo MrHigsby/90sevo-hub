@@ -1523,14 +1523,15 @@
         }
     }
 
-    // --- CALENDAR & STANDINGS ---
+// --- CALENDAR & STANDINGS ---
     const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-    let currentCalDate = new Date(2026, 4, 1);
-    const calEvents = {
-        "2026-4-15": { title: "Round 1: Suzuka", class: "90s JDM LEGENDS", status: "completed" },
-        "2026-4-22": { title: "Round 2: Bathurst", class: "ENDURANCE PRO-AM", status: "upcoming" },
-        "2026-4-29": { title: "Round 3: Spa", class: "MODERN GT3 / GT4", status: "tba" }
-    };
+    
+    // Start the calendar on the CURRENT month automatically, instead of a hardcoded date
+    let today = new Date();
+    let currentCalDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    // Create an empty container. Firebase will fill this in automatically.
+    window.calEvents = {}; 
 
     function renderCalendar() {
         const year = currentCalDate.getFullYear();
@@ -1542,13 +1543,18 @@
         for (let i = 0; i < firstDay; i++) gridHtml += `<div class="cal-day" style="opacity: 0.1; border-color: #111;"></div>`;
         for (let day = 1; day <= daysInMonth; day++) {
             let dateKey = `${year}-${month}-${day}`;
-            let evt = calEvents[dateKey];
+            
+            // Read from the live window.calEvents object
+            let evt = window.calEvents[dateKey]; 
             let evtHtml = '';
-            if (evt) evtHtml = `<div class="cal-event ${evt.status}" onclick="alert('Event Details: ${evt.title}\\nClass: ${evt.class}')">${evt.title}</div>`;
+            
+            if (evt) evtHtml = `<div class="cal-event ${evt.status}" onclick="alert('Event Details: ${evt.title}\\nConfig: ${evt.class}')">${evt.title}</div>`;
             gridHtml += `<div class="cal-day"><div class="cal-date">${day}</div>${evtHtml}</div>`;
         }
         document.getElementById('calendarGrid').innerHTML = gridHtml;
     }
+
+    function changeMonth(dir) { currentCalDate.setMonth(currentCalDate.getMonth() + dir); renderCalendar(); }
 
     function changeMonth(dir) { currentCalDate.setMonth(currentCalDate.getMonth() + dir); renderCalendar(); }
 
