@@ -1576,34 +1576,38 @@ function renderCalendar() {
     }
 
     // Loop through every day of the current month
-    for (let day = 1; day <= daysInMonth; day++) {
-        let dateKey = `${year}-${month}-${day}`;
-        let yesterdayKey = `${year}-${month}-${day - 1}`;
-        
-        let evt = window.calEvents[dateKey]; 
-        let evtHtml = '';
-        
-        if (evt) {
-            // Check if this is the start of the event so we don't repeat text
-            let isStartOfEvent = (day === 1 || !window.calEvents[yesterdayKey] || window.calEvents[yesterdayKey].title !== evt.title);
+for (let day = 1; day <= daysInMonth; day++) {
+            let dateKey = `${year}-${month}-${day}`;
+            let yesterdayKey = `${year}-${month}-${day - 1}`;
             
-            // Show title on day 1, empty bar on following days
-            let displayText = isStartOfEvent ? evt.title : '&nbsp;'; 
+            let dayEvents = window.calEvents[dateKey] || []; 
+            let yesterdayEvents = window.calEvents[yesterdayKey] || [];
+            let eventsHtml = '';
             
-            // onclick now only passes Title, Config (class), and Status
-            evtHtml = `<div class="cal-event ${evt.status}" 
-                            style="min-height: 20px;" 
-                            onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}')">
-                            ${displayText}
-                       </div>`;
+            // Loop through all events for THIS specific day
+            dayEvents.forEach(evt => {
+                // Check if this specific event existed yesterday
+                let existsYesterday = yesterdayEvents.some(y => y.title === evt.title);
+                let isStartOfEvent = (day === 1 || !existsYesterday);
+                
+                let displayText = isStartOfEvent ? evt.title : '&nbsp;'; 
+                
+                eventsHtml += `
+                    <div class="cal-event ${evt.status}" 
+                         style="min-height: 18px; margin-bottom: 2px; font-size: 0.7rem;" 
+                         onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}')">
+                         ${displayText}
+                    </div>`;
+            });
+
+            gridHtml += `
+                <div class="cal-day" style="display: flex; flex-direction: column;">
+                    <div class="cal-date">${day}</div>
+                    <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+                        ${eventsHtml}
+                    </div>
+                </div>`;
         }
-        
-        gridHtml += `
-            <div class="cal-day">
-                <div class="cal-date">${day}</div>
-                ${evtHtml}
-            </div>`;
-    }
 
     document.getElementById('calendarGrid').innerHTML = gridHtml;
 }
@@ -2716,31 +2720,26 @@ async function initStaticData() {
                 let rawSch = await schRes.json() || [];
                 if (!Array.isArray(rawSch) && Object.keys(rawSch).length > 0) rawSch = [rawSch];
                 
-                window.calEvents = {};
+window.calEvents = {};
                 rawSch.forEach(evt => {
                     if (!evt.StartDate || !evt.EndDate) return;
-
-                    let start = new Date(evt.StartDate);
-                    let end = new Date(evt.EndDate);
-                    
-                    // Loop through every day from start to end
-                    let current = new Date(start);
-                    // Set time to midnight to ensure the comparison works for multi-day
+                    let current = new Date(evt.StartDate);
                     current.setHours(0,0,0,0);
-                    let endSnap = new Date(end);
+                    let endSnap = new Date(evt.EndDate);
                     endSnap.setHours(0,0,0,0);
 
                     while (current <= endSnap) {
                         let key = `${current.getFullYear()}-${current.getMonth()}-${current.getDate()}`;
                         
-                        // If multiple events land on one day, this keeps the most important one
-                        window.calEvents[key] = {
+                        // NEW: If this day doesn't have a list yet, create one
+                        if (!window.calEvents[key]) window.calEvents[key] = [];
+                        
+                        // Push this event into the day's list
+                        window.calEvents[key].push({
                             title: evt.EventName,
                             class: evt.PresetID,
-                            status: evt.Status,
-							port: evt.Port
-                        };
-                        // Move to the next day
+                            status: evt.Status
+                        });
                         current.setDate(current.getDate() + 1);
                     }
                 });
