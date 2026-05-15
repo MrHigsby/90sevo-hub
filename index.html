@@ -1012,11 +1012,8 @@
         <h2 style="color: var(--neon-cyan); border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 40px;">LIVE CHAMPIONSHIP STANDINGS</h2>
         <div style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Current point totals for active seasons.</div>
 
-        <div class="standings-tab-bar">
-            <button class="standings-tab active" onclick="loadStandings('gt3', this)">GT3 SPRINT (SEASON 4)</button>
-            <button class="standings-tab" onclick="loadStandings('enduro', this)">ENDURANCE PRO-AM</button>
-            <button class="standings-tab" onclick="loadStandings('jdm', this)">90s JDM TOUGE</button>
-        </div>
+        <div class="standings-tab-bar" id="standingsTabBar">
+            </div>
 
         <div style="overflow-x: auto; margin-bottom: 40px;">
             <table>
@@ -1573,17 +1570,76 @@
         ]
     };
 
-    function loadStandings(series, btnElement) {
+let currentlyRenderedSeasons = "";
+
+    // Dynamically build the tabs based on active servers
+    function updateStandingsUI() {
+        const tabBar = document.getElementById('standingsTabBar');
+        if (!tabBar || !dbProfiles) return;
+        
+        const activeSeasons = [...window.raceServers, ...window.tdServers].filter(s => s.season && s.season !== "None");
+        const seasonCheck = activeSeasons.map(s => s.port + s.season).join('|');
+        
+        // Prevent rebuilding the tabs if the seasons haven't changed (stops flashing)
+        if (currentlyRenderedSeasons === seasonCheck) return; 
+        currentlyRenderedSeasons = seasonCheck;
+
+        if (activeSeasons.length === 0) {
+            tabBar.innerHTML = `<div style="color: #666; font-family: 'Share Tech Mono'; width: 100%; text-align: center;">[ NO ACTIVE SEASONS DETECTED ]</div>`;
+            document.getElementById('standingsBody').innerHTML = '';
+            return;
+        }
+
+        let html = '';
+        activeSeasons.forEach((srv, idx) => {
+            html += `<button class="standings-tab ${idx === 0 ? 'active' : ''}" onclick="loadStandings('${srv.port}', this)">${srv.season.toUpperCase()}</button>`;
+        });
+        tabBar.innerHTML = html;
+        
+        // Auto-load the first season's data
+        loadStandings(activeSeasons[0].port, tabBar.firstElementChild);
+    }
+
+    // Pull driver points directly from driver_profiles.json
+    function loadStandings(port, btnElement) {
         document.querySelectorAll('.standings-tab').forEach(b => b.classList.remove('active'));
         if(btnElement) btnElement.classList.add('active');
+        
         let html = '';
-        standingsData[series].forEach(r => {
-            html += `<tr class="lb-row-table" style="color: ${r.pos <= 3 ? r.color : '#fff'};">
-                        <td style="color: ${r.pos <= 3 ? r.color : '#888'};">${r.pos}</td>
+        if(!dbProfiles) return;
+
+        let drivers = [];
+        for (let sid in dbProfiles) {
+            let p = dbProfiles[sid];
+            if (p.ServerStats && p.ServerStats[port] && p.ServerStats[port].Points > 0) {
+                drivers.push({
+                    name: p.Name,
+                    pts: p.ServerStats[port].Points,
+                    starts: p.Starts || 0,
+                    wins: p.Wins || 0
+                });
+            }
+        }
+
+        // Sort Highest Points First
+        drivers.sort((a,b) => b.pts - a.pts);
+
+        if (drivers.length === 0) {
+            document.getElementById('standingsBody').innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px; color: #666;">[ NO DRIVERS HAVE SCORED POINTS YET ]</td></tr>`;
+            return;
+        }
+
+        drivers.forEach((r, idx) => {
+            let pos = idx + 1;
+            let color = pos === 1 ? 'var(--neon-gold)' : (pos === 2 ? 'var(--neon-mint)' : (pos === 3 ? 'var(--neon-cyan)' : '#888'));
+            let textCol = pos <= 3 ? '#fff' : '#888';
+            
+            html += `<tr class="lb-row-table" style="color: ${textCol};">
+                        <td style="color: ${color}; font-weight:bold;">${pos}</td>
                         <td style="font-weight: bold; font-family: 'Chakra Petch', sans-serif;">${r.name}</td>
-                        <td style="font-weight: bold;">${r.pts}</td>
-                        <td style="color: ${r.pos <= 3 ? '#fff' : '#888'};">${r.starts}</td>
-                        <td style="color: ${r.pos <= 3 ? '#fff' : '#888'};">${r.wins}</td>
+                        <td style="color: ${color}; font-weight: bold; font-size: 1.1rem;">${r.pts}</td>
+                        <td>${r.starts}</td>
+                        <td>${r.wins}</td>
                     </tr>`;
         });
         document.getElementById('standingsBody').innerHTML = html;
@@ -2378,6 +2434,7 @@ function renderHomeTrackRecords() {
             renderServerList('raceServersContainer', window.raceServers, true);
             renderServerList('tdServersContainer', window.tdServers, false);
             updateSeasonSections([...window.raceServers, ...window.tdServers]);
+			updateStandingsUI();
             updateHeroBanner();
         } catch (error) { console.error("📡 FIREBASE FETCH ERROR:", error); }
     }
@@ -2579,6 +2636,27 @@ async function initStaticData() {
                 processLeaderboardData();
             }
 
+            // --- FETCH SCHEDULE (NEW) ---
+            const schRes = await fetch('https://sevo-hub-default-rtdb.firebaseio.com/schedule.json', fetchOpts);
+            if (schRes.ok) {
+                let rawSch = await schRes.json() || [];
+                if (!Array.isArray(rawSch) && Object.keys(rawSch).length > 0) rawSch = [rawSch];
+                
+                window.calEvents = {};
+                rawSch.forEach(evt => {
+                    if (!evt.StartDate) return;
+                    // Firebase returns an ISO string, we parse it to build the dictionary key
+                    let d = new Date(evt.StartDate);
+                    let key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                    window.calEvents[key] = {
+                        title: evt.EventName,
+                        class: evt.PresetID,
+                        status: evt.Status
+                    };
+                });
+                renderCalendar();
+            }
+
             const bootloader = document.querySelector('.bootloader');
             if (bootloader) bootloader.style.display = 'none';
         } catch (err) { console.error("📡 STATIC SYNC ERROR:", err); }
@@ -2639,7 +2717,6 @@ async function initStaticData() {
         });
 
         renderCalendar();
-        loadStandings('gt3', document.querySelector('.standings-tab.active'));
         
         // Loop BOTH the live status and the static stats every 3 seconds
         setInterval(() => {
