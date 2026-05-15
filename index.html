@@ -1533,27 +1533,39 @@
     // Create an empty container. Firebase will fill this in automatically.
     window.calEvents = {}; 
 
-    function renderCalendar() {
+function renderCalendar() {
         const year = currentCalDate.getFullYear();
         const month = currentCalDate.getMonth();
         document.getElementById('calendarMonthDisplay').innerText = `${monthNames[month]} ${year}`;
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
         let gridHtml = `<div class="cal-header">SUN</div><div class="cal-header">MON</div><div class="cal-header">TUE</div><div class="cal-header">WED</div><div class="cal-header">THU</div><div class="cal-header">FRI</div><div class="cal-header">SAT</div>`;
+        
         for (let i = 0; i < firstDay; i++) gridHtml += `<div class="cal-day" style="opacity: 0.1; border-color: #111;"></div>`;
+
+        // --- THE UPDATED LOOP START ---
         for (let day = 1; day <= daysInMonth; day++) {
             let dateKey = `${year}-${month}-${day}`;
+            let yesterdayKey = `${year}-${month}-${day - 1}`;
             
-            // Read from the live window.calEvents object
             let evt = window.calEvents[dateKey]; 
             let evtHtml = '';
             
-            if (evt) evtHtml = `<div class="cal-event ${evt.status}" onclick="alert('Event Details: ${evt.title}\\nConfig: ${evt.class}')">${evt.title}</div>`;
+            if (evt) {
+                // If it's the 1st of the month, or the event didn't exist yesterday, show the title.
+                // Otherwise, show "..." so the calendar doesn't look cluttered.
+                let isStartOfEvent = (day === 1 || !window.calEvents[yesterdayKey] || window.calEvents[yesterdayKey].title !== evt.title);
+                let displayText = isStartOfEvent ? evt.title : '...'; 
+                
+                evtHtml = `<div class="cal-event ${evt.status}" onclick="alert('Event Details: ${evt.title}\\nConfig: ${evt.class}')">${displayText}</div>`;
+            }
             gridHtml += `<div class="cal-day"><div class="cal-date">${day}</div>${evtHtml}</div>`;
         }
+        // --- THE UPDATED LOOP END ---
+
         document.getElementById('calendarGrid').innerHTML = gridHtml;
     }
-
     function changeMonth(dir) { currentCalDate.setMonth(currentCalDate.getMonth() + dir); renderCalendar(); }
 
     function changeMonth(dir) { currentCalDate.setMonth(currentCalDate.getMonth() + dir); renderCalendar(); }
@@ -2642,7 +2654,7 @@ async function initStaticData() {
                 processLeaderboardData();
             }
 
-            // --- FETCH SCHEDULE (NEW) ---
+// --- FETCH SCHEDULE (DYNAMIC RANGE UPDATE) ---
             const schRes = await fetch('https://sevo-hub-default-rtdb.firebaseio.com/schedule.json', fetchOpts);
             if (schRes.ok) {
                 let rawSch = await schRes.json() || [];
@@ -2650,15 +2662,30 @@ async function initStaticData() {
                 
                 window.calEvents = {};
                 rawSch.forEach(evt => {
-                    if (!evt.StartDate) return;
-                    // Firebase returns an ISO string, we parse it to build the dictionary key
-                    let d = new Date(evt.StartDate);
-                    let key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-                    window.calEvents[key] = {
-                        title: evt.EventName,
-                        class: evt.PresetID,
-                        status: evt.Status
-                    };
+                    if (!evt.StartDate || !evt.EndDate) return;
+
+                    let start = new Date(evt.StartDate);
+                    let end = new Date(evt.EndDate);
+                    
+                    // Loop through every day from start to end
+                    let current = new Date(start);
+                    // Set time to midnight to ensure the comparison works for multi-day
+                    current.setHours(0,0,0,0);
+                    let endSnap = new Date(end);
+                    endSnap.setHours(0,0,0,0);
+
+                    while (current <= endSnap) {
+                        let key = `${current.getFullYear()}-${current.getMonth()}-${current.getDate()}`;
+                        
+                        // If multiple events land on one day, this keeps the most important one
+                        window.calEvents[key] = {
+                            title: evt.EventName,
+                            class: evt.PresetID,
+                            status: evt.Status
+                        };
+                        // Move to the next day
+                        current.setDate(current.getDate() + 1);
+                    }
                 });
                 renderCalendar();
             }
