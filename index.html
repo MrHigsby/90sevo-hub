@@ -2394,6 +2394,7 @@ function renderHomeTrackRecords() {
                         isSessionBest: (idx === 0 && d.BestLap && d.BestLap !== "--:--.---"), 
                         steamId: d.SteamID,
                         incidents: d.Incidents || 0
+						role: d.Role || "Public"
                     }))
                 };
                 
@@ -2476,11 +2477,17 @@ if(s.roster && s.roster.length > 0) {
                                         incPerLap = (r.incidents / parsedLaps).toFixed(2);
                                     }
                                     let incColor = incPerLap >= 1.5 ? 'var(--neon-pink)' : '#fff';
+									let badgeHtml = "";
+                                    if (r.role === "Admin") {
+                                        badgeHtml = `<span style="color: var(--neon-red); margin-right: 5px; text-shadow: 0 0 5px var(--neon-red);" title="Admin">👑</span>`;
+                                    } else if (r.role === "Member") {
+                                        badgeHtml = `<span style="color: var(--neon-gold); margin-right: 5px; text-shadow: 0 0 5px var(--neon-gold);" title="VIP">⭐</span>`;
+                                    }
 
                                     return `
                                     <tr onclick="event.stopPropagation(); openDriverCard('${r.steamId}')" style="border-bottom: 1px solid #222; cursor: pointer;">
                                         <td style="padding: 8px 4px; color: #555; font-family: 'Share Tech Mono';">${r.pos}</td>
-                                        <td style="padding: 8px 4px; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">${r.name}</td>
+                                        <td style="padding: 8px 4px; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">${badgeHtml}${r.name}</td>
                                         
                                         <td class="hide-on-mobile" style="padding: 8px 4px; text-align: center; white-space: nowrap;">
                                             <span style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.8rem;">${r.rating}</span>
@@ -2534,12 +2541,12 @@ if(s.roster && s.roster.length > 0) {
 
 async function initStaticData() {
         try {
-            const profRes = await fetch('driver_profiles.json?t=' + Date.now());
+            const profRes = await fetch('https://sevo-hub-default-rtdb.firebaseio.com/driver_profiles.json');;
             if (profRes.ok) {
                 dbProfiles = await profRes.json();
                 updateHomeEliteLists(); 
             }
-            const lbRes = await fetch('leaderboard.json?t=' + Date.now());
+const lbRes = await fetch('https://sevo-hub-default-rtdb.firebaseio.com/leaderboard.json');
             if (lbRes.ok) {
                 dbLeaderboard = await lbRes.json();
 
