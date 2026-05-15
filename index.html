@@ -2393,7 +2393,7 @@ function renderHomeTrackRecords() {
                         level: d.Level || 1,
                         isSessionBest: (idx === 0 && d.BestLap && d.BestLap !== "--:--.---"), 
                         steamId: d.SteamID,
-                        incidents: d.Incidents || 0
+                        incidents: d.Incidents || 0,
 						role: d.Role || "Public"
                     }))
                 };
