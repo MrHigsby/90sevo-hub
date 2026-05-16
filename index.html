@@ -410,9 +410,14 @@
 
 /* The Time Fade for Past Events */
 .cal-event.past-event {
-    opacity: 0.35; /* Dims the neon colors instead of making them grey */
+    opacity: 0.35;
+    filter: grayscale(80%);
+    border-left-color: #555 !important;
+    color: #888 !important;
 }
-opacity: 1; /* Lights back up to full brightness when hovered */
+.cal-event.past-event:hover {
+    opacity: 0.8;
+    filter: none;
 }
         /* FOOTER */
         footer { border-top: 1px dashed #333; padding: 20px; text-align: center; font-family: 'Share Tech Mono'; font-size: 0.8rem; color: #555; background: var(--bg-dark); margin-top: auto;}
@@ -1613,12 +1618,7 @@ function renderCalendar() {
 dayEvents.forEach(evt => {
             let existsYesterday = yesterdayEvents.some(y => y.title === evt.title);
             let isStartOfEvent = (day === 1 || !existsYesterday);
-            
-            // 1. The name now prints on every single day of the event
-            let displayText = evt.title;
-
-            // 2. If it's continuing from yesterday, we hide the left border so the bar looks connected
-            let borderStyle = isStartOfEvent ? '' : 'border-left-color: transparent !important;';
+            let displayText = isStartOfEvent ? evt.title : '&nbsp;';
 
             if (!eventColorMap[evt.title]) {
                 eventColorMap[evt.title] = palette[nextColorIdx % palette.length];
@@ -1626,10 +1626,9 @@ dayEvents.forEach(evt => {
             }
             let assignedColorClass = eventColorMap[evt.title];
 
-            // 3. Added 'white-space: nowrap' and 'overflow: hidden' so long text doesn't break the calendar boxes
             eventsHtml += `
                 <div class="cal-event ${timeFadeClass} ${assignedColorClass}" 
-                     style="min-height: 18px; margin-bottom: 2px; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; ${borderStyle}" 
+                     style="min-height: 18px; margin-bottom: 2px; font-size: 0.7rem;" 
                      onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}')">
                      ${displayText}
                 </div>`;
