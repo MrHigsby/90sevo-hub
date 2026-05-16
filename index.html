@@ -410,14 +410,9 @@
 
 /* The Time Fade for Past Events */
 .cal-event.past-event {
-    opacity: 0.35;
-    filter: grayscale(80%);
-    border-left-color: #555 !important;
-    color: #888 !important;
+    opacity: 0.35; /* Dims the neon colors instead of making them grey */
 }
-.cal-event.past-event:hover {
-    opacity: 0.8;
-    filter: none;
+opacity: 1; /* Lights back up to full brightness when hovered */
 }
         /* FOOTER */
         footer { border-top: 1px dashed #333; padding: 20px; text-align: center; font-family: 'Share Tech Mono'; font-size: 0.8rem; color: #555; background: var(--bg-dark); margin-top: auto;}
@@ -1615,21 +1610,26 @@ function renderCalendar() {
         let yesterdayEvents = window.calEvents[yesterdayKey] || [];
         let eventsHtml = '';
 
-        dayEvents.forEach(evt => {
+dayEvents.forEach(evt => {
             let existsYesterday = yesterdayEvents.some(y => y.title === evt.title);
             let isStartOfEvent = (day === 1 || !existsYesterday);
-            let displayText = isStartOfEvent ? evt.title : '&nbsp;';
+            
+            // 1. The name now prints on every single day of the event
+            let displayText = evt.title;
 
-            // 4. Assign or retrieve the color for this specific event
+            // 2. If it's continuing from yesterday, we hide the left border so the bar looks connected
+            let borderStyle = isStartOfEvent ? '' : 'border-left-color: transparent !important;';
+
             if (!eventColorMap[evt.title]) {
                 eventColorMap[evt.title] = palette[nextColorIdx % palette.length];
                 nextColorIdx++;
             }
             let assignedColorClass = eventColorMap[evt.title];
 
+            // 3. Added 'white-space: nowrap' and 'overflow: hidden' so long text doesn't break the calendar boxes
             eventsHtml += `
                 <div class="cal-event ${timeFadeClass} ${assignedColorClass}" 
-                     style="min-height: 18px; margin-bottom: 2px; font-size: 0.7rem;" 
+                     style="min-height: 18px; margin-bottom: 2px; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; ${borderStyle}" 
                      onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}')">
                      ${displayText}
                 </div>`;
@@ -2516,6 +2516,10 @@ function renderHomeTrackRecords() {
                     status: server.Mode ? server.Mode.toUpperCase() : "ONLINE",
                     port: server.Port,
                     season: server.Season || "None",
+					weather: server.Weather || "UNKNOWN",
+                    time: server.TimeOfDay || "--:--",
+                    grip: server.Grip || "OPTIMUM",
+                    temp: server.Temp || "0",
                     img: "", 
                     roster: (server.LiveDrivers || []).map((d, idx) => ({
                         pos: idx + 1, 
@@ -2658,11 +2662,15 @@ if(s.roster && s.roster.length > 0) {
             }
 
             html += `
-                <div class="${rowClass}" id="${srvId}" onclick="toggleRoster('${srvId}')" style="margin-bottom: 10px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 4px; border-left: 4px solid ${isRace ? 'var(--neon-gold)' : 'var(--neon-mint)'};">
+<div class="${rowClass}" id="${srvId}" onclick="toggleRoster('${srvId}')" style="margin-bottom: 10px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 4px; border-left: 4px solid ${isRace ? 'var(--neon-gold)' : 'var(--neon-mint)'};">
                     <div class="server-header-row" style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <div style="font-size: 1.1rem; font-weight: bold; color: #fff; text-transform: uppercase;">${s.name}</div>
                             <div style="color: #666; font-family: 'Share Tech Mono'; font-size: 0.8rem; margin-top: 4px;">TRACK: ${s.track} | STATUS: ${s.status}</div>
+                            
+                            <div style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.75rem; margin-top: 6px; font-weight: bold;">
+                                [ ☁️ ${s.weather.toUpperCase()} | 🕒 ${s.time} | 🌡️ ${s.temp}°C | 🚦 ${s.grip.toUpperCase()} ]
+                            </div>
                         </div>
                         <div style="text-align: right;">
                             <div style="color: #fff; font-size: 1.4rem; font-family: 'Share Tech Mono'; font-weight: bold;">${s.p}</div>
