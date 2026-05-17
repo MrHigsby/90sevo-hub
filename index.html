@@ -1583,7 +1583,6 @@ function renderCalendar() {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // 1. Get today's exact midnight for the "Time Fade" math
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -1597,7 +1596,6 @@ function renderCalendar() {
         gridHtml += `<div class="cal-day" style="opacity: 0.1; border-color: #111;"></div>`;
     }
 
-    // 2. Setup the Automatic Color Palette
     const palette = ['color-pink', 'color-cyan', 'color-mint', 'color-gold'];
     let eventColorMap = {};
     let nextColorIdx = 0;
@@ -1605,20 +1603,32 @@ function renderCalendar() {
     for (let day = 1; day <= daysInMonth; day++) {
         let dateKey = `${year}-${month}-${day}`;
         let yesterdayKey = `${year}-${month}-${day - 1}`;
-
-        // 3. Check if this specific square is in the past
+        
         let squareDate = new Date(year, month, day);
         let isPastDate = squareDate < today;
+        let isToday = squareDate.getTime() === today.getTime();
         let timeFadeClass = isPastDate ? 'past-event' : '';
 
         let dayEvents = window.calEvents[dateKey] || [];
         let yesterdayEvents = window.calEvents[yesterdayKey] || [];
         let eventsHtml = '';
 
-dayEvents.forEach(evt => {
+        dayEvents.forEach(evt => {
             let existsYesterday = yesterdayEvents.some(y => y.title === evt.title);
             let isStartOfEvent = (day === 1 || !existsYesterday);
-            let displayText = isStartOfEvent ? evt.title : '&nbsp;';
+
+            // --- THE TEXT VISIBILITY LOGIC ---
+            let showText = false;
+            if (!isPastDate) {
+                // Show text if it is TODAY, or if it's the FIRST DAY of a future event
+                if (isToday || isStartOfEvent) {
+                    showText = true;
+                }
+            }
+
+            let displayText = showText 
+                ? `<span style="font-weight:bold;">${evt.title}</span> <span style="color:rgba(255,255,255,0.5); font-size:0.65rem;">@ ${evt.time}</span>` 
+                : '&nbsp;';
 
             if (!eventColorMap[evt.title]) {
                 eventColorMap[evt.title] = palette[nextColorIdx % palette.length];
@@ -1628,15 +1638,18 @@ dayEvents.forEach(evt => {
 
             eventsHtml += `
                 <div class="cal-event ${timeFadeClass} ${assignedColorClass}" 
-                     style="min-height: 18px; margin-bottom: 2px; font-size: 0.7rem;" 
+                     style="min-height: 18px; margin-bottom: 2px; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
                      onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}')">
                      ${displayText}
                 </div>`;
         });
 
+        // Highlights the current day's number in bright white
+        let dayNumberStyle = isPastDate ? 'color: #444;' : (isToday ? 'color: #fff; font-weight: bold; text-shadow: 0 0 5px var(--neon-cyan);' : 'color: #888;');
+
         gridHtml += `
             <div class="cal-day" style="display: flex; flex-direction: column;">
-                <div class="cal-date" style="${isPastDate ? 'color: #444;' : 'color: #888;'}">${day}</div>
+                <div class="cal-date" style="${dayNumberStyle}">${day}</div>
                 <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-end;">
                     ${eventsHtml}
                 </div>
@@ -2769,18 +2782,20 @@ window.calEvents = {};
                     current.setHours(0,0,0,0);
                     let endSnap = new Date(evt.EndDate);
                     endSnap.setHours(0,0,0,0);
+                    
+                    // Extract the Start Time
+                    let startD = new Date(evt.StartDate);
+                    let timeString = startD.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
                     while (current <= endSnap) {
                         let key = `${current.getFullYear()}-${current.getMonth()}-${current.getDate()}`;
-                        
-                        // NEW: If this day doesn't have a list yet, create one
                         if (!window.calEvents[key]) window.calEvents[key] = [];
                         
-                        // Push this event into the day's list
                         window.calEvents[key].push({
                             title: evt.EventName,
                             class: evt.PresetID,
-                            status: evt.Status
+                            status: evt.Status,
+                            time: timeString // Passes the time to the calendar
                         });
                         current.setDate(current.getDate() + 1);
                     }
