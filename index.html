@@ -1709,19 +1709,10 @@ function openEventModal(title, config, status, time) {
     document.getElementById('eventModal').style.display = 'flex';
 }
 
-    // Match colors to the Hub theme
-    const statusElem = document.getElementById('event-modal-status');
-    if (status === 'active') statusElem.style.color = 'var(--neon-pink)';
-    else if (status === 'upcoming') statusElem.style.color = 'var(--neon-gold)';
-    else statusElem.style.color = 'var(--neon-mint)';
-    
-    document.getElementById('eventModal').style.display = 'flex';
+function changeMonth(dir) { 
+    currentCalDate.setMonth(currentCalDate.getMonth() + dir); 
+    renderCalendar(); 
 }
-
-    function changeMonth(dir) { currentCalDate.setMonth(currentCalDate.getMonth() + dir); renderCalendar(); }
-
-    function changeMonth(dir) { currentCalDate.setMonth(currentCalDate.getMonth() + dir); renderCalendar(); }
-
     const standingsData = {
         'gt3': [
             { pos: 1, name: "SpeedyG", pts: 125, starts: 5, wins: 3, color: "var(--neon-gold)" },
