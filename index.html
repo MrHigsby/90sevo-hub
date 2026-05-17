@@ -1332,41 +1332,23 @@
     © 2026 90SEVO.CA SIM RACING HUB. ALL RIGHTS RESERVED.
 </footer>
 
-<div class="modal-overlay" id="driverModal" onclick="closeModal()">
-    <div class="driver-card-popout" onclick="event.stopPropagation()">
-        <span class="close-btn" onclick="closeModal()">&times;</span>
-        <div class="jdm-text">運転免許証</div>
+<div class="modal-overlay" id="eventModal" onclick="this.style.display='none'">
+    <div class="driver-card-popout" style="border-color: var(--neon-gold); box-shadow: 0 0 40px rgba(255, 183, 0, 0.2);" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="document.getElementById('eventModal').style.display='none'">&times;</span>
+        <div class="jdm-text">レースイベント</div> 
         
         <div class="ticket-header">
             <div>
-                <div style="color: #888; font-size: 0.7rem; font-family: 'Share Tech Mono';">DRIVER ID</div>
-                <h2 id="modal-name" style="margin: 5px 0 2px 0; text-transform: uppercase; font-size: 1.8rem; line-height: 1;">NAME</h2>
-                <div id="modal-car" style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.75rem;">> UNKNOWN CHASSIS</div>
-            </div>
-            <svg class="helmet-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12V19C2 20.1 2.9 21 4 21H20C21.1 21 22 20.1 22 19V12C22 6.48 17.52 2 12 2ZM12 4C16.42 4 20 7.58 20 12V14H4V12C4 7.58 7.58 4 12 4ZM4 19V16H20V19H4ZM7 10C7 8.9 7.9 8 9 8H15C16.1 8 17 8.9 17 10H7Z"/></svg>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px;">
-            <div>
-                <div class="safety-sticker" id="modal-safety" style="display: inline-block; margin-bottom: 15px;">CLASS R [2.50]</div>
-                <div style="font-size: 0.7rem; color: #888; font-family: 'Share Tech Mono'; margin-bottom: 2px;">DRIVER SKILL RATING</div>
-                <div id="modal-rating" style="color: var(--neon-gold); font-size: 1.6rem; font-family: 'Share Tech Mono'; font-weight: bold; line-height: 1;">1500</div>
-            </div>
-            <div style="text-align: right; font-family: 'Share Tech Mono'; font-size: 0.85rem; line-height: 1.6; margin-right: 45px;">
-                <div><span style="color: #888; margin-right: 5px;">WINS</span> <span id="modal-wins" style="color: var(--neon-mint); font-weight: bold;">0</span></div>
-                <div><span style="color: #888; margin-right: 5px;">LAPS</span> <span id="modal-laps" style="color: #fff; font-weight: bold;">0</span></div>
-                <div><span style="color: #888; margin-right: 5px;">INC/RACE</span> <span id="modal-inc" style="color: var(--neon-pink); font-weight: bold;">0.0</span></div>
-                <div><span style="color: #888; margin-right: 5px;">PYLONS</span> <span id="modal-pylons" style="color: var(--neon-pink); font-weight: bold;">0</span></div>
+                <div style="color: #888; font-size: 0.7rem; font-family: 'Share Tech Mono';" id="event-modal-subtitle">SCHEDULED MISSION</div>
+                <h2 id="event-modal-title" style="margin: 5px 0 2px 0; text-transform: uppercase; font-size: 1.8rem; line-height: 1; color: var(--neon-gold);">EVENT NAME</h2>
+                <div id="event-modal-config" style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-size: 0.75rem;">> LOADING CONFIG...</div>
             </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px;">
-            <div style="color: var(--neon-cyan); font-family: 'Share Tech Mono';" id="modal-level">TrackXP LVL 1</div>
-            <div class="xp-label" id="modal-xp-text" style="position: static;">0 / 50 XP</div>
-        </div>
-        <div class="xp-container" style="margin-top: 5px;"><div class="xp-fill" id="modal-xp-fill"></div></div>
+        <div style="margin-top: 20px; border-top: 1px dashed #333; padding-top: 15px;" id="event-modal-details">
+            </div>
         
-        <button class="nav-btn" style="width: 100%; border-color: var(--neon-pink); color: var(--neon-pink); background: #000; margin-top: 15px;" onclick="teleportToTelemetry()">ACCESS TELEMETRY</button>
+        <button class="nav-btn" id="event-modal-btn" style="width: 100%; border-color: var(--neon-gold); color: var(--neon-gold); background: #000; margin-top: 25px;">CLOSE BRIEFING</button>
     </div>
 </div>
 
@@ -1631,7 +1613,7 @@ function renderCalendar() {
         let yesterdayEvents = window.calEvents[yesterdayKey] || [];
         let eventsHtml = '';
 
-        dayEvents.forEach(evt => {
+        dayEvents.forEach((evt, idx) => {
             let existsYesterday = yesterdayEvents.some(y => y.title === evt.title);
             let isStartOfEvent = (day === 1 || !existsYesterday);
 
@@ -1654,10 +1636,10 @@ function renderCalendar() {
             let assignedColorClass = eventColorMap[evt.title];
 
             // Passes the time safely to the openEventModal call
-            eventsHtml += `
+        eventsHtml += `
                 <div class="cal-event ${timeFadeClass} ${assignedColorClass}" 
                      style="min-height: 18px; margin-bottom: 2px; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
-                     onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}', '${evt.time}')">
+                     onclick="openEventModal('${dateKey}', ${idx})">
                      ${displayText}
                 </div>`;
         });
@@ -1676,36 +1658,85 @@ function renderCalendar() {
     document.getElementById('calendarGrid').innerHTML = gridHtml;
 }
 	
-function openEventModal(title, config, status, time) {
-    document.getElementById('event-modal-title').innerText = title;
-    document.getElementById('event-modal-config').innerText = "> ID: " + config;
-    document.getElementById('event-modal-status').innerText = status.toUpperCase();
-    document.getElementById('event-modal-time').innerText = time || "--:--";
+function openEventModal(dateKey, idx) {
+    const evt = window.calEvents[dateKey][idx];
+    if(!evt) return;
 
-    // Set fallback strings in case it's a completely custom setup
-    let targetClass = "CUSTOM BUILD / SERVER ROTATION";
-    let weatherInfo = "DETERMINED BY PORT LIFECYCLE";
+    document.getElementById('event-modal-title').innerText = evt.title;
+    document.getElementById('event-modal-config').innerText = "> PRESET: " + evt.class;
 
-    // Strip "Preset: " if it exists to cleanly scan your JSON keys
-    let cleanKey = config.replace("Preset: ", "").trim();
+    const detailsBox = document.getElementById('event-modal-details');
+    const btn = document.getElementById('event-modal-btn');
+    const subtitle = document.getElementById('event-modal-subtitle');
+    const titleText = document.getElementById('event-modal-title');
 
-    // If the event maps directly to a configuration profile, extract the parameters
-    if (dbPresets && dbPresets[cleanKey]) {
-        const preset = dbPresets[cleanKey];
-        if (preset.Class) targetClass = preset.Class.toUpperCase();
-        if (preset.Weather) weatherInfo = preset.Weather.toUpperCase();
-    } else if (config === "Current Server Config") {
-        targetClass = "LIVE SELECTION / WEB VOTE WINNER";
+    // 1. Search the Live Servers to see if this event's port is currently online
+    let liveServer = null;
+    if (evt.status === 'active') {
+        const allLive = [...(window.raceServers||[]), ...(window.tdServers||[])];
+        liveServer = allLive.find(s => s.port === evt.port);
     }
 
-    document.getElementById('event-modal-class').innerText = targetClass;
-    document.getElementById('event-modal-weather').innerText = weatherInfo;
+    if (liveServer) {
+        // --- 🔴 LIVE MONITOR MODE (Server is Online) ---
+        subtitle.innerText = "LIVE TELEMETRY UPLINK";
+        titleText.style.color = "var(--neon-pink)";
 
-    const statusElem = document.getElementById('event-modal-status');
-    if (status === 'active') statusElem.style.color = 'var(--neon-pink)';
-    else if (status === 'upcoming') statusElem.style.color = 'var(--neon-gold)';
-    else statusElem.style.color = 'var(--neon-mint)';
-    
+        detailsBox.innerHTML = `
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-bottom: 6px;">
+                <span style="color: #888;">STATUS:</span> <span style="color: var(--neon-pink); text-transform: uppercase; font-weight: bold;">ONLINE / LIVE</span>
+            </div>
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-bottom: 6px;">
+                <span style="color: #888;">TRACK:</span> <span>${liveServer.track.toUpperCase()}</span>
+            </div>
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-bottom: 6px;">
+                <span style="color: #888;">CONDITIONS:</span> <span style="color: var(--neon-cyan);">${liveServer.weather.toUpperCase()} / ${liveServer.temp}°C / ${liveServer.grip.toUpperCase()}</span>
+            </div>
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff;">
+                <span style="color: #888;">DRIVERS:</span> <span style="color: var(--neon-mint);">${liveServer.p}</span>
+            </div>
+        `;
+
+        btn.innerText = "JUMP TO LIVE SERVER";
+        btn.style.color = "#000";
+        btn.style.background = "var(--neon-pink)";
+        btn.style.borderColor = "var(--neon-pink)";
+        
+        btn.onclick = () => {
+            document.getElementById('eventModal').style.display='none';
+            let isRace = window.raceServers.includes(liveServer);
+            let srvArray = isRace ? window.raceServers : window.tdServers;
+            goToServerAndExpand(`srv-${isRace?'r':'t'}-${srvArray.indexOf(liveServer)}`, isRace?'race':'trackday');
+        };
+
+    } else {
+        // --- 🟡 BRIEFING ROOM MODE (Server is Offline/Upcoming) ---
+        subtitle.innerText = "SCHEDULED MISSION";
+        let tColor = evt.status === 'completed' ? 'var(--neon-mint)' : 'var(--neon-gold)';
+        titleText.style.color = tColor;
+
+        detailsBox.innerHTML = `
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-bottom: 6px;">
+                <span style="color: #888;">STATUS:</span> <span style="color: ${tColor}; text-transform: uppercase; font-weight: bold;">${evt.status}</span>
+            </div>
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-bottom: 6px;">
+                <span style="color: #888;">START TIME:</span> <span>${evt.time}</span>
+            </div>
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-bottom: 6px;">
+                <span style="color: #888;">TARGET CLASS:</span> <span style="color: var(--neon-pink);">${evt.targetClass.toUpperCase()}</span>
+            </div>
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff;">
+                <span style="color: #888;">PLANNED WEATHER:</span> <span style="color: var(--neon-cyan);">${evt.weather.toUpperCase()}</span>
+            </div>
+        `;
+
+        btn.innerText = "CLOSE BRIEFING";
+        btn.style.color = "var(--neon-gold)";
+        btn.style.background = "#000";
+        btn.style.borderColor = "var(--neon-gold)";
+        btn.onclick = () => document.getElementById('eventModal').style.display='none';
+    }
+
     document.getElementById('eventModal').style.display = 'flex';
 }
 
@@ -2829,11 +2860,15 @@ window.calEvents = {};
                         let key = `${current.getFullYear()}-${current.getMonth()}-${current.getDate()}`;
                         if (!window.calEvents[key]) window.calEvents[key] = [];
                         
-                        window.calEvents[key].push({
+window.calEvents[key].push({
                             title: evt.EventName,
                             class: evt.PresetID,
                             status: evt.Status,
-                            time: timeString // Passes the time to the calendar
+                            time: timeString,
+                            port: evt.Port, // The bridge to the Live Data!
+                            targetClass: evt.TargetClass || "CUSTOM BUILD",
+                            inGameTime: evt.InGameTime || "AUTO",
+                            weather: evt.Weather || "DYNAMIC"
                         });
                         current.setDate(current.getDate() + 1);
                     }
