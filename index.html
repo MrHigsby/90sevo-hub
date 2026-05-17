@@ -1220,36 +1220,31 @@
         </div>
     </div>
 
-    <div id="report" class="page">
-        <h2 style="color: var(--neon-red); border-bottom: 1px solid #333; padding-bottom: 10px;">FILE INCIDENT REPORT</h2>
-        <div style="color: #888; font-size: 0.9rem; margin-bottom: 20px;">Stewards review all tickets. Malicious or false reporting may result in SR deductions.</div>
-        
-        <div class="report-form" style="border-top-color: var(--neon-red);">
+<div class="report-form" style="border-top-color: var(--neon-red);">
             <div>
                 <div class="report-label" style="color: var(--neon-red);">OFFENDING DRIVER NAME / ID</div>
-                <input type="text" class="report-input" placeholder="e.g. SpeedyG">
+                <input type="text" id="rep-offender" class="report-input" placeholder="e.g. SpeedyG">
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div>
                     <div class="report-label" style="color: var(--neon-red);">SERVER NAME</div>
-                    <input type="text" class="report-input" placeholder="e.g. 90s Nurburgring">
+                    <input type="text" id="rep-server" class="report-input" placeholder="e.g. 90s Nurburgring">
                 </div>
                 <div>
                     <div class="report-label" style="color: var(--neon-red);">APPROX. LAP # OR TIME</div>
-                    <input type="text" class="report-input" placeholder="e.g. Lap 4 / 20:15 EST">
+                    <input type="text" id="rep-time" class="report-input" placeholder="e.g. Lap 4 / 20:15 EST">
                 </div>
             </div>
             <div>
                 <div class="report-label" style="color: var(--neon-red);">INCIDENT DESCRIPTION</div>
-                <textarea class="report-input" placeholder="Describe what happened clearly and objectively..."></textarea>
+                <textarea id="rep-desc" class="report-input" placeholder="Describe what happened clearly and objectively..."></textarea>
             </div>
             <div>
                 <div class="report-label" style="color: var(--neon-red);">VIDEO EVIDENCE LINK (YOUTUBE/STREAMABLE)</div>
-                <input type="text" class="report-input" placeholder="https://...">
+                <input type="text" id="rep-video" class="report-input" placeholder="https://...">
             </div>
-            <button class="nav-btn" style="border-color: var(--neon-red); color: var(--bg-dark); background: var(--neon-red); margin-top: 10px;" onclick="alert('Ticket submitted to Stewards.')">SUBMIT TICKET</button>
+            <button class="nav-btn" id="rep-submit-btn" style="border-color: var(--neon-red); color: var(--bg-dark); background: var(--neon-red); margin-top: 10px;" onclick="submitDriverReport()">SUBMIT TICKET</button>
         </div>
-    </div>
 
     <div id="profile" class="page">
         
@@ -2958,6 +2953,82 @@ window.calEvents[key].push({
                     }
                 }
             }, 4500);
+        });
+
+        renderCalendar();
+		
+		function changeMonth(dir) { 
+        currentCalDate.setMonth(currentCalDate.getMonth() + dir); 
+        renderCalendar(); 
+    }
+
+    // --- DRIVER REPORTING TO DISCORD ---
+    async function submitDriverReport() {
+        const offender = document.getElementById('rep-offender').value.trim();
+        const server = document.getElementById('rep-server').value.trim();
+        const time = document.getElementById('rep-time').value.trim();
+        const desc = document.getElementById('rep-desc').value.trim();
+        const video = document.getElementById('rep-video').value.trim();
+
+        if (!offender || !server || !desc) {
+            alert("Please fill out the Offending Driver, Server, and Description fields.");
+            return;
+        }
+
+        // Paste your Discord Webhook URL between the quotes below
+        const webhookUrl = "https://discord.com/api/webhooks/1505496953759334462/fBnNbO95_Pyb2CbUGdRKDn5ap2IQoV4mfNEuqlvpVj5_ojw2tA_7DSSPqKzM-y08mux_";
+
+        const payload = {
+            embeds: [{
+                title: "🚨 NEW INCIDENT REPORT TICKET",
+                color: 16724787, 
+                fields: [
+                    { name: "Offending Driver", value: offender, inline: true },
+                    { name: "Server", value: server, inline: true },
+                    { name: "Approx. Time/Lap", value: time || "Not Provided", inline: true },
+                    { name: "Incident Description", value: desc },
+                    { name: "Video Evidence", value: video || "No Link Provided" }
+                ],
+                footer: { text: "90s Evo Steward System" },
+                timestamp: new Date().toISOString()
+            }]
+        };
+
+        const btn = document.getElementById('rep-submit-btn');
+        btn.innerText = "TRANSMITTING...";
+        btn.style.pointerEvents = "none";
+
+        try {
+            const response = await fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                alert("Ticket successfully submitted to the Stewards. We will review the telemetry.");
+                document.getElementById('rep-offender').value = '';
+                document.getElementById('rep-server').value = '';
+                document.getElementById('rep-time').value = '';
+                document.getElementById('rep-desc').value = '';
+                document.getElementById('rep-video').value = '';
+            } else {
+                alert("Connection error. Could not reach Discord servers.");
+            }
+        } catch (err) {
+            console.error("Webhook Error:", err);
+            alert("Network error. Ticket transmission failed.");
+        } finally {
+            btn.innerText = "SUBMIT TICKET";
+            btn.style.pointerEvents = "auto";
+        }
+    }
+
+    // --- BOOT SEQUENCE ---
+    window.addEventListener('load', () => {
+        initStaticData();
+        fetchLiveStatus().then(() => {
+            // ... [Keep your existing rIdx / tIdx interval code here] ...
         });
 
         renderCalendar();
