@@ -1461,8 +1461,16 @@
     window.tdServers = [];
 
     // SR MATH HELPERS
-    function getStickerColor(c) {
-        if(c==='S') return 'var(--neon-gold)'; if(c==='A') return '#fff'; if(c==='R' || c==='D') return 'var(--neon-pink)'; return 'var(--neon-mint)';
+function getStickerColor(c) {
+        switch(c) {
+            case 'R': return 'var(--neon-red)';   // Rookie
+            case 'D': return 'var(--neon-pink)';  // Novice
+            case 'C': return 'var(--neon-cyan)';  // Clubman
+            case 'B': return 'var(--neon-mint)';  // Pro
+            case 'A': return '#fff';              // Elite
+            case 'S': return 'var(--neon-gold)';  // Master
+            default:  return 'var(--neon-red)';
+        }
     }
     function getSrFill(sr) { return Math.min(((parseFloat(sr) || 2.50) / 4.0) * 100, 100).toFixed(1); }
 
@@ -2583,16 +2591,13 @@ function renderHomeTrackRecords() {
             return;
         }
 
-        const getSRStyles = (cls) => {
-            const styles = [
-                { name: 'R', color: '#ff00ff' }, // ROOKIE
-                { name: 'D', color: '#55efc4' }, // NOVICE
-                { name: 'C', color: '#74b9ff' }, // AMATEUR
-                { name: 'B', color: '#a29bfe' }, // SEMI-PRO
-                { name: 'A', color: '#ffe135' }, // PRO
-                { name: 'S', color: '#ff7675' }  // ELITE
-            ];
-            return styles[cls] || styles[0];
+const getSRStyles = (cls) => {
+            // Converts the number (0-5) into the letter (R-S), then fetches the master color
+            const letter = classLetters[cls] || 'R';
+            return {
+                name: letter,
+                color: getStickerColor(letter)
+            };
         };
 
         servers.forEach((s, idx) => {
