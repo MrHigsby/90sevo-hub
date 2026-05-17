@@ -1370,7 +1370,7 @@
     </div>
 </div>
 
-<<div class="modal-overlay" id="eventModal" onclick="this.style.display='none'">
+<div class="modal-overlay" id="eventModal" onclick="this.style.display='none'">
     <div class="driver-card-popout" style="border-color: var(--neon-gold); box-shadow: 0 0 40px rgba(255, 183, 0, 0.2);" onclick="event.stopPropagation()">
         <span class="close-btn" onclick="document.getElementById('eventModal').style.display='none'">&times;</span>
         <div class="jdm-text">レースイベント</div> 
@@ -1387,7 +1387,16 @@
             <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff;">
                 <span style="color: #888;">STATUS:</span> <span id="event-modal-status" style="text-transform: uppercase;">UPCOMING</span>
             </div>
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-top: 8px;">
+                <span style="color: #888;">START TIME:</span> <span id="event-modal-time">--:--</span>
             </div>
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-top: 8px;">
+                <span style="color: #888;">TARGET CLASS:</span> <span id="event-modal-class">--</span>
+            </div>
+            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-top: 8px;">
+                <span style="color: #888;">WEATHER:</span> <span id="event-modal-weather">--</span>
+            </div>
+        </div>
         
         <button class="nav-btn" style="width: 100%; border-color: var(--neon-gold); color: var(--neon-gold); background: #000; margin-top: 25px;" onclick="document.getElementById('eventModal').style.display='none'">CLOSE BRIEFING</button>
     </div>
@@ -1439,6 +1448,7 @@
         }
     }
     
+	let dbPresets = {};
     let dbProfiles = {};
     let dbLeaderboard = [];
     const classLetters = ["R", "D", "C", "B", "A", "S"];
@@ -1625,17 +1635,16 @@ function renderCalendar() {
             let existsYesterday = yesterdayEvents.some(y => y.title === evt.title);
             let isStartOfEvent = (day === 1 || !existsYesterday);
 
-            // --- THE TEXT VISIBILITY LOGIC ---
             let showText = false;
             if (!isPastDate) {
-                // Show text if it is TODAY, or if it's the FIRST DAY of a future event
                 if (isToday || isStartOfEvent) {
                     showText = true;
                 }
             }
 
+            // FIX: Removed the time snippet from the calendar bar text string
             let displayText = showText 
-                ? `<span style="font-weight:bold;">${evt.title}</span> <span style="color:rgba(255,255,255,0.5); font-size:0.65rem;">@ ${evt.time}</span>` 
+                ? `<span style="font-weight:bold;">${evt.title}</span>` 
                 : '&nbsp;';
 
             if (!eventColorMap[evt.title]) {
@@ -1644,15 +1653,15 @@ function renderCalendar() {
             }
             let assignedColorClass = eventColorMap[evt.title];
 
+            // Passes the time safely to the openEventModal call
             eventsHtml += `
                 <div class="cal-event ${timeFadeClass} ${assignedColorClass}" 
                      style="min-height: 18px; margin-bottom: 2px; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" 
-                     onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}')">
+                     onclick="openEventModal('${evt.title.replace(/'/g, "\\'")}', '${evt.class}', '${evt.status}', '${evt.time}')">
                      ${displayText}
                 </div>`;
         });
 
-        // Highlights the current day's number in bright white
         let dayNumberStyle = isPastDate ? 'color: #444;' : (isToday ? 'color: #fff; font-weight: bold; text-shadow: 0 0 5px var(--neon-cyan);' : 'color: #888;');
 
         gridHtml += `
@@ -1667,10 +1676,38 @@ function renderCalendar() {
     document.getElementById('calendarGrid').innerHTML = gridHtml;
 }
 	
-function openEventModal(title, config, status) {
+function openEventModal(title, config, status, time) {
     document.getElementById('event-modal-title').innerText = title;
-    document.getElementById('event-modal-config').innerText = "> " + config;
+    document.getElementById('event-modal-config').innerText = "> ID: " + config;
     document.getElementById('event-modal-status').innerText = status.toUpperCase();
+    document.getElementById('event-modal-time').innerText = time || "--:--";
+
+    // Set fallback strings in case it's a completely custom setup
+    let targetClass = "CUSTOM BUILD / SERVER ROTATION";
+    let weatherInfo = "DETERMINED BY PORT LIFECYCLE";
+
+    // Strip "Preset: " if it exists to cleanly scan your JSON keys
+    let cleanKey = config.replace("Preset: ", "").trim();
+
+    // If the event maps directly to a configuration profile, extract the parameters
+    if (dbPresets && dbPresets[cleanKey]) {
+        const preset = dbPresets[cleanKey];
+        if (preset.Class) targetClass = preset.Class.toUpperCase();
+        if (preset.Weather) weatherInfo = preset.Weather.toUpperCase();
+    } else if (config === "Current Server Config") {
+        targetClass = "LIVE SELECTION / WEB VOTE WINNER";
+    }
+
+    document.getElementById('event-modal-class').innerText = targetClass;
+    document.getElementById('event-modal-weather').innerText = weatherInfo;
+
+    const statusElem = document.getElementById('event-modal-status');
+    if (status === 'active') statusElem.style.color = 'var(--neon-pink)';
+    else if (status === 'upcoming') statusElem.style.color = 'var(--neon-gold)';
+    else statusElem.style.color = 'var(--neon-mint)';
+    
+    document.getElementById('eventModal').style.display = 'flex';
+}
 
     // Match colors to the Hub theme
     const statusElem = document.getElementById('event-modal-status');
@@ -2772,6 +2809,11 @@ async function initStaticData() {
                 populateLeaderboardFilters();
                 startHomeTrackCycle();
                 processLeaderboardData();
+            }
+			
+			const presetRes = await fetch('https://sevo-hub-default-rtdb.firebaseio.com/voting_options.json', fetchOpts);
+            if (presetRes.ok) {
+                dbPresets = await presetRes.json() || {};
             }
 
 // --- FETCH SCHEDULE (DYNAMIC RANGE UPDATE) ---
