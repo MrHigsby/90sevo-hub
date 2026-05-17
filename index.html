@@ -2154,27 +2154,27 @@ function renderHomeTrackRecords() {
         if(el) el.addEventListener('input', processLeaderboardData)
     });
 
-    function populateLeaderboardFilters() {
+function populateLeaderboardFilters() {
         if(!dbLeaderboard) return;
         const tracks = [...new Set(dbLeaderboard.map(x => x.Track || 'Unknown'))].sort();
         const cars = [...new Set(dbLeaderboard.map(x => x.Car || 'Unknown'))].sort();
+        
         const trackSelect = document.getElementById('lbTrack');
         if(trackSelect) {
+            // Save your current selection so it doesn't vanish during the 3-second refresh
+            let currentTrack = trackSelect.value; 
             trackSelect.innerHTML = '<option value="">[ ALL TRACKS ]</option>' + tracks.map(t => `<option value="${t}">${t}</option>`).join('');
-            if(tracks.includes("Nurburgring [Touristenfahrten]")) trackSelect.value = "Nurburgring [Touristenfahrten]";
+            trackSelect.value = currentTrack; 
         }
+        
         const carSelect = document.getElementById('lbCar');
-        if(carSelect) carSelect.innerHTML = '<option value="">[ ALL CARS ]</option>' + cars.map(c => `<option value="${c}">${c}</option>`).join('');
-    }
-
-    window.sortStats = function(colName) {
-        if(currentSortCol === colName) sortAscending = !sortAscending;
-        else {
-            currentSortCol = colName;
-            sortAscending = (['name', 'car', 'track', 'lapTime'].includes(colName) || (colName === 'default' && activeMode === 'laps'));
+        if(carSelect) {
+            // Save your current selection
+            let currentCar = carSelect.value; 
+            carSelect.innerHTML = '<option value="">[ ALL CARS ]</option>' + cars.map(c => `<option value="${c}">${c}</option>`).join('');
+            carSelect.value = currentCar;
         }
-        processLeaderboardData();
-    };
+    }
 
     function processLeaderboardData() {
         if(!lbMode) return;
