@@ -1432,14 +1432,32 @@
         return IMAGE_DICT["DEFAULT"];
     }
 
-    function updateSeasonSections(allServers) {
+function updateSeasonSections(allServers) {
         const currentEventsGrid = document.querySelector('.event-card-grid');
         if (currentEventsGrid) currentEventsGrid.innerHTML = '';
         const activeSeasons = allServers.filter(s => s.season && s.season !== "None");
 
         activeSeasons.forEach(srv => {
+            // Find this server's event position inside the calendar database to map the modal data
+            let matchingDateKey = null;
+            let matchingIdx = -1;
+
+            for (let dateKey in window.calEvents) {
+                let match = window.calEvents[dateKey].findIndex(e => e.port.toString() === srv.port.toString() && e.status === 'active');
+                if (match !== -1) {
+                    matchingDateKey = dateKey;
+                    matchingIdx = match;
+                    break;
+                }
+            }
+
+            // If we found the event in the schedule array, open the briefing modal, otherwise fallback to basic expand
+            let clickAction = (matchingDateKey !== null) 
+                ? `openEventModal('${matchingDateKey}', ${matchingIdx})`
+                : `goToServerAndExpand('srv-${srv.port}', '${window.raceServers.includes(srv) ? 'race' : 'trackday'}')`;
+
             const eventCard = `
-                <div class="event-card" onclick="goToServerAndExpand('srv-${srv.port}', 'race')">
+                <div class="event-card" onclick="${clickAction}">
                     <img src="${srv.img}" alt="${srv.season}">
                     <div class="event-content">
                         <h3>${srv.season.toUpperCase()}</h3>
@@ -1697,10 +1715,8 @@ function openEventModal(dateKey, idx) {
 
     // 1. Search the Live Servers to see if this event's port is currently online
     let liveServer = null;
-    if (evt.status === 'active') {
-        const allLive = [...(window.raceServers||[]), ...(window.tdServers||[])];
-        liveServer = allLive.find(s => s.port === evt.port);
-    }
+    const allLive = [...(window.raceServers||[]), ...(window.tdServers||[])];
+    liveServer = allLive.find(s => s.port.toString() === evt.port.toString());
 
     if (liveServer) {
         // --- 🔴 LIVE MONITOR MODE (Server is Online) ---
@@ -1729,9 +1745,9 @@ function openEventModal(dateKey, idx) {
         
         btn.onclick = () => {
             document.getElementById('eventModal').style.display='none';
-            let isRace = window.raceServers.includes(liveServer);
-            let srvArray = isRace ? window.raceServers : window.tdServers;
-            goToServerAndExpand(`srv-${isRace?'r':'t'}-${srvArray.indexOf(liveServer)}`, isRace?'race':'trackday');
+            let isRace = window.raceServers.some(s => s.port.toString() === liveServer.port.toString());
+            // CORRECTION: Uses the genuine port string ID mapped by renderServerList
+            goToServerAndExpand(`srv-${liveServer.port}`, isRace ? 'race' : 'trackday');
         };
 
     } else {
