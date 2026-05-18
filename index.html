@@ -2790,14 +2790,19 @@ async function initStaticData() {
             // Force the browser to grab fresh data instead of using a stale cache
             const fetchOpts = { cache: "no-store" };
 
-            const profRes = await fetch('https://sevo-hub-default-rtdb.firebaseio.com/driver_profiles.json', fetchOpts);
+            // Your infinite free bandwidth warehouse base URL
+            const dataHost = "https://data.90sevo.ca";
+
+            // 1. FETCH HEAVY DRIVER PROFILES FROM CLOUDFLARE
+            const profRes = await fetch(`${dataHost}/driver_profiles.json`, fetchOpts);
             if (profRes.ok) {
                 // Safeguard against empty database
                 dbProfiles = await profRes.json() || {};
                 updateHomeEliteLists(); 
             }
             
-            const lbRes = await fetch('https://sevo-hub-default-rtdb.firebaseio.com/leaderboard.json', fetchOpts);
+            // 2. FETCH HEAVY LEADERBOARDS FROM CLOUDFLARE
+            const lbRes = await fetch(`${dataHost}/leaderboard.json`, fetchOpts);
             if (lbRes.ok) {
                 let rawLb = await lbRes.json() || [];
                 
@@ -2858,18 +2863,19 @@ async function initStaticData() {
                 processLeaderboardData();
             }
 			
-			const presetRes = await fetch('https://sevo-hub-default-rtdb.firebaseio.com/voting_options.json', fetchOpts);
+            // 3. VOTING OPTIONS (Kept on Firebase for dynamic pool updates)
+            const presetRes = await fetch('https://sevo-hub-default-rtdb.firebaseio.com/voting_options.json', fetchOpts);
             if (presetRes.ok) {
                 dbPresets = await presetRes.json() || {};
             }
 
-// --- FETCH SCHEDULE (DYNAMIC RANGE UPDATE) ---
-            const schRes = await fetch('https://sevo-hub-default-rtdb.firebaseio.com/schedule.json', fetchOpts);
+            // 4. FETCH SCHEDULE FROM CLOUDFLARE (DYNAMIC RANGE UPDATE)
+            const schRes = await fetch(`${dataHost}/schedule.json`, fetchOpts);
             if (schRes.ok) {
                 let rawSch = await schRes.json() || [];
                 if (!Array.isArray(rawSch) && Object.keys(rawSch).length > 0) rawSch = [rawSch];
                 
-window.calEvents = {};
+                window.calEvents = {};
                 rawSch.forEach(evt => {
                     if (!evt.StartDate || !evt.EndDate) return;
                     let current = new Date(evt.StartDate);
@@ -2885,7 +2891,7 @@ window.calEvents = {};
                         let key = `${current.getFullYear()}-${current.getMonth()}-${current.getDate()}`;
                         if (!window.calEvents[key]) window.calEvents[key] = [];
                         
-window.calEvents[key].push({
+                        window.calEvents[key].push({
                             title: evt.EventName,
                             class: evt.PresetID,
                             status: evt.Status,
@@ -2901,10 +2907,14 @@ window.calEvents[key].push({
                 renderCalendar();
             }
 
+            // Hide UI loading screen once data engines clear
             const bootloader = document.querySelector('.bootloader');
             if (bootloader) bootloader.style.display = 'none';
-        } catch (err) { console.error("📡 STATIC SYNC ERROR:", err); }
-    }
+
+        } catch (err) { 
+            console.error("📡 STATIC SYNC ERROR:", err); 
+        }
+}
 // --- BOOT SEQUENCE ---
     window.addEventListener('load', () => {
         // 1. Initial boot: Grab everything once immediately
