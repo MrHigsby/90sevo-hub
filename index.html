@@ -2450,11 +2450,10 @@ function populateLeaderboardFilters() {
         }
     });
 
-function renderProfileRecords() {
+    function renderProfileRecords() {
         if (!currentTelemetryDriver) return;
         const id = currentTelemetryDriver;
         let pRecords = dbLeaderboard.filter(entry => entry.SteamID === id);
-        const p = dbProfiles[id] || {};
         
         const trackSelect = document.getElementById('profTrackFilter');
         const carSelect = document.getElementById('profCarFilter');
@@ -2485,28 +2484,13 @@ function renderProfileRecords() {
         if(pRecords.length > 0) {
             recDiv.innerHTML = pRecords.map(r => {
                 let lapSetString = r.LapSetOn ? `<span style="font-size: 0.8rem; color: #555;">[ SET ON LAP ${r.LapSetOn} ]</span>` : '';
-                
-                // --- 🏎️ THE MATRIX ENGINE INTIGRATION ---
-                // Query the nested data profile matrix for this exact track and car combination
-                let totalMileageHtml = '';
-                if (p.Matrix && p.Matrix[r.Track] && p.Matrix[r.Track][r.Car]) {
-                    let totalCarLapsOnTrack = p.Matrix[r.Track][r.Car];
-                    totalMileageHtml = `
-                        <div style="font-family: 'Share Tech Mono'; font-size: 0.75rem; color: var(--neon-cyan); margin-top: 4px; border-left: 2px solid var(--neon-cyan); padding-left: 6px;">
-                            > LIFETIME STABLE DURATION: <span style="color: var(--neon-mint); font-weight: bold;">${totalCarLapsOnTrack} LAPS COMPLETED</span>
-                        </div>`;
-                }
-
                 return `
-                <div class="record-card" style="display: block; margin-bottom: 12px; padding: 15px; background: rgba(0,0,0,0.4); border-left: 3px solid var(--neon-mint);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <div>
-                            <div class="record-track" style="margin-bottom: 2px;">${r.Track || 'Unknown Track'} ${lapSetString}</div>
-                            <div class="record-car">> ${r.Car}</div>
-                        </div>
-                        <div class="record-time" style="text-align: right;">${r.LapTime}</div>
+                <div class="record-card">
+                    <div>
+                        <div class="record-track">${r.Track || 'Unknown Track'} ${lapSetString}</div>
+                        <div class="record-car">> ${r.Car}</div>
                     </div>
-                    ${totalMileageHtml}
+                    <div class="record-time">${r.LapTime}</div>
                 </div>
             `}).join('');
         } else {
