@@ -2350,13 +2350,16 @@ function populateLeaderboardFilters() {
 
     function loadMoreRows() { lbCurrentPage++; renderTableRows(); }
 
-    // --- PROFILES ---
+// --- PROFILES ---
     function openDriverCard(steamId) {
         if(Object.keys(dbProfiles).length === 0) { alert("Please load DRIVER_PROFILES.JSON on the Home tab first to view ID Cards."); return; }
         const prof = dbProfiles[steamId];
         if(!prof) { alert("Driver profile not found in local database."); return; }
         
+        // FIX: Bind the active target globally to the window scope so the telemetry buttons can see it!
+        window.activeModalSteamID = steamId; 
         activeModalSteamID = steamId; 
+        
         const className = classLetters[prof.LicenseClass || 0] || "R";
         const srValue = (prof.SafetyRating || 2.50).toFixed(2);
         const xp = prof.TrackdayXP || 0;
@@ -2405,8 +2408,13 @@ function populateLeaderboardFilters() {
 
 function teleportToTelemetry() {
         closeModal();
-        if(activeModalSteamID) {
-            viewDriverStats(activeModalSteamID);
+        // Read the locked window target ID
+        const targetID = window.activeModalSteamID || activeModalSteamID;
+        if(targetID) {
+            viewDriverStats(targetID);
+            showPage('profile');
+        } else {
+            // Ultimate fallback to Home view if no active target data is registered
             showPage('profile');
         }
     }
