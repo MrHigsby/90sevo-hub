@@ -1274,6 +1274,13 @@
             <div style="text-align: right;"><div class="safety-sticker" id="profSafety" style="transform: none; font-size: 1.5rem;">CLASS R [2.50]</div><div style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; margin-top:10px;">TrackXP LVL <span id="profLevel">0</span></div></div>
         </div>
 		
+		<div style="margin-bottom: 25px; display: flex; align-items: center; gap: 12px;">
+            <label style="font-family: 'Share Tech Mono'; color: var(--neon-gold); font-size: 1rem; font-weight: bold;">> SELECT CHASSIS MATRIX:</label>
+            <select class="filter-select" id="profChassisFilter" style="border-color: var(--neon-gold); color: var(--neon-gold); font-size: 1rem; max-width: 350px;" onchange="updateCarSpecificMetrics()">
+                <option value="GLOBAL">[ GLOBAL OVERVIEW (ALL VEHICLES) ]</option>
+            </select>
+        </div>
+		
         <h3 style="color: var(--neon-gold); font-family: 'Share Tech Mono';">> TROPHY CABINET</h3>
         <div class="stat-grid">
             <div class="stat-box"><div class="stat-label">RATING (ELO)</div><div class="stat-value" id="profRating" style="color: var(--neon-cyan);">1500</div></div>
@@ -2450,13 +2457,14 @@ function populateLeaderboardFilters() {
         }
     });
 
-    function renderProfileRecords() {
+function renderProfileRecords() {
         if (!currentTelemetryDriver) return;
         const id = currentTelemetryDriver;
         let pRecords = dbLeaderboard.filter(entry => entry.SteamID === id);
         
         const trackSelect = document.getElementById('profTrackFilter');
         const carSelect = document.getElementById('profCarFilter');
+        const activeCarDropdownVal = document.getElementById('profChassisFilter').value;
         
         if(trackSelect && trackSelect.options.length <= 1 && pRecords.length > 0) { 
             const tracks = [...new Set(pRecords.map(x => x.Track || 'Unknown'))].sort();
@@ -2465,14 +2473,20 @@ function populateLeaderboardFilters() {
             carSelect.innerHTML = '<option value="">[ ALL CARS ]</option>' + cars.map(c => `<option value="${c}">${c}</option>`).join('');
         }
 
+        // Match against dropdown values automatically
         const tFilter = trackSelect ? trackSelect.value : "";
-        const cFilter = carSelect ? carSelect.value : "";
-        const sortF = document.getElementById('profSortFilter');
-        const sFilter = sortF ? sortF.value : "asc";
+        let cFilter = carSelect ? carSelect.value : "";
+        
+        if (activeCarDropdownVal !== "GLOBAL") {
+            cFilter = activeCarDropdownVal;
+            if (carSelect) { carSelect.value = ""; } // Suppress independent filter box values
+        }
 
         if(tFilter) pRecords = pRecords.filter(r => (r.Track || 'Unknown') === tFilter);
-        if(cFilter) pRecords = pRecords.filter(r => (r.Car || 'Unknown') === cFilter);
+        if(cFilter) pRecords = pRecords.filter(r => (r.Car || 'Unknown').toUpperCase() === cFilter.toUpperCase());
 
+        const sortF = document.getElementById('profSortFilter');
+        const sFilter = sortF ? sortF.value : "asc";
         pRecords.sort((a,b) => {
             if(sFilter === 'asc') return a.TotalMs - b.TotalMs;
             return b.TotalMs - a.TotalMs;
@@ -2494,164 +2508,191 @@ function populateLeaderboardFilters() {
                 </div>
             `}).join('');
         } else {
-            recDiv.innerHTML = '<div style="color: #666; font-style: italic; padding: 20px; text-align: center;">[ NO MATCHING RECORDS ]</div>';
+            recDiv.innerHTML = '<div style="color: #666; font-style: italic; padding: 20px; text-align: center;">[ NO PERSONAL BEST LAP FILES CONFIGURED ]</div>';
         }
     }
 
-    function viewDriverStats(id) {
+function viewDriverStats(id) {
         const p = dbProfiles[id];
         if(!p) { alert("Profile missing. Please load DRIVER_PROFILES.JSON."); return; }
 
+        currentTelemetryDriver = id;
+        
+        // Populate the unique chassis select box options driven by what they actually own/drove
+        const chassisSelect = document.getElementById('profChassisFilter');
+        if (chassisSelect) {
+            chassisSelect.innerHTML = '<option value="GLOBAL">[ GLOBAL OVERVIEW (ALL VEHICLES) ]</option>';
+            if (p.CarStats && Object.keys(p.CarStats).length > 0) {
+                Object.keys(p.CarStats).sort().forEach(carName => {
+                    const opt = document.createElement('option');
+                    opt.value = carName;
+                    opt.innerText = carName.toUpperCase();
+                    chassisSelect.appendChild(opt);
+                });
+            }
+            chassisSelect.value = "GLOBAL"; // Reset selection index back to default overview
+        }
+
+        // Trigger header cards mapping rules
         const className = classLetters[p.LicenseClass || 0] || "R";
         const srValue = (p.SafetyRating || 2.50).toFixed(2);
         const lvl = Math.floor(Math.sqrt((p.TrackdayXP||0) / 50)) + 1;
         
         document.getElementById('profName').innerText = p.Name;
         document.getElementById('profSteamId').innerText = "STEAM_ID: " + id;
-        document.getElementById('profRating').innerText = p.DriverRating || 1500;
-        
-        let totalTitles = 0;
-        let totalPts = 0;
-        if(p.ServerStats) {
-            for (let k in p.ServerStats) {
-                totalTitles += (p.ServerStats[k].Titles || 0);
-                totalPts += (p.ServerStats[k].Points || 0);
-            }
-        }
-        document.getElementById('profTitles').innerText = totalTitles;
-        document.getElementById('profSeasonPts').innerText = totalPts;
-        
-        let profSticker = document.getElementById('profSafety');
-        profSticker.innerText = `CLASS ${className} [${srValue}]`;
-        profSticker.style.borderColor = getStickerColor(className);
-        profSticker.style.background = `linear-gradient(to right, ${getStickerColor(className)} ${getSrFill(p.SafetyRating)}%, #222 ${getSrFill(p.SafetyRating)}%)`;
-        
         document.getElementById('profLevel').innerText = lvl;
         
-        const wins = p.Wins || 0;
-        const starts = p.Starts || 0;
-        const winPct = starts > 0 ? ((wins/starts)*100).toFixed(1) : 0;
-        const top5Pct = starts > 0 ? (((p.Top5s || 0)/starts)*100).toFixed(1) : 0;
-        const ptsPerRace = starts > 0 ? (totalPts/starts).toFixed(1) : "0.0";
-        const incPerRace = starts > 0 ? ((p.RaceContacts || 0)/starts).toFixed(1) : "0.0";
-        
-        document.getElementById('profWins').innerText = wins;
-        document.getElementById('profStarts').innerText = starts;
-        document.getElementById('profTop5').innerText = p.Top5s || 0;
-        document.getElementById('profPoles').innerText = p.Poles || 0;
-        document.getElementById('profLaps').innerText = p.Laps || 0;
-        
-        let wpElem = document.getElementById('profWinPctVal');
-        wpElem.innerText = winPct + "%";
-        wpElem.style.color = winPct >= 20.0 ? "var(--neon-gold)" : "#fff";
-
-        let t5pElem = document.getElementById('profTop5Pct');
-        t5pElem.innerText = top5Pct + "%";
-        t5pElem.style.color = top5Pct >= 50.0 ? "var(--neon-gold)" : "#fff";
-
-        document.getElementById('profPtsPerRace').innerText = ptsPerRace;
-        document.getElementById('profIncPerRace').innerText = incPerRace;
-        
-        let avgS = starts > 0 ? (p.TotalStartPos / starts).toFixed(1) : "0.0";
-        let avgF = starts > 0 ? (p.TotalFinishPos / starts).toFixed(1) : "0.0";
-        document.getElementById('profAvgStart').innerText = "P" + avgS;
-        document.getElementById('profAvgFinish').innerText = "P" + avgF;
-        
-        let delta = (parseFloat(avgS) - parseFloat(avgF)).toFixed(1);
-        let deltaBox = document.getElementById('deltaBox');
-        let deltaElem = document.getElementById('profDelta');
-        
-        if(starts === 0) {
-            deltaElem.innerText = "0.0";
-            deltaElem.style.color = "#fff";
-            deltaBox.style.borderColor = "#333";
-            deltaBox.classList.remove('bad', 'gold');
-        } else if (delta > 0) {
-            deltaElem.innerText = "+" + delta;
-            deltaElem.style.color = "var(--neon-mint)";
-            deltaBox.style.borderColor = "var(--neon-mint)";
-            deltaBox.classList.remove('bad', 'gold');
-        } else if (delta < 0) {
-            deltaElem.innerText = delta;
-            deltaElem.style.color = "var(--neon-pink)";
-            deltaBox.style.borderColor = "var(--neon-pink)";
-            deltaBox.classList.add('bad');
-            deltaBox.classList.remove('gold');
-        } else {
-            deltaElem.innerText = delta;
-            deltaElem.style.color = "#fff";
-            deltaBox.style.borderColor = "#333";
-            deltaBox.classList.remove('bad', 'gold');
+        let profSticker = document.getElementById('profSafety');
+        if (profSticker) {
+            profSticker.innerText = `CLASS ${className} [${srValue}]`;
+            profSticker.style.borderColor = getStickerColor(className);
+            profSticker.style.background = `linear-gradient(to right, ${getStickerColor(className)} ${getSrFill(p.SafetyRating)}%, #222 ${getSrFill(p.SafetyRating)}%)`;
         }
         
         document.getElementById('profMostCar').innerText = p.MostDrivenCar && p.MostDrivenCar !== "None" ? p.MostDrivenCar : "NO DATA";
         document.getElementById('profMostTrack').innerText = p.MostDrivenTrack && p.MostDrivenTrack !== "None" ? p.MostDrivenTrack : "NO DATA";
 
-        document.getElementById('profContacts').innerText = p.RaceContacts || 0;
-        document.getElementById('profQualiScuffs').innerText = p.QualiIncidents || 0;
-        document.getElementById('profTDScuffs').innerText = p.TrackdayScuffs || 0;
-        document.getElementById('profPylons').innerText = p.Pylons || 0;
-        document.getElementById('profDnfs').innerText = p.DNFs || 0;
-        
-// --- ADVANCED TELEMETRY UPLINK: Championship + Track-Car Matrix ---
-        const seasonDiv = document.getElementById('profSeasons');
-        let combinedHtml = '';
+        // Render standard global view on screen entry
+        updateCarSpecificMetrics();
 
-        // 1. Render Active Championship Points
-        if (p.ServerStats && Object.keys(p.ServerStats).length > 0) {
-            for (let port in p.ServerStats) {
-                if (p.ServerStats[port].Points > 0) {
-                    combinedHtml += `<div class="season-row"><span>> CHAMPIONSHIP PORT ${port}</span><span style="color: var(--neon-gold); font-weight: bold;">${p.ServerStats[port].Points} PTS</span></div>`;
-                }
-            }
-        }
-
-        // 2. Render Nested Matrix (Laps Per Car Per Track)
-        if (p.Matrix && Object.keys(p.Matrix).length > 0) {
-            combinedHtml += `<div style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; margin-top: 25px; margin-bottom: 12px; font-weight: bold; border-bottom: 1px dashed #333; padding-bottom: 3px;">> LIFETIME MATRIX BREAKDOWN</div>`;
-            
-            // Sort tracks alphabetically
-            const sortedTracks = Object.keys(p.Matrix).sort();
-            
-            sortedTracks.forEach(trackName => {
-                // Calculate total laps on this track across all cars
-                let totalTrackLaps = 0;
-                for (let car in p.Matrix[trackName]) {
-                    totalTrackLaps += p.Matrix[trackName][car];
-                }
-
-                // Render Main Track Header row
-                combinedHtml += `
-                    <div class="season-row" style="margin-top: 10px; background: rgba(0, 243, 255, 0.02); padding: 4px 8px; border-left: 2px solid var(--neon-cyan);">
-                        <span style="color: #fff; font-weight: bold;">> ${trackName.toUpperCase()}</span>
-                        <span style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-weight: bold;">${totalTrackLaps} TOTAL LAPS</span>
-                    </div>`;
-                
-                // Extract and sort cars driven on this specific track by lap count (highest first)
-                const trackCars = Object.keys(p.Matrix[trackName]).sort((a,b) => p.Matrix[trackName][b] - p.Matrix[trackName][a]);
-                
-                trackCars.forEach(carName => {
-                    let carLaps = p.Matrix[trackName][carName];
-                    // Render indented sub-row for the car metrics
-                    combinedHtml += `
-                        <div class="season-row" style="padding-left: 25px; border-bottom: 1px solid #111; font-size: 0.85rem;">
-                            <span style="color: #888;">⤷ ${carName}</span>
-                            <span style="color: var(--neon-mint); font-family: 'Share Tech Mono';">${carLaps} LAPS</span>
-                        </div>`;
-                });
-            });
-        }
-
-        // Output final data grid
-        seasonDiv.innerHTML = combinedHtml !== '' ? combinedHtml : `<div style="color: #666; font-style: italic; text-align: center;">[ NO DRIVER LABS RECORDED ]</div>`;
-
-        currentTelemetryDriver = id;
         document.getElementById('profTrackFilter').innerHTML = '<option value="">[ ALL TRACKS ]</option>'; 
         document.getElementById('profCarFilter').innerHTML = '<option value="">[ ALL CARS ]</option>';
         document.getElementById('profSortFilter').value = 'asc';
-        renderProfileRecords();
 
         showPage('profile');
+    }
+
+    // --- NEW SECONDARY SUB-ROUTINE: VEHICLE STATS ENGINE MATRIX ---
+    function updateCarSpecificMetrics() {
+        if (!currentTelemetryDriver) return;
+        const id = currentTelemetryDriver;
+        const p = dbProfiles[id];
+        if (!p) return;
+
+        const selectedCar = document.getElementById('profChassisFilter').value;
+        
+        let starts = 0, wins = 0, poles = 0, dnfs = 0, laps = 0;
+        let totalStartPos = 0, totalFinishPos = 0;
+        let raceContacts = 0, trackdayScuffs = 0, pylons = 0, qualiIncidents = 0;
+        let totalPts = 0, totalTitles = 0;
+
+        if (selectedCar === "GLOBAL") {
+            // Pull raw global overview statistics (Original behaviour)
+            starts = p.Starts || 0;
+            wins = p.Wins || 0;
+            poles = p.Poles || 0;
+            dnfs = p.DNFs || 0;
+            laps = p.Laps || 0;
+            totalStartPos = p.TotalStartPos || 0;
+            totalFinishPos = p.TotalFinishPos || 0;
+            raceContacts = p.RaceContacts || 0;
+            trackdayScuffs = p.TrackdayScuffs || 0;
+            pylons = p.Pylons || 0;
+            qualiIncidents = p.QualiIncidents || 0;
+            
+            if (p.ServerStats) {
+                for (let k in p.ServerStats) {
+                    totalTitles += (p.ServerStats[k].Titles || 0);
+                    totalPts += (p.ServerStats[k].Points || 0);
+                }
+            }
+            document.getElementById('profRating').innerText = p.DriverRating || 1500;
+        } else {
+            // Extract statistics explicitly bound inside this single car stats node
+            const cData = (p.CarStats && p.CarStats[selectedCar]) ? p.CarStats[selectedCar] : null;
+            if (cData) {
+                starts = cData.Starts || 0;
+                wins = cData.Wins || 0;
+                poles = cData.Poles || 0;
+                dnfs = cData.DNFs || 0;
+                laps = cData.Laps || 0;
+                totalStartPos = cData.TotalStartPos || 0;
+                totalFinishPos = cData.TotalFinishPos || 0;
+                raceContacts = cData.RaceContacts || 0;
+                trackdayScuffs = cData.TrackdayScuffs || 0;
+                pylons = cData.Pylons || 0;
+                qualiIncidents = cData.QualiIncidents || 0;
+            }
+            // Display overall driver score regardless of car, or default text indicator
+            document.getElementById('profRating').innerText = p.DriverRating || 1500;
+        }
+
+        // Live calculation math helpers for display
+        const winPct = starts > 0 ? ((wins / starts) * 100).toFixed(1) : "0.0";
+        const ptsPerRace = starts > 0 ? (totalPts / starts).toFixed(1) : "0.0";
+        const incPerRace = starts > 0 ? (raceContacts / starts).toFixed(1) : "0.0";
+        const avgS = starts > 0 ? (totalStartPos / starts).toFixed(1) : "0.0";
+        const avgF = totalFinishPos > 0 && starts > 0 ? (totalFinishPos / starts).toFixed(1) : "0.0";
+        const delta = (parseFloat(avgS) - parseFloat(avgF)).toFixed(1);
+
+        // Update the panel metric box frames text strings
+        document.getElementById('profTitles').innerText = selectedCar === "GLOBAL" ? totalTitles : "---";
+        document.getElementById('profSeasonPts').innerText = selectedCar === "GLOBAL" ? totalPts : "---";
+        document.getElementById('profWins').innerText = wins;
+        document.getElementById('profStarts').innerText = starts;
+        document.getElementById('profLaps').innerText = laps;
+        document.getElementById('profPoles').innerText = poles;
+        
+        let wpElem = document.getElementById('profWinPctVal');
+        wpElem.innerText = winPct + "%";
+        wpElem.style.color = parseFloat(winPct) >= 20.0 ? "var(--neon-gold)" : "#fff";
+
+        document.getElementById('profPtsPerRace').innerText = selectedCar === "GLOBAL" ? ptsPerRace : "---";
+        document.getElementById('profIncPerRace').innerText = incPerRace;
+        document.getElementById('profAvgStart').innerText = starts > 0 ? "P" + avgS : "P0";
+        document.getElementById('profAvgFinish').innerText = starts > 0 ? "P" + avgF : "P0";
+
+        let deltaBox = document.getElementById('deltaBox');
+        let deltaElem = document.getElementById('profDelta');
+        if (starts === 0) {
+            deltaElem.innerText = "0.0"; deltaElem.style.color = "#fff";
+            if (deltaBox) { deltaBox.style.borderColor = "#333"; deltaBox.classList.remove('bad', 'gold'); }
+        } else if (parseFloat(delta) > 0) {
+            deltaElem.innerText = "+" + delta; deltaElem.style.color = "var(--neon-mint)";
+            if (deltaBox) { deltaBox.style.borderColor = "var(--neon-mint)"; deltaBox.classList.remove('bad', 'gold'); }
+        } else if (parseFloat(delta) < 0) {
+            deltaElem.innerText = delta; deltaElem.style.color = "var(--neon-pink)";
+            if (deltaBox) { deltaBox.style.borderColor = "var(--neon-pink)"; deltaBox.classList.add('bad'); deltaBox.classList.remove('gold'); }
+        } else {
+            deltaElem.innerText = delta; deltaElem.style.color = "#fff";
+            if (deltaBox) { deltaBox.style.borderColor = "#333"; deltaBox.classList.remove('bad', 'gold'); }
+        }
+
+        document.getElementById('profContacts').innerText = raceContacts;
+        document.getElementById('profQualiIncidents' ? 'profQualiIncidents' : 'profQualiScuffs').innerText = qualiIncidents;
+        document.getElementById('profTDScuffs').innerText = trackdayScuffs;
+        document.getElementById('profPylons').innerText = pylons;
+        document.getElementById('profDnfs').innerText = dnfs;
+
+        // Render current events points list layout panel
+        const seasonDiv = document.getElementById('profSeasons');
+        if (selectedCar === "GLOBAL" && p.ServerStats && Object.keys(p.ServerStats).length > 0) {
+            let sHtml = '';
+            for (let port in p.ServerStats) {
+                if (p.ServerStats[port].Points > 0) {
+                    sHtml += `<div class="season-row"><span>> SERVER PORT ${port}</span><span style="color: var(--neon-gold); font-weight: bold;">${p.ServerStats[port].Points} PTS</span></div>`;
+                }
+            }
+            seasonDiv.innerHTML = sHtml !== '' ? sHtml : `<div style="color: #666; font-style: italic; text-align: center;">[ NO SEASON PARTICIPATION FOUND ]</div>`;
+        } else if (selectedCar !== "GLOBAL") {
+            // Render specific track breakdown for this unique car card
+            const cData = p.CarStats[selectedCar];
+            if (cData && cData.TrackBreakdown && Object.keys(cData.TrackBreakdown).length > 0) {
+                let tHtml = `<div style="color: var(--neon-cyan); margin-bottom: 8px;">> ACTIVE TRACK BREAKDOWN (${selectedCar})</div>`;
+                Object.keys(cData.TrackBreakdown).sort().forEach(tName => {
+                    const tStats = cData.TrackBreakdown[tName];
+                    tHtml += `<div class="season-row" style="padding-left: 10px;"><span style="color:#fff;">> ${tName.toUpperCase()}</span><span style="color:var(--neon-mint);">${tStats.Laps} LAPS // <span style="color:var(--neon-pink);">${tStats.RaceContacts}x INC</span></span></div>`;
+                });
+                seasonDiv.innerHTML = tHtml;
+            } else {
+                seasonDiv.innerHTML = `<div style="color: #666; font-style: italic; text-align: center;">[ NO SPECIFIC TRACK MAP DATA RECORDED FOR THIS VEHICLE ]</div>`;
+            }
+        } else {
+            seasonDiv.innerHTML = `<div style="color: #666; font-style: italic; text-align: center;">[ NO SEASON PARTICIPATION FOUND ]</div>`;
+        }
+
+        // Force personal best records panel below to match our filtered car dropdown choice
+        renderProfileRecords();
     }
 
     // --- LIVE FETCH ---
