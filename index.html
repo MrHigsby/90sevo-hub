@@ -1397,25 +1397,6 @@
     </div>
 </div>
 
-        <div style="margin-top: 20px; border-top: 1px dashed #333; padding-top: 15px;">
-            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff;">
-                <span style="color: #888;">STATUS:</span> <span id="event-modal-status" style="text-transform: uppercase;">UPCOMING</span>
-            </div>
-            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-top: 8px;">
-                <span style="color: #888;">START TIME:</span> <span id="event-modal-time">--:--</span>
-            </div>
-            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-top: 8px;">
-                <span style="color: #888;">TARGET CLASS:</span> <span id="event-modal-class">--</span>
-            </div>
-            <div style="font-family: 'Share Tech Mono'; font-size: 0.9rem; color: #fff; margin-top: 8px;">
-                <span style="color: #888;">WEATHER:</span> <span id="event-modal-weather">--</span>
-            </div>
-        </div>
-        
-        <button class="nav-btn" style="width: 100%; border-color: var(--neon-gold); color: var(--neon-gold); background: #000; margin-top: 25px;" onclick="document.getElementById('eventModal').style.display='none'">CLOSE BRIEFING</button>
-    </div>
-</div>
-
 <script>
 // --- GLOBAL VARIABLES ---
     let lockedOrderPool = null;
@@ -2668,7 +2649,8 @@ function viewDriverStats(id) {
         }
 
         document.getElementById('profContacts').innerText = raceContacts;
-        document.getElementById('profQualiIncidents' ? 'profQualiIncidents' : 'profQualiScuffs').innerText = qualiIncidents;
+        const qElem = document.getElementById('profQualiScuffs');
+        if (qElem) { qElem.innerText = qualiIncidents; }
         document.getElementById('profTDScuffs').innerText = trackdayScuffs;
         document.getElementById('profPylons').innerText = pylons;
         document.getElementById('profDnfs').innerText = dnfs;
