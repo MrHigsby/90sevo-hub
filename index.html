@@ -2403,10 +2403,11 @@ function populateLeaderboardFilters() {
         if(dModal) dModal.style.display = 'none'; 
     }
 
-    function teleportToTelemetry() {
+function teleportToTelemetry() {
         closeModal();
         if(activeModalSteamID) {
             viewDriverStats(activeModalSteamID);
+            showPage('profile');
         }
     }
     
