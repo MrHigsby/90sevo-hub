@@ -2330,6 +2330,27 @@ function populateLeaderboardFilters() {
     }
 
     function loadMoreRows() { lbCurrentPage++; renderTableRows(); }
+	
+	function sortStats(col) {
+        // If they click the exact same column they are already looking at, just flip the direction!
+        if (currentSortCol === col) {
+            sortAscending = !sortAscending;
+        } else {
+            // If they clicked a brand new column, set it as the active target
+            currentSortCol = col;
+            
+            // Smart Defaults: Strings (Names/Cars) and 'Lower is Better' stats (Lap Times/Incidents) default to Ascending.
+            // 'Higher is Better' stats (Wins/ELO/Levels) default to Descending.
+            if (col === 'lapTime' || col === 'inc' || col === 'incRatio' || col === 'name' || col === 'car' || col === 'track') {
+                sortAscending = true;
+            } else {
+                sortAscending = false;
+            }
+        }
+        
+        // Re-run the main table engine with the new sorting rules
+        processLeaderboardData();
+    }
 
 // --- PROFILES ---
     function openDriverCard(steamId) {
