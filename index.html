@@ -1313,7 +1313,7 @@
             <div class="stat-box bad"><div class="stat-label">DNFs (QUITS)</div><div class="stat-value" id="profDnfs" style="color: var(--neon-pink);">0</div></div>
         </div>
 
-        <h3 style="color: var(--neon-gold); font-family: 'Share Tech Mono'; margin-top: 30px;">> SEASON EVENTS</h3>
+        <h3 id="profSeasonsHeader" style="color: var(--neon-gold); font-family: 'Share Tech Mono'; margin-top: 30px;">> SEASON EVENTS</h3>
         <div class="season-list" id="profSeasons">
             <div style="color: #666; font-style: italic; text-align: center;">[ NO SEASON PARTICIPATION FOUND ]</div>
         </div>
@@ -2676,9 +2676,12 @@ function viewDriverStats(id) {
         document.getElementById('profPylons').innerText = pylons;
         document.getElementById('profDnfs').innerText = dnfs;
 
-        // Render current events points list layout panel
+// Render current events points list layout panel
         const seasonDiv = document.getElementById('profSeasons');
+        const seasonHeader = document.getElementById('profSeasonsHeader');
+
         if (selectedCar === "GLOBAL" && p.ServerStats && Object.keys(p.ServerStats).length > 0) {
+            if (seasonHeader) { seasonHeader.innerText = "> SEASON EVENTS"; seasonHeader.style.color = "var(--neon-gold)"; }
             let sHtml = '';
             for (let port in p.ServerStats) {
                 if (p.ServerStats[port].Points > 0) {
@@ -2688,18 +2691,20 @@ function viewDriverStats(id) {
             seasonDiv.innerHTML = sHtml !== '' ? sHtml : `<div style="color: #666; font-style: italic; text-align: center;">[ NO SEASON PARTICIPATION FOUND ]</div>`;
         } else if (selectedCar !== "GLOBAL") {
             // Render specific track breakdown for this unique car card
+            if (seasonHeader) { seasonHeader.innerText = "> CHASSIS TRACK BREAKDOWN"; seasonHeader.style.color = "var(--neon-cyan)"; }
             const cData = p.CarStats[selectedCar];
             if (cData && cData.TrackBreakdown && Object.keys(cData.TrackBreakdown).length > 0) {
-                let tHtml = `<div style="color: var(--neon-cyan); margin-bottom: 8px;">> ACTIVE TRACK BREAKDOWN (${selectedCar})</div>`;
+                let tHtml = '';
                 Object.keys(cData.TrackBreakdown).sort().forEach(tName => {
                     const tStats = cData.TrackBreakdown[tName];
-                    tHtml += `<div class="season-row" style="padding-left: 10px;"><span style="color:#fff;">> ${tName.toUpperCase()}</span><span style="color:var(--neon-mint);">${tStats.Laps} LAPS // <span style="color:var(--neon-pink);">${tStats.RaceContacts}x INC</span></span></div>`;
+                    tHtml += `<div class="season-row"><span style="color:#fff;">> ${tName.toUpperCase()}</span><span style="color:var(--neon-mint);">${tStats.Laps} LAPS // <span style="color:var(--neon-pink);">${tStats.RaceContacts}x INC</span></span></div>`;
                 });
                 seasonDiv.innerHTML = tHtml;
             } else {
                 seasonDiv.innerHTML = `<div style="color: #666; font-style: italic; text-align: center;">[ NO SPECIFIC TRACK MAP DATA RECORDED FOR THIS VEHICLE ]</div>`;
             }
         } else {
+            if (seasonHeader) { seasonHeader.innerText = "> SEASON EVENTS"; seasonHeader.style.color = "var(--neon-gold)"; }
             seasonDiv.innerHTML = `<div style="color: #666; font-style: italic; text-align: center;">[ NO SEASON PARTICIPATION FOUND ]</div>`;
         }
 
