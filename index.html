@@ -2593,18 +2593,57 @@ function populateLeaderboardFilters() {
         document.getElementById('profPylons').innerText = p.Pylons || 0;
         document.getElementById('profDnfs').innerText = p.DNFs || 0;
         
+// --- ADVANCED TELEMETRY UPLINK: Championship + Track-Car Matrix ---
         const seasonDiv = document.getElementById('profSeasons');
+        let combinedHtml = '';
+
+        // 1. Render Active Championship Points
         if (p.ServerStats && Object.keys(p.ServerStats).length > 0) {
-            let sHtml = '';
             for (let port in p.ServerStats) {
                 if (p.ServerStats[port].Points > 0) {
-                    sHtml += `<div class="season-row"><span>> SERVER PORT ${port}</span><span style="color: var(--neon-gold); font-weight: bold;">${p.ServerStats[port].Points} PTS</span></div>`;
+                    combinedHtml += `<div class="season-row"><span>> CHAMPIONSHIP PORT ${port}</span><span style="color: var(--neon-gold); font-weight: bold;">${p.ServerStats[port].Points} PTS</span></div>`;
                 }
             }
-            seasonDiv.innerHTML = sHtml !== '' ? sHtml : `<div style="color: #666; font-style: italic; text-align: center;">[ NO SEASON PARTICIPATION FOUND ]</div>`;
-        } else {
-            seasonDiv.innerHTML = `<div style="color: #666; font-style: italic; text-align: center;">[ NO SEASON PARTICIPATION FOUND ]</div>`;
         }
+
+        // 2. Render Nested Matrix (Laps Per Car Per Track)
+        if (p.Matrix && Object.keys(p.Matrix).length > 0) {
+            combinedHtml += `<div style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; margin-top: 25px; margin-bottom: 12px; font-weight: bold; border-bottom: 1px dashed #333; padding-bottom: 3px;">> LIFETIME MATRIX BREAKDOWN</div>`;
+            
+            // Sort tracks alphabetically
+            const sortedTracks = Object.keys(p.Matrix).sort();
+            
+            sortedTracks.forEach(trackName => {
+                // Calculate total laps on this track across all cars
+                let totalTrackLaps = 0;
+                for (let car in p.Matrix[trackName]) {
+                    totalTrackLaps += p.Matrix[trackName][car];
+                }
+
+                // Render Main Track Header row
+                combinedHtml += `
+                    <div class="season-row" style="margin-top: 10px; background: rgba(0, 243, 255, 0.02); padding: 4px 8px; border-left: 2px solid var(--neon-cyan);">
+                        <span style="color: #fff; font-weight: bold;">> ${trackName.toUpperCase()}</span>
+                        <span style="color: var(--neon-cyan); font-family: 'Share Tech Mono'; font-weight: bold;">${totalTrackLaps} TOTAL LAPS</span>
+                    </div>`;
+                
+                // Extract and sort cars driven on this specific track by lap count (highest first)
+                const trackCars = Object.keys(p.Matrix[trackName]).sort((a,b) => p.Matrix[trackName][b] - p.Matrix[trackName][a]);
+                
+                trackCars.forEach(carName => {
+                    let carLaps = p.Matrix[trackName][carName];
+                    // Render indented sub-row for the car metrics
+                    combinedHtml += `
+                        <div class="season-row" style="padding-left: 25px; border-bottom: 1px solid #111; font-size: 0.85rem;">
+                            <span style="color: #888;">⤷ ${carName}</span>
+                            <span style="color: var(--neon-mint); font-family: 'Share Tech Mono';">${carLaps} LAPS</span>
+                        </div>`;
+                });
+            });
+        }
+
+        // Output final data grid
+        seasonDiv.innerHTML = combinedHtml !== '' ? combinedHtml : `<div style="color: #666; font-style: italic; text-align: center;">[ NO DRIVER LABS RECORDED ]</div>`;
 
         currentTelemetryDriver = id;
         document.getElementById('profTrackFilter').innerHTML = '<option value="">[ ALL TRACKS ]</option>'; 
