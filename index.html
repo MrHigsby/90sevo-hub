@@ -2905,8 +2905,9 @@ window.calEvents[key].push({
             if (bootloader) bootloader.style.display = 'none';
         } catch (err) { console.error("📡 STATIC SYNC ERROR:", err); }
     }
-    // --- BOOT SEQUENCE ---
+// --- BOOT SEQUENCE ---
     window.addEventListener('load', () => {
+        // 1. Initial boot: Grab everything once immediately
         initStaticData();
         fetchLiveStatus().then(() => {
             let rIdx = 0; let tIdx = 0;
@@ -2962,11 +2963,17 @@ window.calEvents[key].push({
 
         renderCalendar();
         
-        // Loop BOTH the live status and the static stats every 3 seconds
+        // 🏎️ THE FAST LOOP: Live Telemetry & Track Status
+        // Pulls the tiny live_status.json every 3 seconds. Costs almost zero bandwidth.
         setInterval(() => {
             fetchLiveStatus();
-            initStaticData();
         }, 3000);
+
+        // 🚚 THE HEAVY LOOP: Profiles, Leaderboards, & Voting Options
+        // Throttled to only pull every 60 seconds (60000ms). 
+        setInterval(() => {
+            initStaticData();
+        }, 60000);
     });
 </script>
 </body>
